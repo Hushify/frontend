@@ -1,0 +1,291 @@
+'use client';
+
+import { Logo } from '@/components/logo';
+import { clientRoutes } from '@/data/routes';
+import { getClaim } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth-store';
+import { Dialog, Transition } from '@headlessui/react';
+import { useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Fragment, SVGProps, useCallback, useMemo, useState } from 'react';
+import {
+    Home,
+    LogOut,
+    Menu as MenuIcon,
+    Search,
+    Settings,
+    Star,
+    Trash,
+    X,
+} from 'react-feather';
+
+export interface Navigation {
+    name: string;
+    href: string;
+    icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+}
+
+export interface UserNavigation {
+    name: string;
+    href?: string;
+    action?: () => void;
+}
+
+const navigation = [
+    {
+        href: clientRoutes.drive.index,
+        name: 'Drive',
+        icon: (props: any) => <Home {...props} />,
+    },
+    {
+        href: '/starred',
+        name: 'Starred',
+        icon: (props: any) => <Star {...props} />,
+    },
+    {
+        href: '/trash',
+        name: 'Trash',
+        icon: (props: any) => <Trash {...props} />,
+    },
+    {
+        href: '/settings',
+        name: 'Settings',
+        icon: (props: any) => <Settings {...props} />,
+    },
+];
+
+export const AppShell: React.FC<{
+    children: React.ReactNode;
+    pageTitle: string;
+}> = ({ children, pageTitle }) => {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarDesktopOpen, setSidebarDesktopOpen] = useState(true);
+    const path = usePathname();
+    const logoutFromAuthStore = useAuthStore(state => state.logout);
+    const accessToken = useAuthStore(state => state.accessToken);
+    const { clear } = useQueryClient();
+
+    const logout = useCallback(async () => {
+        clear();
+        await logoutFromAuthStore();
+    }, [logoutFromAuthStore, clear]);
+
+    const name = useMemo(() => {
+        if (accessToken) {
+            return getClaim(accessToken, 'name')!;
+        }
+
+        return '';
+    }, [accessToken]);
+
+    return (
+        <div className='h-full'>
+            <Transition.Root show={sidebarOpen} as={Fragment}>
+                <Dialog
+                    as='div'
+                    className='fixed inset-0 z-40 flex md:hidden'
+                    onClose={setSidebarOpen}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter='transition-opacity ease-linear duration-300'
+                        enterFrom='opacity-0'
+                        enterTo='opacity-100'
+                        leave='transition-opacity ease-linear duration-300'
+                        leaveFrom='opacity-100'
+                        leaveTo='opacity-0'>
+                        <Dialog.Overlay className='fixed inset-0 bg-gray-600 bg-opacity-75' />
+                    </Transition.Child>
+                    <Transition.Child
+                        as={Fragment}
+                        enter='transition ease-in-out duration-300 transform'
+                        enterFrom='-translate-x-full'
+                        enterTo='translate-x-0'
+                        leave='transition ease-in-out duration-300 transform'
+                        leaveFrom='translate-x-0'
+                        leaveTo='-translate-x-full'>
+                        <div className='relative flex w-full max-w-xs flex-1 flex-col bg-gray-800 pb-4'>
+                            <Transition.Child
+                                as={Fragment}
+                                enter='ease-in-out duration-300'
+                                enterFrom='opacity-0'
+                                enterTo='opacity-100'
+                                leave='ease-in-out duration-300'
+                                leaveFrom='opacity-100'
+                                leaveTo='opacity-0'>
+                                <div className='absolute top-0 right-0 -mr-12 pt-2'>
+                                    <button
+                                        type='button'
+                                        className='ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white'
+                                        onClick={() => setSidebarOpen(false)}>
+                                        <span className='sr-only'>
+                                            Close sidebar
+                                        </span>
+                                        <X
+                                            className='h-6 w-6 text-white'
+                                            aria-hidden='true'
+                                        />
+                                    </button>
+                                </div>
+                            </Transition.Child>
+                            <div className='flex h-16 flex-shrink-0 items-center space-x-3 bg-gray-900 px-4 text-white'>
+                                <Logo height={32} width={32} />
+                                <span className='text-xl font-semibold'>
+                                    Hushify Drive
+                                </span>
+                            </div>
+                            <div className='mt-5 h-0 flex-1 overflow-y-auto'>
+                                <nav className='space-y-1 px-2'>
+                                    {navigation.map(item => (
+                                        <Link
+                                            href={item.href}
+                                            key={item.name}
+                                            className={clsx(
+                                                item.href === path
+                                                    ? 'bg-gray-900 text-white'
+                                                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                                'group flex items-center rounded-md px-2 py-2 text-base font-medium'
+                                            )}
+                                            onClick={() =>
+                                                setSidebarOpen(false)
+                                            }>
+                                            <item.icon
+                                                className={clsx(
+                                                    item.href === path
+                                                        ? 'text-gray-300'
+                                                        : 'text-gray-400 group-hover:text-gray-300',
+                                                    'mr-4 h-6 w-6 flex-shrink-0'
+                                                )}
+                                                aria-hidden='true'
+                                            />
+                                            {item.name}
+                                        </Link>
+                                    ))}
+                                    <button
+                                        type='button'
+                                        className='group flex w-full items-center rounded-md px-2 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                                        onClick={logout}>
+                                        <LogOut
+                                            size={20}
+                                            className='mr-4 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300'
+                                            aria-hidden='true'
+                                        />
+                                        <span>Logout ({name})</span>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </Transition.Child>
+                    <div className='w-14 flex-shrink-0' aria-hidden='true'>
+                        {/* Dummy element to force sidebar to shrink to fit close icon */}
+                    </div>
+                </Dialog>
+            </Transition.Root>
+
+            {/* Static sidebar for desktop */}
+            <div
+                className={clsx(
+                    'hidden',
+                    sidebarDesktopOpen &&
+                        'md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col',
+                    !sidebarDesktopOpen && 'hidden'
+                )}>
+                {/* Sidebar component, swap this element with another sidebar if you like */}
+                <div className='flex min-h-0 flex-1 flex-col bg-gray-800'>
+                    <div className='flex h-16 flex-shrink-0 items-center space-x-3 bg-gray-900 px-4 text-white'>
+                        <Logo height={32} width={32} />
+                        <span className='text-xl font-semibold'>
+                            Hushify Drive
+                        </span>
+                    </div>
+                    <div className='flex flex-1 flex-col overflow-y-auto'>
+                        <nav className='flex-1 space-y-1 px-2 py-4'>
+                            {navigation.map(item => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={clsx(
+                                        item.href === path
+                                            ? 'bg-brand text-white'
+                                            : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                        'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
+                                    )}>
+                                    <item.icon
+                                        className={clsx(
+                                            item.href === path
+                                                ? 'text-gray-300'
+                                                : 'text-gray-400 group-hover:text-gray-300',
+                                            'mr-3 h-6 w-6 flex-shrink-0'
+                                        )}
+                                        aria-hidden='true'
+                                    />
+                                    {item.name}
+                                </Link>
+                            ))}
+                            <button
+                                type='button'
+                                className='group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                                onClick={logout}>
+                                <LogOut
+                                    className='mr-3 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300'
+                                    size={20}
+                                />
+                                <span>Logout</span>
+                            </button>
+                        </nav>
+                        <div className='text-md group flex w-full items-center justify-center break-all bg-brand px-2 py-3 text-center font-medium text-white'>
+                            {name}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                className={clsx(
+                    'flex h-full flex-col',
+                    sidebarDesktopOpen && 'md:pl-64',
+                    !sidebarDesktopOpen && 'md:pl-0'
+                )}>
+                <div className='sticky top-0 z-20 flex h-16 flex-shrink-0 bg-white shadow'>
+                    <button
+                        type='button'
+                        className='border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand md:hidden'
+                        onClick={() => setSidebarOpen(true)}>
+                        <span className='sr-only'>Open sidebar</span>
+                        <MenuIcon className='h-6 w-6' aria-hidden='true' />
+                    </button>
+                    <button
+                        type='button'
+                        className='hidden border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand md:inline-block'
+                        onClick={() => setSidebarDesktopOpen(prev => !prev)}>
+                        <span className='sr-only'>Toggle sidebar</span>
+                        <MenuIcon className='h-6 w-6' aria-hidden='true' />
+                    </button>
+                    <div className='flex flex-1 justify-between px-4'>
+                        {/* Page Title */}
+                        <div className='flex flex-1 items-center'>
+                            <h1 className='text-xl font-semibold text-gray-900 lg:text-2xl'>
+                                {pageTitle}
+                            </h1>
+                        </div>
+                        <div className='ml-4 flex items-center md:ml-6'>
+                            <button
+                                type='button'
+                                className='cursor-pointer rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2'>
+                                <span className='sr-only'>Search</span>
+                                <Search size={24} aria-hidden='true' />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <main className='flex-1'>
+                    <div className='mx-auto h-[calc(100%-8rem)] px-4 pt-4 sm:px-6 lg:px-8'>
+                        {children}
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+};
