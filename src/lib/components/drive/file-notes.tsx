@@ -1,7 +1,7 @@
 'use client';
 
 // import { NotesEditor } from '@/components/drive/notes-editor';
-import { EditorJsWrapper } from '@/components/editor-js';
+import { EditorJsWrapper } from '@/lib/components/editor-js';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 

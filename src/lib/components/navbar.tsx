@@ -1,4 +1,4 @@
-import { clientRoutes } from '@/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import Link from 'next/link';
 
 export const Navbar = () => (
