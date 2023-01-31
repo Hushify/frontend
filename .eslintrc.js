@@ -11,6 +11,7 @@ module.exports = {
         'plugin:import/recommended',
         'plugin:import/typescript',
         'prettier',
+        '@sanity/eslint-config-studio',
     ],
     plugins: ['@typescript-eslint', 'import'],
     settings: {

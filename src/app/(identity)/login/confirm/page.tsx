@@ -1,16 +1,19 @@
 'use client';
 
-import { apiRoutes, clientRoutes } from '@/data/routes';
-import { authenticate, initiateLogin } from '@/services/auth';
-import { CryptoService } from '@/services/crypto.worker';
-import { useAuthStore } from '@/stores/auth-store';
-import { addServerErrors } from '@/utils/addServerErrors';
+import { InputWithLabel } from '@/lib/components/input-with-label';
+import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { useFormMutation } from '@/lib/hooks/use-form-mutation';
+import { authenticate, initiateLogin } from '@/lib/services/auth';
+import { CryptoService } from '@/lib/services/crypto.worker';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { wrap } from 'comlink';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
 
@@ -31,13 +34,7 @@ const confirmSchema = zod
 
 const Confirm = () => {
     const { push } = useRouter();
-
-    const [isDisabled, setIsDisabled] = useState(false);
     const searchParams = useSearchParams();
-
-    useEffect(() => {
-        setIsDisabled(!searchParams.has('email'));
-    }, [searchParams]);
 
     const {
         register,
@@ -51,7 +48,6 @@ const Confirm = () => {
         },
     });
     const [showPassword, setShowPassword] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const setAccessToken = useAuthStore(state => state.setAccessToken);
     const setMasterKey = useAuthStore(state => state.setMasterKey);
     const setAsymmetricEncKeyPair = useAuthStore(
@@ -60,12 +56,11 @@ const Confirm = () => {
     const setSigningKeyPair = useAuthStore(state => state.setSigningKeyPair);
     const setStatus = useAuthStore(state => state.setStatus);
 
-    const [resendTimer, setResendTimer] = useState(60);
-    const [resending, setResending] = useState(false);
+    const [resendTimer, setResendTimer] = useState(30);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if (resendTimer >= 60) {
+            if (resendTimer >= 30) {
                 clearInterval(interval);
             }
             setResendTimer(prev => {
@@ -82,99 +77,83 @@ const Confirm = () => {
     }, [resendTimer]);
 
     const resendCode = async () => {
-        try {
-            setResending(true);
-            setIsSubmitting(true);
-            const result = await initiateLogin(
-                apiRoutes.identity.initiateLogin,
-                searchParams.get('email') as string
-            );
+        const result = await initiateLogin(
+            apiRoutes.identity.initiateLogin,
+            searchParams.get('email') as string
+        );
 
-            if (!result.success) {
-                addServerErrors(result.errors, setError, ['errors', 'email']);
-                return;
-            }
-
-            setResendTimer(60);
-        } catch (error) {
-            const message = error
-                ? (error as Error).message
-                : 'Something went wrong!';
-            addServerErrors({ errors: [message] }, setError, [
-                'errors',
-                'email',
-            ]);
-        } finally {
-            setIsSubmitting(false);
-            setResending(false);
+        if (!result.success) {
+            addServerErrors(result.errors, setError, ['errors', 'email']);
+            return;
         }
+
+        setResendTimer(30);
     };
+
+    const resendMutation = useFormMutation(resendCode, undefined, error => {
+        const message = error
+            ? (error as Error).message
+            : 'Something went wrong!';
+        addServerErrors(
+            { errors: [message] },
+            setError,
+            Object.keys({ errors: undefined })
+        );
+    });
 
     const onSubmit = async (data: ConfirmFormInputs) => {
-        try {
-            setIsSubmitting(true);
+        const result = await authenticate<ConfirmFormInputs>(
+            apiRoutes.identity.login,
+            data.email,
+            data.code
+        );
 
-            const result = await authenticate<ConfirmFormInputs>(
-                apiRoutes.identity.login,
-                data.email,
-                data.code
-            );
-
-            if (!result.success) {
-                addServerErrors(result.errors, setError, Object.keys(data));
-                return;
-            }
-
-            const worker = new Worker(
-                new URL('@/services/crypto.worker', import.meta.url),
-                {
-                    type: 'module',
-                    name: 'hushify-crypto-worker',
-                }
-            );
-
-            const crypto = wrap<typeof CryptoService>(worker);
-
-            const keys = await crypto.decryptRequiredKeys(
-                data.password,
-                result.data.salt,
-                result.data.masterKeyNonce,
-                result.data.encMasterKey,
-                result.data.asymmetricEncKeyNonce,
-                result.data.encAsymmetricPrivateKey,
-                result.data.signingKeyNonce,
-                result.data.encSigningPrivateKey
-            );
-
-            const accessToken = await crypto.decryptAccessToken(
-                result.data.encAccessToken,
-                result.data.encAccessTokenNonce,
-                result.data.serverPublicKey,
-                keys.asymmetricPrivateKey
-            );
-
-            setStatus('authenticated');
-            setMasterKey(keys.masterKey);
-            setAsymmetricEncKeyPair(
-                result.data.asymmetricEncPublicKey,
-                keys.asymmetricPrivateKey
-            );
-            setSigningKeyPair(
-                result.data.signingPublicKey,
-                keys.signingPrivateKey
-            );
-            setAccessToken(accessToken);
-
-            push(clientRoutes.drive.index);
-        } catch (error) {
-            const message = error
-                ? (error as Error).message
-                : 'Something went wrong!';
-            addServerErrors({ errors: [message] }, setError, Object.keys(data));
-        } finally {
-            setIsSubmitting(false);
+        if (!result.success) {
+            addServerErrors(result.errors, setError, Object.keys(data));
+            return;
         }
+
+        const worker = new Worker(
+            new URL('@/lib/services/crypto.worker', import.meta.url),
+            {
+                type: 'module',
+                name: 'hushify-crypto-worker',
+            }
+        );
+
+        const crypto = wrap<typeof CryptoService>(worker);
+
+        const keys = await crypto.decryptRequiredKeys(
+            data.password,
+            result.data.salt,
+            result.data.masterKeyNonce,
+            result.data.encMasterKey,
+            result.data.asymmetricEncKeyNonce,
+            result.data.encAsymmetricPrivateKey,
+            result.data.signingKeyNonce,
+            result.data.encSigningPrivateKey
+        );
+
+        const accessToken = await crypto.decryptAccessToken(
+            result.data.encAccessToken,
+            result.data.encAccessTokenNonce,
+            result.data.serverPublicKey,
+            keys.asymmetricPrivateKey
+        );
+
+        setStatus('authenticated');
+        setMasterKey(keys.masterKey);
+        setAsymmetricEncKeyPair(
+            result.data.asymmetricEncPublicKey,
+            keys.asymmetricPrivateKey
+        );
+        setSigningKeyPair(result.data.signingPublicKey, keys.signingPrivateKey);
+        setAccessToken(accessToken);
+
+        push(clientRoutes.drive.index);
     };
+
+    const mutation = useFormMutation(onSubmit, setError);
 
     return (
         <motion.div
@@ -199,25 +178,18 @@ const Confirm = () => {
                     We just sent you a one time code on your email.
                 </div>
             </div>
-            <form className='mt-8 space-y-3' onSubmit={handleSubmit(onSubmit)}>
+            <form
+                className='mt-8 space-y-3'
+                onSubmit={handleSubmit(data => mutation.mutateAsync(data))}>
                 <small className='text-red-600'>{errors.errors?.message}</small>
-                <div className='flex flex-col gap-1'>
-                    <label
-                        htmlFor='email'
-                        className='flex items-center justify-between text-sm tracking-wide'>
-                        Email
-                    </label>
-                    <input
-                        readOnly
-                        type='email'
-                        id='email'
-                        className='h-9 bg-gray-200'
-                        {...register('email')}
-                    />
-                    <small className='text-red-600'>
-                        {errors.email?.message}
-                    </small>
-                </div>
+                <InputWithLabel
+                    error={errors.email}
+                    type='email'
+                    id='email'
+                    autoComplete='email'
+                    {...register('email')}>
+                    Email
+                </InputWithLabel>
                 <div className='flex flex-col gap-1'>
                     <label
                         htmlFor='password'
@@ -255,110 +227,51 @@ const Confirm = () => {
                         </small>
                     )}
                 </div>
-                <div className='flex flex-col gap-1'>
-                    <label
-                        htmlFor='code'
-                        className='flex items-center justify-between text-sm tracking-wide'>
-                        <span>Code</span>
-                        <div className='flex items-center justify-center gap-1'>
-                            {resendTimer <= 0 ? (
-                                <button
-                                    disabled={resending || isSubmitting}
-                                    type='button'
-                                    onClick={resendCode}
-                                    className='underline disabled:cursor-not-allowed disabled:no-underline'>
-                                    Resend
-                                </button>
-                            ) : (
-                                <span>Resend in {resendTimer}</span>
-                            )}
-                            {resending && (
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    viewBox='0 0 24 24'
-                                    fill='none'
-                                    stroke='currentColor'
-                                    strokeWidth='2'
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    className='h-4 w-4 animate-spin'>
-                                    <line x1='12' y1='2' x2='12' y2='6' />
-                                    <line x1='12' y1='18' x2='12' y2='22' />
-                                    <line
-                                        x1='4.93'
-                                        y1='4.93'
-                                        x2='7.76'
-                                        y2='7.76'
-                                    />
-                                    <line
-                                        x1='16.24'
-                                        y1='16.24'
-                                        x2='19.07'
-                                        y2='19.07'
-                                    />
-                                    <line x1='2' y1='12' x2='6' y2='12' />
-                                    <line x1='18' y1='12' x2='22' y2='12' />
-                                    <line
-                                        x1='4.93'
-                                        y1='19.07'
-                                        x2='7.76'
-                                        y2='16.24'
-                                    />
-                                    <line
-                                        x1='16.24'
-                                        y1='7.76'
-                                        x2='19.07'
-                                        y2='4.93'
-                                    />
-                                </svg>
-                            )}
-                        </div>
-                    </label>
-                    <input
-                        type='text'
-                        id='code'
-                        placeholder='Enter the code'
-                        autoComplete='off'
-                        minLength={6}
-                        className={clsx(
-                            'h-9 bg-transparent placeholder:text-slate-400',
-                            !!errors.code && 'border-red-600'
+                <InputWithLabel
+                    error={errors.code}
+                    type='text'
+                    id='code'
+                    placeholder='Enter the code'
+                    autoComplete='off'
+                    minLength={6}
+                    {...register('code')}>
+                    <span>Code</span>
+                    <div className='flex items-center justify-center gap-1'>
+                        {resendTimer <= 0 ? (
+                            <button
+                                disabled={
+                                    resendMutation.isLoading ||
+                                    mutation.isLoading
+                                }
+                                type='button'
+                                onClick={resendMutation.mutateAsync}
+                                className='underline disabled:cursor-not-allowed disabled:no-underline'>
+                                Resend
+                            </button>
+                        ) : (
+                            <span>Resend in {resendTimer}</span>
                         )}
-                        {...register('code')}
-                    />
-                    <small className='text-red-600'>
-                        {errors.code?.message}
-                    </small>
-                </div>
+                        {resendMutation.isLoading && (
+                            <Loader size={16} className='animate-spin' />
+                        )}
+                    </div>
+                </InputWithLabel>
                 <button
                     type='submit'
-                    disabled={isSubmitting || isDisabled}
+                    disabled={mutation.isLoading}
                     className={clsx(
-                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 py-1.5 font-medium text-white',
-                        'disabled:cursor-not-allowed disabled:bg-opacity-80'
+                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
+                        'disabled:cursor-not-allowed disabled:bg-opacity-80',
+                        'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                     )}>
                     <span>Continue</span>
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
+                    <Loader
+                        size={16}
                         className={clsx(
-                            'h-4 w-4 animate-spin',
-                            !isSubmitting && 'hidden'
-                        )}>
-                        <line x1='12' y1='2' x2='12' y2='6' />
-                        <line x1='12' y1='18' x2='12' y2='22' />
-                        <line x1='4.93' y1='4.93' x2='7.76' y2='7.76' />
-                        <line x1='16.24' y1='16.24' x2='19.07' y2='19.07' />
-                        <line x1='2' y1='12' x2='6' y2='12' />
-                        <line x1='18' y1='12' x2='22' y2='12' />
-                        <line x1='4.93' y1='19.07' x2='7.76' y2='16.24' />
-                        <line x1='16.24' y1='7.76' x2='19.07' y2='4.93' />
-                    </svg>
+                            'animate-spin',
+                            !mutation.isLoading && 'hidden'
+                        )}
+                    />
                 </button>
             </form>
         </motion.div>

@@ -1,8 +1,6 @@
-'use client';
-
 const Page = () => (
-    <div>
-        <h1 className='text-center text-xl font-bold text-brand'>
+    <div className='flex flex-auto items-center justify-center'>
+        <h1 className='text-center text-xl font-bold text-brand-600'>
             Under heavy construction!
         </h1>
     </div>

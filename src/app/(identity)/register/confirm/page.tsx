@@ -1,14 +1,16 @@
 'use client';
 
-import { apiRoutes, clientRoutes } from '@/data/routes';
+import { InputWithLabel } from '@/lib/components/input-with-label';
+import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import {
     checkPasswordStrength,
+    register as registerApi,
     registerConfirm,
-    registerOrForgotPassword,
-} from '@/services/auth';
-import { CryptoService } from '@/services/crypto.worker';
-import { useAuthStore } from '@/stores/auth-store';
-import { addServerErrors } from '@/utils/addServerErrors';
+} from '@/lib/services/auth';
+import { CryptoService } from '@/lib/services/crypto.worker';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { Dialog, Transition } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
@@ -17,6 +19,7 @@ import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import qrcode from 'qrcode';
 import { Fragment, useEffect, useState } from 'react';
+import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import colors from 'tailwindcss/colors';
 import zod from 'zod';
@@ -31,20 +34,16 @@ type ConfirmFormInputs = {
 const confirmSchema = zod
     .object({
         email: zod.string().email(),
-        code: zod.string(),
+        code: zod.string().length(6, 'Code can not be empty.'),
         password: zod.string().min(10).max(64),
     })
     .required();
 
+const RESEND_TIME = 30;
+
 const Confirm = () => {
     const { push } = useRouter();
-
-    const [isDisabled, setIsDisabled] = useState(false);
     const searchParams = useSearchParams();
-
-    useEffect(() => {
-        setIsDisabled(!searchParams.has('email'));
-    }, [searchParams]);
 
     const {
         register,
@@ -57,8 +56,8 @@ const Confirm = () => {
             email: searchParams.get('email') ?? undefined,
         },
     });
+
     const [showPassword, setShowPassword] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const setMasterKey = useAuthStore(state => state.setMasterKey);
     const setAsymmetricEncKeyPair = useAuthStore(
@@ -67,29 +66,11 @@ const Confirm = () => {
     const setSigningKeyPair = useAuthStore(state => state.setSigningKeyPair);
     const setStatus = useAuthStore(state => state.setStatus);
 
-    const [isRecoveryKeyModalOpen, setIsRecoveryKeyModalOpen] = useState(false);
-    const [recoveryMnemonic, setRecoveryMnemonic] = useState('');
-    const [recoveryQr, setRecoveryQr] = useState('');
-
-    useEffect(() => {
-        if (recoveryMnemonic) {
-            qrcode
-                .toDataURL(recoveryMnemonic, {
-                    color: {
-                        dark: colors.indigo[600],
-                        light: colors.white,
-                    },
-                })
-                .then(setRecoveryQr);
-        }
-    }, [recoveryMnemonic]);
-
-    const [resendTimer, setResendTimer] = useState(60);
-    const [resending, setResending] = useState(false);
+    const [resendTimer, setResendTimer] = useState(RESEND_TIME);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if (resendTimer >= 60) {
+            if (resendTimer >= RESEND_TIME) {
                 clearInterval(interval);
             }
             setResendTimer(prev => {
@@ -106,106 +87,102 @@ const Confirm = () => {
     }, [resendTimer]);
 
     const resendCode = async () => {
-        try {
-            setResending(true);
-            setIsSubmitting(true);
-            const result = await registerOrForgotPassword(
-                apiRoutes.identity.register,
-                searchParams.get('email') as string
-            );
+        const result = await registerApi(
+            apiRoutes.identity.register,
+            searchParams.get('email') as string
+        );
 
-            if (!result.success) {
-                addServerErrors(result.errors, setError, ['errors', 'email']);
-                return;
-            }
-
-            setResendTimer(60);
-        } catch (error) {
-            const message = error
-                ? (error as Error).message
-                : 'Something went wrong!';
-            addServerErrors({ errors: [message] }, setError, [
-                'errors',
-                'email',
-            ]);
-        } finally {
-            setIsSubmitting(false);
-            setResending(false);
+        if (!result.success) {
+            addServerErrors(result.errors, setError, ['errors', 'email']);
+            return;
         }
+
+        setResendTimer(60);
     };
 
-    const openRecoveryKeyModal = (recoveryKeyMnemonic: string) => {
+    const resendMutation = useFormMutation(resendCode, undefined, error => {
+        const message = error
+            ? (error as Error).message
+            : 'Something went wrong!';
+        addServerErrors(
+            { errors: [message] },
+            setError,
+            Object.keys({ errors: undefined })
+        );
+    });
+
+    const [isRecoveryKeyModalOpen, setIsRecoveryKeyModalOpen] = useState(false);
+    const [recoveryMnemonic, setRecoveryMnemonic] = useState('');
+    const [recoveryQr, setRecoveryQr] = useState('');
+
+    const openRecoveryKeyModal = async (recoveryKeyMnemonic: string) => {
         setRecoveryMnemonic(recoveryKeyMnemonic);
+        const recoveryQrCode = await qrcode.toDataURL(recoveryMnemonic, {
+            color: {
+                dark: colors.indigo[600],
+                light: colors.white,
+            },
+        });
+        setRecoveryQr(recoveryQrCode);
         setIsRecoveryKeyModalOpen(true);
-        // TODO: Update this properly once Next.js fixes this on their side
         document.title = 'Recovery Key';
     };
 
     const onSubmit = async (data: ConfirmFormInputs) => {
-        try {
-            setIsSubmitting(true);
+        const pwStrengthResult = checkPasswordStrength(
+            data.password,
+            data.email
+        );
 
-            const pwStrengthResult = checkPasswordStrength(
-                data.password,
-                data.email
-            );
-            if (!pwStrengthResult.success) {
-                setError('password', {
-                    type: 'zxcvbn',
-                    message: pwStrengthResult.error,
-                });
-                return;
-            }
-
-            const worker = new Worker(
-                new URL('@/services/crypto.worker', import.meta.url),
-                {
-                    type: 'module',
-                    name: 'hushify-crypto-worker',
-                }
-            );
-
-            const crypto = wrap<typeof CryptoService>(worker);
-
-            const keys = await crypto.generateRequiredKeys(data.password);
-
-            const result = await registerConfirm<ConfirmFormInputs>(
-                apiRoutes.identity.registerConfirm,
-                data.email,
-                data.code,
-                keys.salt,
-                keys.masterKeyBundle,
-                keys.recoveryMasterKeyBundle,
-                keys.recoveryKeyBundle,
-                keys.asymmetricEncKeyBundle,
-                keys.signingKeyBundle
-            );
-
-            if (result.success) {
-                setStatus('authenticated');
-                setMasterKey(keys.masterKey);
-                setAsymmetricEncKeyPair(
-                    keys.asymmetricEncKeyBundle.publicKey,
-                    keys.asymmetricEncPrivateKey
-                );
-                setSigningKeyPair(
-                    keys.signingKeyBundle.publicKey,
-                    keys.signingPrivateKey
-                );
-                openRecoveryKeyModal(keys.recoveryMnemonic);
-                return;
-            }
-
-            addServerErrors(result.errors, setError, Object.keys(data));
-        } catch (error) {
-            const message = error
-                ? (error as Error).message
-                : 'Something went wrong!';
-            addServerErrors({ errors: [message] }, setError, Object.keys(data));
-        } finally {
-            setIsSubmitting(false);
+        if (!pwStrengthResult.success) {
+            setError('password', {
+                type: 'zxcvbn',
+                message: pwStrengthResult.error,
+            });
+            return;
         }
+
+        const worker = new Worker(
+            new URL('@/lib/services/crypto.worker', import.meta.url),
+            {
+                type: 'module',
+                name: 'hushify-crypto-worker',
+            }
+        );
+        const crypto = wrap<typeof CryptoService>(worker);
+        const keys = await crypto.generateRequiredKeys(data.password);
+
+        const result = await registerConfirm<ConfirmFormInputs>(
+            apiRoutes.identity.registerConfirm,
+            data.email,
+            data.code,
+            keys.salt,
+            keys.masterKeyBundle,
+            keys.recoveryMasterKeyBundle,
+            keys.recoveryKeyBundle,
+            keys.asymmetricEncKeyBundle,
+            keys.signingKeyBundle
+        );
+
+        if (result.success) {
+            setStatus('authenticated');
+            setMasterKey(keys.masterKey);
+            setAsymmetricEncKeyPair(
+                keys.asymmetricEncKeyBundle.publicKey,
+                keys.asymmetricEncPrivateKey
+            );
+            setSigningKeyPair(
+                keys.signingKeyBundle.publicKey,
+                keys.signingPrivateKey
+            );
+            await openRecoveryKeyModal(keys.recoveryMnemonic);
+            return;
+        }
+
+        addServerErrors(result.errors, setError, Object.keys(data));
     };
+
+    const confirmMutation = useFormMutation(onSubmit, setError);
 
     return (
         <motion.div
@@ -225,7 +202,7 @@ const Confirm = () => {
                 `}
             </style>
             <Transition appear show={isRecoveryKeyModalOpen} as={Fragment}>
-                <Dialog as='div' className='relative z-10' onClose={() => {}}>
+                <Dialog as='div' className='relative z-50' onClose={() => {}}>
                     <Transition.Child
                         as={Fragment}
                         enter='ease-out duration-300'
@@ -283,7 +260,7 @@ const Confirm = () => {
                                     <button
                                         type='button'
                                         onClick={() => window.print()}
-                                        className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 py-1.5 font-medium text-white print:hidden'>
+                                        className='button button-primary text-white print:hidden'>
                                         Print
                                     </button>
 
@@ -292,7 +269,7 @@ const Confirm = () => {
                                         onClick={() =>
                                             push(clientRoutes.drive.index)
                                         }
-                                        className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-600 py-1.5 font-medium text-white focus-visible:ring-gray-600/75 print:hidden'>
+                                        className='button button-secondary print:hidden'>
                                         Continue to Drive
                                     </button>
                                 </Dialog.Panel>
@@ -307,26 +284,20 @@ const Confirm = () => {
                     We just sent you a one time code on your email.
                 </div>
             </div>
-            <form className='mt-8 space-y-3' onSubmit={handleSubmit(onSubmit)}>
+            <form
+                className='mt-8 space-y-3'
+                onSubmit={handleSubmit(data =>
+                    confirmMutation.mutateAsync(data)
+                )}>
                 <small className='text-red-600'>{errors.errors?.message}</small>
-                <div className='flex flex-col gap-1'>
-                    <label
-                        htmlFor='email'
-                        className='flex items-center justify-between text-sm tracking-wide'>
-                        Email
-                    </label>
-                    <input
-                        readOnly
-                        type='email'
-                        id='email'
-                        autoComplete='email'
-                        className='h-9 bg-gray-200'
-                        {...register('email')}
-                    />
-                    <small className='text-red-600'>
-                        {errors.email?.message}
-                    </small>
-                </div>
+                <InputWithLabel
+                    error={errors.email}
+                    type='email'
+                    id='email'
+                    autoComplete='email'
+                    {...register('email')}>
+                    Email
+                </InputWithLabel>
                 <div className='flex flex-col gap-1'>
                     <label
                         htmlFor='password'
@@ -364,110 +335,53 @@ const Confirm = () => {
                         </small>
                     )}
                 </div>
-                <div className='flex flex-col gap-1'>
-                    <label
-                        htmlFor='code'
-                        className='flex items-center justify-between text-sm tracking-wide'>
-                        <span>Code</span>
-                        <div className='flex items-center justify-between text-sm tracking-wide'>
-                            {resendTimer <= 0 ? (
-                                <button
-                                    disabled={resending || isSubmitting}
-                                    type='button'
-                                    onClick={resendCode}
-                                    className='underline disabled:cursor-not-allowed disabled:no-underline'>
-                                    Resend
-                                </button>
-                            ) : (
-                                <span>Resend in {resendTimer}</span>
-                            )}
-                            {resending && (
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    viewBox='0 0 24 24'
-                                    fill='none'
-                                    stroke='currentColor'
-                                    strokeWidth='2'
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    className='h-4 w-4 animate-spin'>
-                                    <line x1='12' y1='2' x2='12' y2='6' />
-                                    <line x1='12' y1='18' x2='12' y2='22' />
-                                    <line
-                                        x1='4.93'
-                                        y1='4.93'
-                                        x2='7.76'
-                                        y2='7.76'
-                                    />
-                                    <line
-                                        x1='16.24'
-                                        y1='16.24'
-                                        x2='19.07'
-                                        y2='19.07'
-                                    />
-                                    <line x1='2' y1='12' x2='6' y2='12' />
-                                    <line x1='18' y1='12' x2='22' y2='12' />
-                                    <line
-                                        x1='4.93'
-                                        y1='19.07'
-                                        x2='7.76'
-                                        y2='16.24'
-                                    />
-                                    <line
-                                        x1='16.24'
-                                        y1='7.76'
-                                        x2='19.07'
-                                        y2='4.93'
-                                    />
-                                </svg>
-                            )}
-                        </div>
-                    </label>
-                    <input
-                        type='text'
-                        id='code'
-                        placeholder='Enter the code'
-                        autoComplete='off'
-                        minLength={6}
-                        className={clsx(
-                            'h-9 bg-transparent placeholder:text-slate-400',
-                            !!errors.code && 'border-red-600'
+                <InputWithLabel
+                    error={errors.code}
+                    type='text'
+                    id='code'
+                    placeholder='Enter the code'
+                    autoComplete='off'
+                    minLength={6}
+                    {...register('code')}>
+                    <span>Code</span>
+                    <div className='flex items-center justify-between'>
+                        {resendTimer <= 0 ? (
+                            <button
+                                disabled={
+                                    resendMutation.isLoading ||
+                                    confirmMutation.isLoading
+                                }
+                                type='button'
+                                onClick={resendMutation.mutateAsync}
+                                className='underline disabled:cursor-not-allowed disabled:no-underline'>
+                                Resend
+                            </button>
+                        ) : (
+                            <span>Resend in {resendTimer}</span>
                         )}
-                        {...register('code')}
-                    />
-                    <small className='text-red-600'>
-                        {errors.code?.message}
-                    </small>
-                </div>
+                        {resendMutation.isLoading && (
+                            <Loader size={16} className='animate-spin' />
+                        )}
+                    </div>
+                </InputWithLabel>
                 <button
                     type='submit'
-                    disabled={isSubmitting || isDisabled}
+                    disabled={
+                        confirmMutation.isLoading || resendMutation.isLoading
+                    }
                     className={clsx(
-                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 py-1.5 font-medium text-white',
-                        'disabled:cursor-not-allowed disabled:bg-opacity-80'
+                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
+                        'disabled:cursor-not-allowed disabled:bg-opacity-80',
+                        'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                     )}>
                     <span>Continue</span>
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
+                    <Loader
+                        size={6}
                         className={clsx(
-                            'h-4 w-4 animate-spin',
-                            !isSubmitting && 'hidden'
-                        )}>
-                        <line x1='12' y1='2' x2='12' y2='6' />
-                        <line x1='12' y1='18' x2='12' y2='22' />
-                        <line x1='4.93' y1='4.93' x2='7.76' y2='7.76' />
-                        <line x1='16.24' y1='16.24' x2='19.07' y2='19.07' />
-                        <line x1='2' y1='12' x2='6' y2='12' />
-                        <line x1='18' y1='12' x2='22' y2='12' />
-                        <line x1='4.93' y1='19.07' x2='7.76' y2='16.24' />
-                        <line x1='16.24' y1='7.76' x2='19.07' y2='4.93' />
-                    </svg>
+                            'animate-spin',
+                            !confirmMutation.isLoading && 'hidden'
+                        )}
+                    />
                 </button>
             </form>
         </motion.div>

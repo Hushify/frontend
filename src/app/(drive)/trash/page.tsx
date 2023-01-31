@@ -75,7 +75,7 @@ const Trash = () => (
                             </td>
                             <td className='flex items-center gap-2 whitespace-nowrap py-4 pr-3 text-gray-900'>
                                 <Folder
-                                    className='fill-brand text-brand'
+                                    className='fill-brand-600 text-brand-600'
                                     size={16}
                                 />
                                 <span className='truncate'>

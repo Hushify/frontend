@@ -1,13 +1,11 @@
-import { AppShell } from '@/components/app-shell';
-import { AuthStateProvider, Providers } from '@/components/providers';
+import { AppShell } from '@/lib/components/app-shell';
+import { AuthStateProvider } from '@/lib/components/providers';
 import { FC, PropsWithChildren } from 'react';
 
 const RootLayout: FC<PropsWithChildren> = ({ children }) => (
-    <Providers>
-        <AuthStateProvider>
-            <AppShell pageTitle='Drive'>{children}</AppShell>
-        </AuthStateProvider>
-    </Providers>
+    <AuthStateProvider>
+        <AppShell>{children}</AppShell>
+    </AuthStateProvider>
 );
 
 export default RootLayout;

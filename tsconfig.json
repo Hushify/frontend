@@ -11,7 +11,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "preserveWatchOutput": true,
-        "target": "es5",
+        "target": "ESNext",
         "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
         "allowJs": true,
         "skipLibCheck": true,
@@ -25,7 +25,8 @@
         "isolatedModules": true,
         "jsx": "preserve",
         "paths": {
-            "@/*": ["src/*"]
+            "@/*": ["src/*"],
+            "@@/*": ["./*"]
         },
         "plugins": [
             {

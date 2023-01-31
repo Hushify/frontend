@@ -10,6 +10,7 @@ module.exports = {
             'dummyimage.com',
             'images.unsplash.com',
             'hushify.io',
+            'cdn.sanity.io',
             process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io',
         ],
         formats: ['image/avif', 'image/webp'],

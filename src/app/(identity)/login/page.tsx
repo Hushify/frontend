@@ -1,20 +1,21 @@
 'use client';
 
-import { apiRoutes, clientRoutes } from '@/data/routes';
-import { initiateLogin, refreshToken } from '@/services/auth';
-import { CryptoService } from '@/services/crypto.worker';
-import { useAuthStore } from '@/stores/auth-store';
-import { addServerErrors } from '@/utils/addServerErrors';
+import { InputWithLabel } from '@/lib/components/input-with-label';
+import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { useFormMutation } from '@/lib/hooks/use-form-mutation';
+import { initiateLogin } from '@/lib/services/auth';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
-import { wrap } from 'comlink';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
-import shallow from 'zustand/shallow';
+import { shallow } from 'zustand/shallow';
 
 type LoginFormInputs = {
     errors: string;
@@ -40,27 +41,12 @@ const Login = ({
     } = useForm<LoginFormInputs>({
         resolver: zodResolver(loginSchema),
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const authState = useAuthStore(state => state, shallow);
 
-    useEffect(() => {
-        document.title = 'Login';
-    }, []);
+    const authState = useAuthStore(state => state, shallow);
 
     const { push } = useRouter();
 
     useEffect(() => {
-        const abortController = new AbortController();
-
-        if (
-            authState.accessToken &&
-            authState.masterKey &&
-            authState.status === 'authenticated'
-        ) {
-            push(clientRoutes.drive.index);
-            return () => abortController.abort();
-        }
-
         if (
             authState.masterKey &&
             authState.asymmetricEncPrivateKey &&
@@ -69,91 +55,29 @@ const Login = ({
             authState.signingPrivateKey &&
             authState.status === 'authenticated'
         ) {
-            const tryRefreshSession = async () => {
-                try {
-                    const result = await refreshToken(
-                        apiRoutes.identity.refresh
-                    );
-
-                    if (abortController.signal.aborted) {
-                        return;
-                    }
-
-                    if (result.success) {
-                        const worker = new Worker(
-                            new URL(
-                                '@/services/crypto.worker',
-                                import.meta.url
-                            ),
-                            {
-                                type: 'module',
-                                name: 'hushify-crypto-worker',
-                            }
-                        );
-                        const cryptoWorker = wrap<typeof CryptoService>(worker);
-                        authState.setAccessToken(
-                            await cryptoWorker.decryptAccessToken(
-                                result.data.encAccessToken,
-                                result.data.accessTokenNonce,
-                                result.data.serverPublicKey,
-                                authState.asymmetricEncPrivateKey!
-                            )
-                        );
-                        authState.setStatus('authenticated');
-                    } else {
-                        authState.setStatus('unauthenticated');
-                        authState.setMasterKey(undefined);
-                    }
-                } catch {
-                    if (!abortController.signal.aborted) {
-                        authState.setStatus('unauthenticated');
-                        authState.setMasterKey(undefined);
-                    }
-                }
-            };
-
-            tryRefreshSession();
-
-            return () => abortController.abort();
+            push(clientRoutes.drive.index);
         }
-
-        return () => abortController.abort();
-    }, [
-        authState,
-        authState.accessToken,
-        authState.masterKey,
-        authState.status,
-        push,
-    ]);
+    }, [authState, push]);
 
     const onSubmit = async (data: LoginFormInputs) => {
-        try {
-            setIsSubmitting(true);
-            const result = await initiateLogin(
-                apiRoutes.identity.initiateLogin,
-                data.email
-            );
+        const result = await initiateLogin(
+            apiRoutes.identity.initiateLogin,
+            data.email
+        );
 
-            if (!result.success) {
-                addServerErrors(result.errors, setError, Object.keys(data));
-                return;
-            }
-
-            const params = new URLSearchParams({
-                email: data.email,
-            });
-
-            push(`${clientRoutes.identity.loginConfirm}?${params.toString()}`);
-        } catch (error) {
-            await authState.logout();
-            const message = error
-                ? (error as Error).message
-                : 'Something went wrong!';
-            addServerErrors({ errors: [message] }, setError, Object.keys(data));
-        } finally {
-            setIsSubmitting(false);
+        if (!result.success) {
+            addServerErrors(result.errors, setError, Object.keys(data));
+            return;
         }
+
+        const params = new URLSearchParams({
+            email: data.email,
+        });
+
+        push(`${clientRoutes.identity.loginConfirm}?${params.toString()}`);
     };
+
+    const mutation = useFormMutation(onSubmit, setError, authState.logout);
 
     return (
         <motion.div
@@ -163,65 +87,45 @@ const Login = ({
             <div className='space-y-1 text-center'>
                 <h1 className='text-2xl font-bold'>Login</h1>
                 <div className='text-sm text-slate-600'>
-                    Don&apos;t have an account?{' '}
+                    Forgot your password?{' '}
                     <Link
-                        href={clientRoutes.identity.register}
-                        className='text-brand underline'>
-                        Register
+                        href={clientRoutes.identity.resetPassword}
+                        className='text-brand-600 underline'>
+                        Reset
                     </Link>
                 </div>
             </div>
 
-            <form className='mt-8 space-y-3' onSubmit={handleSubmit(onSubmit)}>
+            <form
+                className='mt-8 space-y-3'
+                onSubmit={handleSubmit(data => mutation.mutateAsync(data))}>
                 <small className='text-red-600'>{errors.errors?.message}</small>
-                <div className='flex flex-col gap-1'>
-                    <label htmlFor='email' className='text-sm tracking-wide'>
-                        Email
-                    </label>
-                    <input
-                        type='email'
-                        id='email'
-                        placeholder='Enter your email'
-                        autoComplete='email'
-                        className={clsx(
-                            'h-9 bg-transparent placeholder:text-slate-400',
-                            !!errors.email && 'border-red-600'
-                        )}
-                        {...register('email')}
-                    />
-                    <small className='text-red-600'>
-                        {errors.email?.message}
-                    </small>
-                </div>
+                <InputWithLabel
+                    error={errors.email}
+                    id='email'
+                    type='email'
+                    placeholder='Enter your email'
+                    autoComplete='email'
+                    {...register('email')}>
+                    Email
+                </InputWithLabel>
+
                 <button
                     type='submit'
-                    disabled={isSubmitting}
+                    disabled={mutation.isLoading}
                     className={clsx(
-                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-600 py-1.5 font-medium text-white',
-                        'disabled:cursor-not-allowed disabled:bg-opacity-80'
+                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
+                        'disabled:cursor-not-allowed disabled:bg-opacity-80',
+                        'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                     )}>
-                    <span>Login</span>
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
+                    <span>Continue</span>
+                    <Loader
+                        size={16}
                         className={clsx(
-                            'h-4 w-4 animate-spin',
-                            !isSubmitting && 'hidden'
-                        )}>
-                        <line x1='12' y1='2' x2='12' y2='6' />
-                        <line x1='12' y1='18' x2='12' y2='22' />
-                        <line x1='4.93' y1='4.93' x2='7.76' y2='7.76' />
-                        <line x1='16.24' y1='16.24' x2='19.07' y2='19.07' />
-                        <line x1='2' y1='12' x2='6' y2='12' />
-                        <line x1='18' y1='12' x2='22' y2='12' />
-                        <line x1='4.93' y1='19.07' x2='7.76' y2='16.24' />
-                        <line x1='16.24' y1='7.76' x2='19.07' y2='4.93' />
-                    </svg>
+                            'animate-spin',
+                            !mutation.isLoading && 'hidden'
+                        )}
+                    />
                 </button>
             </form>
 
@@ -231,10 +135,13 @@ const Login = ({
 
             <div>
                 <button
-                    onClick={() => push(clientRoutes.identity.forgotPassword)}
+                    onClick={() => push(clientRoutes.identity.register)}
                     type='button'
-                    className='flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-600 py-1.5 font-medium text-white'>
-                    Forgot Password?
+                    className={clsx(
+                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
+                        'bg-gray-600 text-white focus-visible:ring-gray-600/75'
+                    )}>
+                    Register
                 </button>
             </div>
         </motion.div>
