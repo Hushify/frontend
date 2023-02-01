@@ -5,7 +5,7 @@ export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
 export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET!;
 export const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION!;
 
-const clientWithoutCache = createClient({
+export const clientRaw = createClient({
     projectId,
     dataset,
     apiVersion,
@@ -13,4 +13,4 @@ const clientWithoutCache = createClient({
 });
 
 // Wrap the cache function in a way that reuses the TypeScript definitions
-export const client = cache(clientWithoutCache.fetch.bind(clientWithoutCache));
+export const client = cache(clientRaw.fetch.bind(clientRaw));
