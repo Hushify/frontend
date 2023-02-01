@@ -1696,13 +1696,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reach/observe-rect@npm:^1.1.0":
-  version: 1.2.0
-  resolution: "@reach/observe-rect@npm:1.2.0"
-  checksum: 7dd903eeaad0e22c6d973bd26265d91eadba56ab5134701ceb3e85214db75339fae94aa7e8b88a65e8daa64bc7cf1b915d4ffcdfd324466b561dc6adc3c6e070
-  languageName: node
-  linkType: hard
-
 "@reduxjs/toolkit@npm:^1.9.0":
   version: 1.9.2
   resolution: "@reduxjs/toolkit@npm:1.9.2"
@@ -1888,7 +1881,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sanity/icons@npm:*, @sanity/icons@npm:^2.0.0, @sanity/icons@npm:^2.1.0, @sanity/icons@npm:^2.2.2":
+"@sanity/icons@npm:*, @sanity/icons@npm:^2.1.0, @sanity/icons@npm:^2.2.2":
   version: 2.2.2
   resolution: "@sanity/icons@npm:2.2.2"
   peerDependencies:
@@ -2010,34 +2003,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sanity/scheduled-publishing@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@sanity/scheduled-publishing@npm:1.1.0"
-  dependencies:
-    "@sanity/color": ^2.1.20
-    "@sanity/icons": ^2.0.0
-    "@sanity/incompatible-plugin": ^1.0.4
-    "@sanity/ui": ^1.0.0
-    "@sanity/util": ^3.0.0
-    "@vvo/tzdb": ^6.75.0
-    date-fns: ^2.29.3
-    date-fns-tz: ^1.3.7
-    debug: ^4.3.4
-    lodash: ^4.17.21
-    pluralize: ^8.0.0
-    react-focus-lock: ^2.9.1
-    react-virtual: ^2.10.4
-    rxjs: ^7.5.7
-    swr: ^1.3.0
-  peerDependencies:
-    react: ^18
-    react-dom: ^18
-    sanity: ^3.0.0
-    styled-components: ^5.3.3
-  checksum: 4b059ccb9d4e2afd408ef50df175cbf1951c286092e362641f9f3d0cf0957880488b7811a63ca8be4b823bab501d485adbc6657a45738d8bc7f1ccaeb4ea0030
-  languageName: node
-  linkType: hard
-
 "@sanity/schema@npm:3.2.5":
   version: 3.2.5
   resolution: "@sanity/schema@npm:3.2.5"
@@ -2090,16 +2055,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sanity/types@npm:3.2.6":
-  version: 3.2.6
-  resolution: "@sanity/types@npm:3.2.6"
-  dependencies:
-    "@sanity/client": ^4.0.1
-    "@types/react": ^18.0.25
-  checksum: 671a6d809ab96d4b8b2e9bb93ec6cb7ceb4a300a3705ddd92007517cf8fcae7d76fc68fab5cc582d17292d661cd864785847e74e30062b77c38e36f6a84b8bbb
-  languageName: node
-  linkType: hard
-
 "@sanity/ui@npm:*, @sanity/ui@npm:^1, @sanity/ui@npm:^1.0.0":
   version: 1.2.0
   resolution: "@sanity/ui@npm:1.2.0"
@@ -2127,17 +2082,6 @@ __metadata:
     get-random-values-esm: ^1.0.0
     moment: ^2.29.4
   checksum: 37556bee6790defc98b0533b6a4f90fcc70cec3d61821adfa9f721765929c53c56541f47359e51f6f4e9b90738f96a2c373e59367424d19521ae6db4c02b883f
-  languageName: node
-  linkType: hard
-
-"@sanity/util@npm:^3.0.0":
-  version: 3.2.6
-  resolution: "@sanity/util@npm:3.2.6"
-  dependencies:
-    "@sanity/types": 3.2.6
-    get-random-values-esm: ^1.0.0
-    moment: ^2.29.4
-  checksum: c2809243b4dae438c91d5c295d53f3a25893927c567ec2ea5be51976968de4a1dc44c0e4ae86e5b421b2857166c16a64db0d7098f9bc2e4fd6690ced36f7d7e5
   languageName: node
   linkType: hard
 
@@ -3207,13 +3151,6 @@ __metadata:
   peerDependencies:
     vite: ^4.0.0
   checksum: fde9dd4d3a3387d3a93ea164f58b71a40786842d66b072e75b10ef3c1c1f30cbe545367c4adb980d15f310a70c3ca24f8bf36ea5e896d0fcae0adc926172ca58
-  languageName: node
-  linkType: hard
-
-"@vvo/tzdb@npm:^6.75.0":
-  version: 6.92.0
-  resolution: "@vvo/tzdb@npm:6.92.0"
-  checksum: 7b2afd798f35086d02cbc78fd96b02d1ec36b9a7f51fd36ded492136d52090c43bcb788d699db3ab2da0444c4a04f9e1bf46ca419287d1e29cbed759de2cc0ca
   languageName: node
   linkType: hard
 
@@ -4674,15 +4611,6 @@ __metadata:
   version: 2.1.0
   resolution: "dataloader@npm:2.1.0"
   checksum: bbd43496c41697766f8611f60ed3bae437b450985499140b9603a2447c10d45975d3a0661caaebaa9750bc1bc9fd154676a314423294916c8b8ca1a59a08d139
-  languageName: node
-  linkType: hard
-
-"date-fns-tz@npm:^1.3.7":
-  version: 1.3.8
-  resolution: "date-fns-tz@npm:1.3.8"
-  peerDependencies:
-    date-fns: ">=2.0.0"
-  checksum: dbf17cb88de7c7b71a9f86b815ac62ebdbf725c030e78d2421309456b5001a85284a5b6763f4af0ba660183f12e876c165e725a0723f642edb7846407db03133
   languageName: node
   linkType: hard
 
@@ -6905,7 +6833,6 @@ __metadata:
     "@popperjs/core": ^2.11.6
     "@portabletext/react": ^2.0.1
     "@sanity/image-url": ^1.0.2
-    "@sanity/scheduled-publishing": ^1.1.0
     "@sanity/vision": ^3.2.5
     "@sanity/webhook": ^2.0.0
     "@scure/bip39": ^1.1.0
@@ -10211,7 +10138,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-focus-lock@npm:^2.8.1, react-focus-lock@npm:^2.9.1":
+"react-focus-lock@npm:^2.8.1":
   version: 2.9.3
   resolution: "react-focus-lock@npm:2.9.3"
   dependencies:
@@ -10407,17 +10334,6 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 75602840106aa9c6545149d6d7ae1502fb7b7abadcce70a6954c4b64a438ff1cd16fc77a0a1e5197cdd72da398f39eb929ea06f9005c45b132ed34e056ebdeb1
-  languageName: node
-  linkType: hard
-
-"react-virtual@npm:^2.10.4":
-  version: 2.10.4
-  resolution: "react-virtual@npm:2.10.4"
-  dependencies:
-    "@reach/observe-rect": ^1.1.0
-  peerDependencies:
-    react: ^16.6.3 || ^17.0.0
-  checksum: 1bebc741b01057829a7d7f29256114caecf0597d41b187cb41e75af77f24a87c780bc1a81ec11205b78ee2e9c801fc5e36b20a9e1ab7ddc70a18dd95417795f8
   languageName: node
   linkType: hard
 
@@ -11831,15 +11747,6 @@ __metadata:
   bin:
     svgo: bin/svgo
   checksum: b92f71a8541468ffd0b81b8cdb36b1e242eea320bf3c1a9b2c8809945853e9d8c80c19744267eb91cabf06ae9d5fff3592d677df85a31be4ed59ff78534fa420
-  languageName: node
-  linkType: hard
-
-"swr@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "swr@npm:1.3.0"
-  peerDependencies:
-    react: ^16.11.0 || ^17.0.0 || ^18.0.0
-  checksum: e7a184f0d560e9c8be85c023cc8e65e56a88a6ed46f9394b301b07f838edca23d2e303685319a4fcd620b81d447a7bcb489c7fa0a752c259f91764903c690cdb
   languageName: node
   linkType: hard
 
