@@ -51,6 +51,17 @@ export default defineType({
             type: 'datetime',
         }),
         defineField({
+            name: 'excerpt',
+            title: 'Excerpt',
+            type: 'text',
+        }),
+        defineField({
+            name: 'social_content',
+            title: 'Social Content',
+            type: 'text',
+            validation: Rule => [Rule.max(140)],
+        }),
+        defineField({
             name: 'body',
             title: 'Body',
             type: 'blockContent',
