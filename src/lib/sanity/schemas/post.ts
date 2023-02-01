@@ -65,7 +65,7 @@ export default defineType({
             name: 'social_content',
             title: 'Social Content',
             type: 'text',
-            validation: Rule => [Rule.max(140)],
+            validation: Rule => [Rule.max(280)],
         }),
         defineField({
             name: 'body',
