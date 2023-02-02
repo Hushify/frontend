@@ -8,9 +8,9 @@ import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import { Loader } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
 

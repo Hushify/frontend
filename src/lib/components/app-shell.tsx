@@ -7,6 +7,16 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { Dialog, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import {
+    Home,
+    LogOut,
+    Menu as MenuIcon,
+    Search,
+    Settings,
+    Star,
+    Trash,
+    X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -17,16 +27,6 @@ import {
     useMemo,
     useState,
 } from 'react';
-import {
-    Home,
-    LogOut,
-    Menu as MenuIcon,
-    Search,
-    Settings,
-    Star,
-    Trash,
-    X,
-} from 'react-feather';
 
 export interface Navigation {
     name: string;

@@ -1,4 +1,4 @@
-import { File, RefreshCw, X } from 'react-feather';
+import { File, RefreshCw, X } from 'lucide-react';
 
 export const UploadProgressBox = () => (
     <div className='fixed bottom-4 right-4 z-20 space-y-4 rounded-lg bg-white px-2 py-4 shadow-2xl ring ring-gray-900 ring-opacity-75'>

@@ -1,5 +1,5 @@
+import { Folder, Icon, Trash } from 'lucide-react';
 import { SVGProps } from 'react';
-import { Folder, Icon, Trash } from 'react-feather';
 
 type Navigation = {
     icon: ((props: SVGProps<SVGSVGElement>) => JSX.Element) | Icon;

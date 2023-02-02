@@ -1,7 +1,7 @@
 'use client';
 
 import { faker } from '@faker-js/faker';
-import { ArrowDown, Folder, Menu } from 'react-feather';
+import { ArrowDown, Folder, Menu } from 'lucide-react';
 
 const Toolbar = () => (
     <div className='py-4 pl-2 pr-1 font-bold text-gray-500'>Toolbar</div>

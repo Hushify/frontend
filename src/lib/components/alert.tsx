@@ -7,7 +7,7 @@ import {
     InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import { X } from 'react-feather';
+import { X } from 'lucide-react';
 import { v4 } from 'uuid';
 import { create } from 'zustand';
 import { shallow } from 'zustand/shallow';

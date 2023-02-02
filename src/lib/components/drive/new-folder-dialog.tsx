@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { wrap } from 'comlink';
+import { Loader } from 'lucide-react';
 import {
     Dispatch,
     Fragment,
@@ -24,7 +25,6 @@ import {
     useCallback,
     useMemo,
 } from 'react';
-import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import sanitize from 'sanitize-filename';
 import zod from 'zod';

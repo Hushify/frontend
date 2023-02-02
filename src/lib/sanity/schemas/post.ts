@@ -10,11 +10,13 @@ export default defineType({
             title: 'Site',
             type: 'reference',
             to: { type: 'site' },
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'title',
             title: 'Title',
             type: 'string',
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'slug',
@@ -24,12 +26,14 @@ export default defineType({
                 source: 'title',
                 maxLength: 96,
             },
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'author',
             title: 'Author',
             type: 'reference',
             to: { type: 'author' },
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'image',
@@ -38,12 +42,14 @@ export default defineType({
             options: {
                 hotspot: true,
             },
+            validation: Rule => [Rule.required()],
         }),
         defineField({
-            name: 'categories',
-            title: 'Categories',
-            type: 'array',
-            of: [{ type: 'reference', to: { type: 'category' } }],
+            name: 'category',
+            title: 'Category',
+            type: 'reference',
+            to: { type: 'category' },
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'tags',
@@ -55,6 +61,7 @@ export default defineType({
             name: 'publishedAt',
             title: 'Published at',
             type: 'datetime',
+            validation: Rule => [Rule.required()],
         }),
         defineField({
             name: 'excerpt',
@@ -71,6 +78,7 @@ export default defineType({
             name: 'body',
             title: 'Body',
             type: 'blockContent',
+            validation: Rule => [Rule.required()],
         }),
     ],
 
@@ -78,7 +86,7 @@ export default defineType({
         select: {
             title: 'title',
             author: 'author.name',
-            media: 'mainImage',
+            media: 'image',
         },
         prepare(selection) {
             const { author } = selection;

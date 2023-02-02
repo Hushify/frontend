@@ -3,7 +3,6 @@
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
 import { Menu, Transition } from '@headlessui/react';
 import { PencilIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 import {
     Copy,
     Download,
@@ -12,7 +11,8 @@ import {
     Move,
     Plus,
     Trash,
-} from 'react-feather';
+} from 'lucide-react';
+import { useState } from 'react';
 
 export const Toolbar = () => {
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);

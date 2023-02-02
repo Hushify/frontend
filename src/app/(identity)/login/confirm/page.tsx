@@ -11,9 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { wrap } from 'comlink';
 import { motion } from 'framer-motion';
+import { Loader } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
 

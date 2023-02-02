@@ -1,45 +1,9 @@
 import { client } from '@/lib/sanity/sanity-client';
 import { groq } from 'next-sanity';
-
-type Post = {
-    _id: string;
-    categories: Category[];
-    tags: Tag[];
-    slug: PostSlug;
-    title: string;
-};
-
-type Category = {
-    _createdAt: string;
-    _id: string;
-    _rev: string;
-    _type: string;
-    _updatedAt: string;
-    slug: CategorySlug;
-    title: string;
-};
-
-type Tag = {
-    _createdAt: string;
-    _id: string;
-    _rev: string;
-    _type: string;
-    _updatedAt: string;
-    slug: CategorySlug;
-    title: string;
-};
-
-type CategorySlug = {
-    _type: string;
-    current: string;
-};
-
-type PostSlug = {
-    current: string;
-};
+import { previewData } from 'next/headers';
 
 const getPosts = () =>
-    client<Post[]>(groq`
+    client(groq`
         *[_type == "post"] {
             _id,
             categories[]-> {
@@ -59,6 +23,10 @@ const getPosts = () =>
     `);
 
 const BlogPage = async () => {
+    if (previewData()) {
+        return <div>Preview</div>;
+    }
+
     const posts = await getPosts();
 
     return (

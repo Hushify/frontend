@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Droplet } from 'lucide-react';
 import { FC } from 'react';
 import { DropzoneInputProps } from 'react-dropzone';
-import { Droplet } from 'react-feather';
 
 export const FullscreenUpload: FC<{
     isDragActive: boolean;

@@ -5,8 +5,8 @@ import { useCheckAuth } from '@/lib/hooks/use-check-auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Loader } from 'lucide-react';
 import { FC, PropsWithChildren } from 'react';
-import { Loader } from 'react-feather';
 
 const queryClient = new QueryClient({
     defaultOptions: {

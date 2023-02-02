@@ -14,9 +14,6 @@ import { PencilIcon } from '@heroicons/react/24/outline';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { format, isToday } from 'date-fns';
-import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FileWithPath, useDropzone } from 'react-dropzone';
 import {
     ArrowDown,
     Copy,
@@ -28,7 +25,10 @@ import {
     Move,
     Star,
     Trash,
-} from 'react-feather';
+} from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FileWithPath, useDropzone } from 'react-dropzone';
 
 const Drive = ({ params: { slug } }: { params: { slug?: string[] } }) => {
     const currentFolder = slug?.at(0);
