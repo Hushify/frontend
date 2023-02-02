@@ -24,7 +24,7 @@ const query = groq`
 }
 `;
 
-const getPosts = () => client(query);
+const getPosts = () => client.fetch(query);
 
 const Loader = () => (
     <div>
