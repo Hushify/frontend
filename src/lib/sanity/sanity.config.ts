@@ -7,7 +7,7 @@ import { media } from 'sanity-plugin-media';
 import { deskTool } from 'sanity/desk';
 
 export default defineConfig({
-    name: 'default',
+    name: 'Hushify_CMS',
     title: 'Hushify CMS',
     basePath: '/studio',
 

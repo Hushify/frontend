@@ -18,7 +18,6 @@ module.exports = {
     experimental: {
         appDir: true,
         nextScriptWorkers: true,
-        newNextLinkBehavior: true,
         fontLoaders: [
             {
                 loader: '@next/font/google',
