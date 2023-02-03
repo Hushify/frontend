@@ -56,6 +56,7 @@
         "sanitize-filename": "^1.6.3",
         "sanity": "^3.2.6",
         "sanity-plugin-asset-source-unsplash": "^1.0.6",
+        "sanity-plugin-iframe-pane": "^2.1.1",
         "sanity-plugin-media": "^2.0.4",
         "styled-components": "^5.3.6",
         "stylelint": "^14.16.1",

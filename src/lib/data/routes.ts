@@ -5,6 +5,7 @@ export const clientRoutes = {
     index: '/',
     privacy: '/privacy',
     terms: '/terms',
+    blog: { index: '/blog' },
     identity: {
         login: '/login',
         loginConfirm: '/login/confirm',

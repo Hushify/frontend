@@ -1,3 +1,4 @@
+import { defaultDocumentNode } from '@/lib/sanity/defaultDocumentNode';
 import { dataset, projectId } from '@/lib/sanity/sanity-client';
 import { schemaTypes } from '@/lib/sanity/schemas';
 import { codeInput } from '@sanity/code-input';
@@ -16,7 +17,9 @@ export default defineConfig({
     dataset,
 
     plugins: [
-        deskTool(),
+        deskTool({
+            defaultDocumentNode,
+        }),
         visionTool(),
         unsplashImageAsset(),
         media(),
