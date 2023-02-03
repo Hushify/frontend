@@ -11,7 +11,7 @@ export const defaultDocumentNode: DefaultDocumentNodeResolver = (
             S.view
                 .component(Iframe)
                 .options({
-                    url: `${process.env.NEXT_PUBLIC_DOMAIN}/api/preview`,
+                    url: `${window.location.protocol}//${window.location.host}/api/preview`,
                     reload: {
                         button: true,
                     },
