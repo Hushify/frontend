@@ -59,7 +59,7 @@ const Head = () => (
         <meta name='msapplication-TileImage' content='/ms-icon-144x144.png' />
         <meta name='theme-color' content='#4f46e5' />
 
-        <title>Hushify Blog</title>
+        <title>Hushify</title>
     </>
 );
 

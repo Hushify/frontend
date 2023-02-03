@@ -7,6 +7,8 @@ import { Post } from '@/lib/sanity/types';
 import { groq } from 'next-sanity';
 import { previewData } from 'next/headers';
 
+export const revalidate = 3600;
+
 const query = groq`
     *[_type == "post" && site->title == "Hushify"] {
         _id,
