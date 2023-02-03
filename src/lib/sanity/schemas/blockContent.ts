@@ -43,7 +43,6 @@ export default defineType({
                     { title: 'Emphasis', value: 'em' },
                     { title: 'Underline', value: 'underline' },
                     { title: 'Strike Through', value: 'strike-through' },
-                    { title: 'Code', value: 'code' },
                 ],
                 // Annotations can be any object structure – e.g. a link or a footnote.
                 annotations: [
@@ -68,6 +67,9 @@ export default defineType({
         defineArrayMember({
             type: 'image',
             options: { hotspot: true },
+        }),
+        defineArrayMember({
+            type: 'code',
         }),
     ],
 });

@@ -21,7 +21,7 @@
         height: -webkit-fill-available;
         height: 100dvh;
         color: theme('colors.gray.900');
-        background-color: theme('colors.gray.50');
+        background-color: theme('colors.white');
     }
 
     [type='text'],

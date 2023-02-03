@@ -1,36 +1,43 @@
-import { PreviewBlog } from '@/lib/components/preview-blog';
+import List from '@/lib/components/blog/list';
+import { PreviewBlog } from '@/lib/components/blog/preview-blog';
+import { Loader } from '@/lib/components/Loader';
 import { PreviewSuspense } from '@/lib/components/sanity/PreviewSuspense';
 import { client } from '@/lib/sanity/sanity-client';
-import { Loader2 } from 'lucide-react';
+import { Post } from '@/lib/sanity/types';
 import { groq } from 'next-sanity';
 import { previewData } from 'next/headers';
 
 const query = groq`
-*[_type == "post"] {
-    _id,
-    categories[]-> {
-        ...,
-    },
-    tags[]-> {
-        ...,
-    },
-    image-> {
-        ...,
-    },
-    slug {
-        current
-    },
-    title
-}
+    *[_type == "post" && site->title == "Hushify"] {
+        _id,
+        publishedAt,
+        category-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        tags[]-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        image,
+        author-> {
+            _id,
+            name,
+            image,
+            slug,
+        },
+        slug,
+        title,
+        body,
+        excerpt
+    } | order(publishedAt desc, _createdAt desc)
 `;
 
-const getPosts = () => client.fetch(query);
-
-const Loader = () => (
-    <div>
-        <Loader2 />
-    </div>
-);
+const getPosts = () => client.fetch<Post[]>(query);
 
 const BlogPage = async () => {
     if (previewData()) {
@@ -43,11 +50,7 @@ const BlogPage = async () => {
 
     const posts = await getPosts();
 
-    return (
-        <pre className='prose prose-lg overflow-auto font-mono'>
-            {JSON.stringify(posts, null, 2)}
-        </pre>
-    );
+    return <List posts={posts} />;
 };
 
 export default BlogPage;

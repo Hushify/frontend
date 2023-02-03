@@ -1,5 +1,6 @@
 import { dataset, projectId } from '@/lib/sanity/sanity-client';
 import { schemaTypes } from '@/lib/sanity/schemas';
+import { codeInput } from '@sanity/code-input';
 import { visionTool } from '@sanity/vision';
 import { defineConfig } from 'sanity';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
@@ -14,7 +15,13 @@ export default defineConfig({
     projectId,
     dataset,
 
-    plugins: [deskTool(), visionTool(), unsplashImageAsset(), media()],
+    plugins: [
+        deskTool(),
+        visionTool(),
+        unsplashImageAsset(),
+        media(),
+        codeInput(),
+    ],
 
     schema: {
         types: schemaTypes,

@@ -55,7 +55,7 @@ export const Toolbar = () => {
                                     </Menu.Item>
                                     <Menu.Item
                                         as='button'
-                                        onClick={console.log}
+                                        onClick={() => {}}
                                         className='group flex w-full items-center gap-1 rounded-md px-2 py-2 text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
                                         <FilePlus className='hidden w-4 md:block' />
                                         <span>Upload File</span>

@@ -1,10 +1,14 @@
-/* eslint-disable no-process-env */
-import { dataset, projectId } from '@/lib/sanity/sanity-client';
-import { loadEnvConfig } from '@next/env';
-import { defineCliConfig } from 'sanity/cli';
+import { createClient } from 'next-sanity';
 
-const dev = process.env.NODE_ENV !== 'production';
-// eslint-disable-next-line no-console
-loadEnvConfig(__dirname, dev, { info: () => null, error: console.error });
+export const projectId =
+    process.env.NEXT_PUBLIC_SANITY_PROJECT_ID! ?? 'fkycycfp';
+export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET! ?? 'production';
+export const apiVersion =
+    process.env.NEXT_PUBLIC_SANITY_API_VERSION! ?? '2021-10-21';
 
-export default defineCliConfig({ api: { projectId, dataset } });
+export const client = createClient({
+    projectId,
+    dataset,
+    apiVersion,
+    useCdn: false,
+});

@@ -1,9 +1,5 @@
-import { Loader2 } from 'lucide-react';
+'use client';
 
-const Loading = () => (
-    <div className='flex h-full items-center justify-center'>
-        <Loader2 className='animate-spin text-brand-600' />
-    </div>
-);
+import { Loader } from '@/lib/components/Loader';
 
-export default Loading;
+export default Loader;
