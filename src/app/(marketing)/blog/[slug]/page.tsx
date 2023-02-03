@@ -1,10 +1,10 @@
 import { SinglePost } from '@/lib/components/blog/post';
 import { PreviewSinglePost } from '@/lib/components/blog/preview-post';
 import { Loader } from '@/lib/components/Loader';
+import { PreviewSuspense } from '@/lib/components/sanity/PreviewSuspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { Post } from '@/lib/sanity/types';
 import { groq } from 'next-sanity';
-import { PreviewSuspense } from 'next-sanity/preview';
 import { previewData } from 'next/headers';
 import { notFound } from 'next/navigation';
 
