@@ -54,7 +54,7 @@ export const generateStaticParams = async () => {
     }));
 };
 
-const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
+const PostPage = async ({ params: { slug } }: { params: { slug: string } }) => {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
@@ -72,4 +72,4 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
     return <SinglePost post={post} />;
 };
 
-export default Page;
+export default PostPage;
