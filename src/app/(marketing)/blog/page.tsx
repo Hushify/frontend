@@ -39,13 +39,43 @@ const query = groq`
     } | order(publishedAt desc, _createdAt desc)
 `;
 
+const previewQuery = groq`
+    *[_type == "post"] {
+        _id,
+        publishedAt,
+        category-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        tags[]-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        image,
+        author-> {
+            _id,
+            name,
+            image,
+            slug,
+        },
+        slug,
+        title,
+        body,
+        excerpt
+    } | order(publishedAt desc, _createdAt desc)
+`;
+
 const getPosts = () => client.fetch<Post[]>(query);
 
 const BlogPage = async () => {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
-                <PreviewBlog query={query} />
+                <PreviewBlog query={previewQuery} />
             </PreviewSuspense>
         );
     }

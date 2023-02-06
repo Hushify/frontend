@@ -38,6 +38,36 @@ const query = groq`
     }[0]
 `;
 
+const previewQuery = groq`
+    *[_type == "post" && slug.current == $slug] {
+        _id,
+        publishedAt,
+        category-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        tags[]-> {
+            _id,
+            description,
+            title,
+            slug,
+        },
+        image,
+        author-> {
+            _id,
+            name,
+            image,
+            slug,
+        },
+        slug,
+        title,
+        body,
+        excerpt
+    }[0]
+`;
+
 const getPost = (slug: string) => client.fetch<Post | null>(query, { slug });
 
 export const revalidate = 3600;
@@ -58,7 +88,7 @@ const PostPage = async ({ params: { slug } }: { params: { slug: string } }) => {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
-                <PreviewSinglePost query={query} slug={slug} />
+                <PreviewSinglePost query={previewQuery} slug={slug} />
             </PreviewSuspense>
         );
     }
