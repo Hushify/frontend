@@ -29,7 +29,7 @@ const Head = () => (
             property='og:image'
             content={`https://${
                 process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io'
-            }/og-image.png`}
+            }/android-chrome-512x512.png`}
         />
 
         <meta
