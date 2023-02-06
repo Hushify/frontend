@@ -25,7 +25,7 @@ export default async function revalidate(
             return;
         }
 
-        if (body._type !== 'post' || body._type !== 'author') {
+        if (body._type !== 'post' && body._type !== 'author') {
             res.status(401).json({
                 message: 'Invalid type',
                 type: body._type,
