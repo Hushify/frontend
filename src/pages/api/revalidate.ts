@@ -2,6 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { parseBody } from 'next-sanity/webhook';
 
+export { config } from 'next-sanity/webhook';
+
 export default async function revalidate(
     req: NextApiRequest,
     res: NextApiResponse
