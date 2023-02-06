@@ -21,6 +21,7 @@ export const PortableTextComponents: Partial<PortableTextReactComponents> = {
         code: ({ value: { language, code } }) => (
             <SyntaxHighlighter language={language} code={code} />
         ),
+        break: () => <hr />,
     },
     marks: {
         link: ({ children, value, text }) => {
@@ -32,7 +33,7 @@ export const PortableTextComponents: Partial<PortableTextReactComponents> = {
                 : '_blank';
             return (
                 <Link
-                    className='underline'
+                    className='text-blue-600 underline'
                     href={link}
                     rel={rel}
                     target={target}>

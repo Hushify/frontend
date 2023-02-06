@@ -1,7 +1,8 @@
-import { PortableTextComponents } from '@/lib/components/blog/portable-text-components';
+import { PortableTextComponents } from '@/lib/components/sanity/portable-text-components';
 import { Post } from '@/lib/sanity/types';
 import { urlFor } from '@/lib/sanity/url-for';
 import { PortableText } from '@portabletext/react';
+import { getImageDimensions } from '@sanity/asset-utils';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -11,7 +12,15 @@ export const SinglePost = ({ post }: { post: Post }) => (
             <Image
                 src={urlFor(post.image).width(600).height(450).url()}
                 alt={post.title}
-                fill
+                placeholder='blur'
+                blurDataURL={urlFor(post.image)
+                    .width(24)
+                    .height(24)
+                    .blur(10)
+                    .url()}
+                width={getImageDimensions(post.image).width}
+                height={getImageDimensions(post.image).height}
+                sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw'
                 className='object-cover'
             />
             <div className='absolute bottom-0 flex w-full justify-between bg-black/50 p-5 text-white backdrop-blur-xl'>
@@ -21,9 +30,15 @@ export const SinglePost = ({ post }: { post: Post }) => (
                             .width(32)
                             .height(32)
                             .url()}
-                        height={32}
-                        width={32}
                         alt={post.author.name}
+                        placeholder='blur'
+                        blurDataURL={urlFor(post.author.image)
+                            .width(16)
+                            .height(16)
+                            .blur(10)
+                            .url()}
+                        width={32}
+                        height={32}
                         className='rounded-full border-2 border-white object-cover'
                     />
                     <div>
@@ -54,11 +69,11 @@ export const SinglePost = ({ post }: { post: Post }) => (
             </div>
         </div>
 
-        <h1 className='text-center text-xl font-bold leading-relaxed text-indigo-600 group-hover:underline 2xl:text-2xl'>
-            {post.title}
-        </h1>
+        <div className='prose prose-base prose-li:marker:text-gray-600 prose-hr:mx-auto prose-hr:max-w-[48ch] prose-hr:border-gray-600 lg:prose-lg'>
+            <h1 className='font-bold leading-snug text-indigo-600'>
+                {post.title}
+            </h1>
 
-        <div className='prose prose-lg'>
             <PortableText
                 value={post.body}
                 components={PortableTextComponents}

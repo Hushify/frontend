@@ -1,3 +1,4 @@
+import { Break } from '@/lib/components/sanity/break';
 import { defineArrayMember, defineType } from 'sanity';
 
 /**
@@ -70,6 +71,12 @@ export default defineType({
         }),
         defineArrayMember({
             type: 'code',
+        }),
+        defineArrayMember({
+            type: 'block',
+            name: 'break',
+            title: 'Break',
+            components: { block: Break },
         }),
     ],
 });

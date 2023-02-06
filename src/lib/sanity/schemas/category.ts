@@ -4,6 +4,7 @@ export default defineType({
     name: 'category',
     title: 'Category',
     type: 'document',
+    liveEdit: true,
     fields: [
         defineField({
             name: 'title',

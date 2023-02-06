@@ -4,6 +4,7 @@ export default defineType({
     name: 'site',
     title: 'Site',
     type: 'document',
+    liveEdit: true,
     fields: [
         defineField({
             name: 'title',

@@ -1,7 +1,7 @@
 import List from '@/lib/components/blog/list';
 import { PreviewBlog } from '@/lib/components/blog/preview-blog';
-import { Loader } from '@/lib/components/Loader';
-import { PreviewSuspense } from '@/lib/components/sanity/PreviewSuspense';
+import { Loader } from '@/lib/components/loader';
+import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { Post } from '@/lib/sanity/types';
 import { groq } from 'next-sanity';

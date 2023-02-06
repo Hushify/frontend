@@ -1,5 +1,13 @@
+import { SanityDocument } from 'sanity';
 import Iframe from 'sanity-plugin-iframe-pane';
 import { DefaultDocumentNodeResolver } from 'sanity/desk';
+
+function getPreviewUrl(doc: SanityDocument) {
+    const slug = doc?.slug as { current: string } | undefined;
+    return slug?.current
+        ? `${window.location.protocol}//${window.location.host}/api/preview?destination=/blog/${slug.current}`
+        : `${window.location.protocol}//${window.location.host}/api/preview`;
+}
 
 export const defaultDocumentNode: DefaultDocumentNodeResolver = (
     S,
@@ -11,7 +19,7 @@ export const defaultDocumentNode: DefaultDocumentNodeResolver = (
             S.view
                 .component(Iframe)
                 .options({
-                    url: `${window.location.protocol}//${window.location.host}/api/preview`,
+                    url: getPreviewUrl,
                     reload: {
                         button: true,
                     },

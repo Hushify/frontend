@@ -4,6 +4,7 @@ export default defineType({
     name: 'tag',
     title: 'Tag',
     type: 'document',
+    liveEdit: true,
     fields: [
         defineField({
             name: 'title',

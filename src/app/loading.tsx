@@ -1,5 +1,5 @@
 'use client';
 
-import { Loader } from '@/lib/components/Loader';
+import { Loader } from '@/lib/components/loader';
 
 export default Loader;
