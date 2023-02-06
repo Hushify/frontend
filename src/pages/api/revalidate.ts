@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { parseBody } from 'next-sanity/webhook';
 
@@ -27,21 +26,23 @@ export default async function revalidate(
             return;
         }
 
-        if (body._type !== 'post' && body._type !== 'author') {
+        const { _type: type } = body;
+
+        if (type !== 'post' && type !== 'author') {
             res.status(401).json({
                 message: 'Invalid type',
-                type: body._type,
+                type,
             });
             return;
         }
 
         let route = '/blog';
 
-        if (body._type === 'post') {
+        if (type === 'post') {
             route = `${route}/${slug.current}`;
         }
 
-        if (body._type === 'author') {
+        if (type === 'author') {
             route = `${route}/author/${slug.current}`;
         }
 

@@ -16,6 +16,7 @@ export default defineType({
             name: 'title',
             title: 'Title',
             type: 'string',
+            description: 'Must be between 15 and 70 characters.',
             validation: Rule => [Rule.min(15), Rule.max(70)],
         }),
         defineField({
@@ -38,12 +39,8 @@ export default defineType({
             name: 'excerpt',
             title: 'Excerpt',
             type: 'text',
-            validation: Rule => [Rule.min(70), Rule.max(160)],
-        }),
-        defineField({
-            name: 'social_content',
-            title: 'Social Content',
-            type: 'text',
+            description:
+                'Meta description, must be between 70 and 160 characters.',
             validation: Rule => [Rule.min(70), Rule.max(160)],
         }),
         defineField({
@@ -85,18 +82,15 @@ export default defineType({
 
     preview: {
         select: {
-            postTitle: 'title',
+            title: 'title',
             media: 'image',
             author: 'author.name',
             site: 'site.title',
-            id: '_id',
         },
         prepare(selection) {
-            const { author, site, id, postTitle: title } = selection;
-            const isDraft = (id as string).startsWith('drafts.');
+            const { author, site } = selection;
             return {
                 ...selection,
-                title: isDraft ? `DRAFT | ${title}` : `LIVE | ${title}`,
                 subtitle: author && `by ${author} | ${site}`,
             };
         },
