@@ -12,7 +12,10 @@ const Head = () => (
         <meta name='robots' content='index, follow' />
 
         <meta name='keywords' content='Hushify' />
-        <meta name='description' content='Hushify' />
+        <meta
+            name='description'
+            content='Hushify, an opensource end to end encrypted storage'
+        />
 
         <meta name='theme-color' content='#4f46e5' />
 
