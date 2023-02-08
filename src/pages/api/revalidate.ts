@@ -3,6 +3,8 @@ import { parseBody } from 'next-sanity/webhook';
 
 export { config } from 'next-sanity/webhook';
 
+const validTypes = ['post', 'category'];
+
 export default async function revalidate(
     req: NextApiRequest,
     res: NextApiResponse
@@ -28,7 +30,7 @@ export default async function revalidate(
 
         const { _type: type } = body;
 
-        if (type !== 'post' && type !== 'author') {
+        if (!validTypes.includes(type)) {
             res.status(401).json({
                 message: 'Invalid type',
                 type,
@@ -36,18 +38,17 @@ export default async function revalidate(
             return;
         }
 
-        let route = '/blog';
+        const baseRoute = '/blog';
 
         if (type === 'post') {
-            route = `${route}/${slug.current}`;
+            await res.revalidate(`${baseRoute}/${slug.current}`);
         }
 
-        if (type === 'author') {
-            route = `${route}/author/${slug.current}`;
+        if (type === 'category') {
+            await res.revalidate(`${baseRoute}/category/${slug.current}`);
         }
 
-        await res.revalidate(route);
-        await res.revalidate('/blog');
+        await res.revalidate(baseRoute);
         res.status(200).json({ message: 'Updated routes' });
         return;
     } catch (err) {
