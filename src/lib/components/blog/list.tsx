@@ -5,7 +5,7 @@ import { getImageDimensions } from '@sanity/asset-utils';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const List = ({ posts }: { posts: Post[] }) => (
+export const List = ({ posts }: { posts: Post[] }) => (
     <ul className='my-8 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3'>
         {posts.map(post => (
             <li key={post._id} className='group p-2'>
@@ -92,5 +92,3 @@ const List = ({ posts }: { posts: Post[] }) => (
         ))}
     </ul>
 );
-
-export default List;

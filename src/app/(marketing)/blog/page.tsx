@@ -1,5 +1,5 @@
-import List from '@/lib/components/blog/list';
-import { PreviewBlog } from '@/lib/components/blog/preview-blog';
+import { List } from '@/lib/components/blog/list';
+import { PreviewList } from '@/lib/components/blog/preview/preview-list';
 import { Loader } from '@/lib/components/loader';
 import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
@@ -75,7 +75,7 @@ const BlogPage = async () => {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
-                <PreviewBlog query={previewQuery} />
+                <PreviewList query={previewQuery} />
             </PreviewSuspense>
         );
     }

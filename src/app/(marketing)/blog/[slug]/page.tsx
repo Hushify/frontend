@@ -1,5 +1,5 @@
 import { SinglePost } from '@/lib/components/blog/post';
-import { PreviewSinglePost } from '@/lib/components/blog/preview-post';
+import { PreviewSinglePost } from '@/lib/components/blog/preview/preview-post';
 import { Loader } from '@/lib/components/loader';
 import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';

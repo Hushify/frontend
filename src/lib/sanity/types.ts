@@ -48,3 +48,8 @@ export type Tag = {
     slug: Slug;
     title: string;
 };
+
+export type CategoryPosts = {
+    slug?: Slug;
+    posts: Post[];
+} & Category;
