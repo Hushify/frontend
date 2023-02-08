@@ -11,7 +11,7 @@ const Head = async ({
         description?: string;
     }>(
         groq`
-            *[_type == "category" && (site->title == "Hushify" || site->title == "All") && slug.current == $category] {
+            *[_type == "category" && slug.current == $category] {
                 title,
                 description,
             }[0]
