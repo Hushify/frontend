@@ -12,7 +12,7 @@ const query = groq`
         _id,
         description,
         title,
-        "posts": *[_type=='post' && (site->title == "Hushify" || site->title == "All") && references(^._id)] {
+        "posts": *[_type=='post' && site->title in ["Hushify", "All"] && references(^._id)] {
             _id,
             publishedAt,
             category-> {
@@ -37,8 +37,9 @@ const query = groq`
             slug,
             title,
             body,
-            excerpt
-        } | order(publishedAt desc, _createdAt desc)
+            excerpt,
+            order
+        } | order(order asc, publishedAt desc, _createdAt desc)
     }[0]
 `;
 
@@ -72,8 +73,9 @@ const previewQuery = groq`
             slug,
             title,
             body,
-            excerpt
-        } | order(publishedAt desc, _createdAt desc)
+            excerpt,
+            order
+        } | order(order asc, publishedAt desc, _createdAt desc)
     }[0]
 `;
 

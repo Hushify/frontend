@@ -10,7 +10,7 @@ import { previewData } from 'next/headers';
 export const revalidate = 3600;
 
 const query = groq`
-    *[_type == "post" && site->title == "Hushify"] {
+    *[_type == "post" && site->title in ["Hushify", "All"]] {
         _id,
         publishedAt,
         category-> {
@@ -35,8 +35,9 @@ const query = groq`
         slug,
         title,
         body,
-        excerpt
-    } | order(publishedAt desc, _createdAt desc)
+        excerpt,
+        order
+    } | order(order asc, publishedAt desc, _createdAt desc)
 `;
 
 const previewQuery = groq`
@@ -65,8 +66,9 @@ const previewQuery = groq`
         slug,
         title,
         body,
-        excerpt
-    } | order(publishedAt desc, _createdAt desc)
+        excerpt,
+        order
+    } | order(order asc, publishedAt desc, _createdAt desc)
 `;
 
 const getPosts = () => client.fetch<Post[]>(query);

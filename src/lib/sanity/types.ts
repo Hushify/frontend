@@ -11,6 +11,7 @@ export type Post = {
     slug: Slug;
     tags: Tag[];
     title: string;
+    order?: number;
 };
 
 export type Author = {

@@ -9,7 +9,7 @@ import { previewData } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 const query = groq`
-    *[_type == "post" && site->title == "Hushify" && slug.current == $slug] {
+    *[_type == "post" && site->title in ["Hushify", "All"] && slug.current == $slug] {
         _id,
         publishedAt,
         category-> {
@@ -74,7 +74,7 @@ export const revalidate = 3600;
 
 export const generateStaticParams = async () => {
     const slugs = await client.fetch<{ slug: { current: string } }[]>(groq`
-        *[_type == "post" && site->title == "Hushify"] {
+        *[_type == "post" && site->title in ["Hushify", "All"]] {
             slug { current }
         }
     `);

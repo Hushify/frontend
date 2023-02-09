@@ -44,6 +44,14 @@ export default defineType({
             validation: Rule => [Rule.min(70), Rule.max(160)],
         }),
         defineField({
+            name: 'order',
+            title: 'Order',
+            type: 'number',
+            initialValue: 0,
+            description: 'Lower the number, higher the priority',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
             name: 'author',
             title: 'Author',
             type: 'reference',

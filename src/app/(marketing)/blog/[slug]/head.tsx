@@ -13,7 +13,7 @@ const Head = async ({ params: { slug } }: { params: { slug: string } }) => {
         }[];
     }>(
         groq`
-            *[_type == "post" && site->title == "Hushify" && slug.current == $slug] {
+            *[_type == "post" && site->title in ["Hushify", "All"] && slug.current == $slug] {
                 title,
                 excerpt,
                 image,
