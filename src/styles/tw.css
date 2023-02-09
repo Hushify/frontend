@@ -5,6 +5,7 @@
 @layer base {
     :root {
         --tw-ring-color: theme('colors.brand.600');
+        --offwhite: 236 240 243;
     }
 
     html {
@@ -21,7 +22,7 @@
         height: -webkit-fill-available;
         height: 100dvh;
         color: theme('colors.gray.900');
-        background-color: theme('colors.white');
+        @apply bg-offwhite;
     }
 
     [type='text'],

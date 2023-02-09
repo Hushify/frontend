@@ -76,13 +76,14 @@ export const List = ({ posts }: { posts: Post[] }) => (
                         </p>
                     </div>
 
-                    <ul className='flex items-center gap-2 text-sm'>
-                        {post.tags.map(tag => (
+                    <ul className='flex items-center gap-1 text-sm'>
+                        {post.tags.map((tag, idx) => (
                             <li key={tag._id}>
                                 <Link
                                     href={`/blog/tag/${tag.slug.current}`}
-                                    className='tracking-wider hover:underline'>
-                                    #{tag.title.replace(/\s+/g, '')}
+                                    className='hover:underline'>
+                                    {tag.title}
+                                    {idx < post.tags.length - 1 ? ', ' : ''}
                                 </Link>
                             </li>
                         ))}

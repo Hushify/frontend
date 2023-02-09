@@ -12,6 +12,7 @@ module.exports = {
         extend: {
             colors: {
                 brand: colors.indigo,
+                offwhite: 'rgb(236 240 243 / <alpha-value>)',
             },
         },
     },
