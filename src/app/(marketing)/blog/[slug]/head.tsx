@@ -3,7 +3,7 @@ import { Image } from '@/lib/sanity/types';
 import { urlFor } from '@/lib/sanity/url-for';
 import { groq } from 'next-sanity';
 
-const Head = async ({ params: { slug } }: { params: { slug: string } }) => {
+async function Head({ params: { slug } }: { params: { slug: string } }) {
     const post = await client.fetch<{
         title: string;
         excerpt: string;
@@ -62,6 +62,6 @@ const Head = async ({ params: { slug } }: { params: { slug: string } }) => {
             )}
         </>
     );
-};
+}
 
 export default Head;

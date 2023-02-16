@@ -1,8 +1,6 @@
 const path = require('path');
 const colors = require('tailwindcss/colors');
-const {
-    fontFamily: { sans },
-} = require('tailwindcss/defaultTheme');
+const { blackA, mauve, violet } = require('@radix-ui/colors');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -13,6 +11,9 @@ module.exports = {
             colors: {
                 brand: colors.indigo,
                 offwhite: 'rgb(236 240 243 / <alpha-value>)',
+                ...blackA,
+                ...mauve,
+                ...violet,
             },
         },
     },

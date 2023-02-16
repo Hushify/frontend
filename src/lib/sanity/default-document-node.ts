@@ -1,6 +1,10 @@
 import { SanityDocument } from 'sanity';
 import Iframe from 'sanity-plugin-iframe-pane';
-import { DefaultDocumentNodeResolver } from 'sanity/desk';
+import {
+    DefaultDocumentNodeContext,
+    DocumentBuilder,
+    StructureBuilder,
+} from 'sanity/desk';
 
 function getPreviewUrl(doc: SanityDocument) {
     const slug = doc?.slug as { current: string } | undefined;
@@ -9,10 +13,10 @@ function getPreviewUrl(doc: SanityDocument) {
         : `${window.location.protocol}//${window.location.host}/api/preview`;
 }
 
-export const defaultDocumentNode: DefaultDocumentNodeResolver = (
-    S,
-    { schemaType }
-) => {
+export function defaultDocumentNode(
+    S: StructureBuilder,
+    { schemaType }: DefaultDocumentNodeContext
+): DocumentBuilder | null | undefined {
     if (schemaType === 'post') {
         return S.document().views([
             S.view.form(),
@@ -30,4 +34,4 @@ export const defaultDocumentNode: DefaultDocumentNodeResolver = (
     }
 
     return S.document().views([S.view.form()]);
-};
+}

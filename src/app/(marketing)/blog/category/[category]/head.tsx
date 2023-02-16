@@ -1,11 +1,11 @@
 import { client } from '@/lib/sanity/sanity-client';
 import { groq } from 'next-sanity';
 
-const Head = async ({
+async function Head({
     params: { category },
 }: {
     params: { category: string };
-}) => {
+}) {
     const fetchedCategory = await client.fetch<{
         title: string;
         description?: string;
@@ -48,6 +48,6 @@ const Head = async ({
             )}
         </>
     );
-};
+}
 
 export default Head;

@@ -1,7 +1,7 @@
 import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
-export const useFormMutation = <T, U>(
+export function useFormMutation<T, U>(
     onSubmit: (data: T) => Promise<U>,
     setError?: (
         fieldName: keyof T,
@@ -12,8 +12,8 @@ export const useFormMutation = <T, U>(
         UseMutationOptions<U, unknown, T, unknown>,
         'mutationFn' | 'onError'
     >
-) =>
-    useMutation({
+) {
+    return useMutation({
         ...options,
         mutationFn: data => onSubmit(data),
         onError(error, variables, _context) {
@@ -30,3 +30,4 @@ export const useFormMutation = <T, U>(
             onErrorCb?.(error);
         },
     });
+}

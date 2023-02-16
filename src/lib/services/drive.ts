@@ -71,11 +71,11 @@ export type DriveList = {
     folders: FolderNodeDecrypted[];
 };
 
-export const list = async (
+export async function list(
     url: string,
     accessToken: string,
     masterKey: string
-): Promise<DriveList> => {
+): Promise<DriveList> {
     const { data } = await axios.get<DriveListResponse>(url, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -146,15 +146,15 @@ export const list = async (
     );
 
     return { ...data, folders, breadcrumbs };
-};
+}
 
-export const createFolder = async <T>(
+export async function createFolder<T>(
     url: string,
     accessToken: string,
     parentFolderId: string | null,
     metadataBundle: MetadataBundle,
     folderKeyBundle: SecretKeyBundle
-): Promise<ResponseMessage<T, { id: string }>> => {
+): Promise<ResponseMessage<T, { id: string }>> {
     const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify({
@@ -175,12 +175,12 @@ export const createFolder = async <T>(
 
     const errors = await getErrors<T>(response);
     return { success: false, errors };
-};
+}
 
-export const deleteFolder = async <T>(
+export async function deleteFolder<T>(
     url: string,
     accessToken: string
-): Promise<ResponseMessage<T, { id: string }>> => {
+): Promise<ResponseMessage<T, { id: string }>> {
     const response = await fetch(url, {
         method: 'DELETE',
         headers: {
@@ -196,4 +196,4 @@ export const deleteFolder = async <T>(
 
     const errors = await getErrors<T>(response);
     return { success: false, errors };
-};
+}

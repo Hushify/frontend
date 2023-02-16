@@ -71,9 +71,11 @@ const previewQuery = groq`
     } | order(order asc, publishedAt desc, _createdAt desc)
 `;
 
-const getPosts = () => client.fetch<Post[]>(query);
+function getPosts() {
+    return client.fetch<Post[]>(query);
+}
 
-const BlogPage = async () => {
+async function BlogPage() {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
@@ -85,6 +87,6 @@ const BlogPage = async () => {
     const posts = await getPosts();
 
     return <List posts={posts} />;
-};
+}
 
 export default BlogPage;

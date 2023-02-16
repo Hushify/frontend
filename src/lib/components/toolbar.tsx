@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-export const Toolbar = () => {
+export function Toolbar() {
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
 
     return (
@@ -103,4 +103,4 @@ export const Toolbar = () => {
             </button>
         </nav>
     );
-};
+}

@@ -1,8 +1,10 @@
-export const Break = () => (
-    <hr
-        style={{
-            marginInline: 'auto',
-            maxWidth: '32ch',
-        }}
-    />
-);
+export function Break() {
+    return (
+        <hr
+            style={{
+                marginInline: 'auto',
+                maxWidth: '32ch',
+            }}
+        />
+    );
+}

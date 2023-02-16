@@ -2,7 +2,7 @@ import { Mutate, StoreApi } from 'zustand';
 
 type StoreWithPersist<T, U> = Mutate<StoreApi<T>, [['zustand/persist', U]]>;
 
-export const withStorageDOMEvents = <T, U>(store: StoreWithPersist<T, U>) => {
+export function withStorageDOMEvents<T, U>(store: StoreWithPersist<T, U>) {
     const storageEventCallback = (e: StorageEvent) => {
         if (e.key === store.persist.getOptions().name && e.newValue) {
             store.persist.rehydrate();
@@ -18,4 +18,4 @@ export const withStorageDOMEvents = <T, U>(store: StoreWithPersist<T, U>) => {
     return () => {
         window.removeEventListener('storage', storageEventCallback);
     };
-};
+}

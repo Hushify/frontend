@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
 
-export const useCheckAuth = () => {
+export function useCheckAuth() {
     const {
         logout,
         setAccessToken,
@@ -54,37 +54,33 @@ export const useCheckAuth = () => {
             try {
                 const result = await refreshToken(apiRoutes.identity.refresh);
 
-                if (result.success) {
-                    const worker = new Worker(
-                        new URL(
-                            '@/lib/services/crypto.worker',
-                            import.meta.url
-                        ),
-                        {
-                            type: 'module',
-                            name: 'hushify-crypto-worker',
-                        }
-                    );
-
-                    const crypto = wrap<typeof CryptoService>(worker);
-
-                    const decryptedAccessToken =
-                        await crypto.decryptAccessToken(
-                            result.data.encAccessToken,
-                            result.data.accessTokenNonce,
-                            result.data.serverPublicKey,
-                            asymmetricEncPrivateKey
-                        );
-
-                    setAccessToken(decryptedAccessToken);
-                    setStatus('authenticated');
-                } else {
+                if (!result.success) {
                     await logout();
                     push(clientRoutes.identity.login);
+                    return;
                 }
+
+                const worker = new Worker(
+                    new URL('@/lib/services/crypto.worker', import.meta.url),
+                    {
+                        type: 'module',
+                        name: 'hushify-crypto-worker',
+                    }
+                );
+
+                const crypto = wrap<typeof CryptoService>(worker);
+
+                const decryptedAccessToken = await crypto.decryptAccessToken(
+                    result.data.encAccessToken,
+                    result.data.accessTokenNonce,
+                    result.data.serverPublicKey,
+                    asymmetricEncPrivateKey
+                );
+
+                setAccessToken(decryptedAccessToken);
+                setStatus('authenticated');
             } catch (e) {
                 await logout();
-                push(clientRoutes.identity.login);
             }
         },
         [
@@ -113,4 +109,4 @@ export const useCheckAuth = () => {
     }, [isSessionValid]);
 
     return status;
-};
+}

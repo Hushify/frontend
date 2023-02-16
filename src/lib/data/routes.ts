@@ -9,22 +9,25 @@ export const clientRoutes = {
     identity: {
         login: '/login',
         loginConfirm: '/login/confirm',
+
         register: '/register',
         registerConfirm: '/register/confirm',
-        resendEmailConfirmation: '/register/resend',
-        resendEmailConfirmationSuccess: '/register/resend/success',
+        recoveryQr: '/recovery-qr',
+
+        resendConfirmation: '/resend',
+        resendConfirmationSuccess: '/resend/success',
+
         forgotPassword: '/forgot-password',
         forgotPasswordSuccess: '/forgot-password/success',
+
         resetPassword: '/reset-password',
         resetPasswordSuccess: '/reset-password/success',
-    },
-    dashboard: {
-        index: '/dashboard',
     },
     drive: {
         index: '/drive',
         trash: '/drive/trash',
     },
+    settings: '/settings',
 };
 
 const nakedApiRoutes = {
@@ -40,7 +43,7 @@ const nakedApiRoutes = {
 
         forgotPassword: '/identity/forgot-password',
 
-        resetPassword: '/identity/resetpassword',
+        resetPassword: '/identity/reset-password',
         getUserClaims: '/identity/getuserclaims',
     },
     drive: {

@@ -9,7 +9,7 @@
  *
  * @return Formatted string.
  */
-const humanFileSize = (bytes: number, si: boolean = false, dp: number = 2) => {
+function humanFileSize(bytes: number, si: boolean = false, dp: number = 2) {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {
@@ -33,6 +33,6 @@ const humanFileSize = (bytes: number, si: boolean = false, dp: number = 2) => {
     );
 
     return `${bytes.toFixed(dp)} ${units[u]}`;
-};
+}
 
 export default humanFileSize;

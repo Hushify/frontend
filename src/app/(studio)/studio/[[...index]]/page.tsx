@@ -4,6 +4,8 @@ import { NextStudio } from 'next-sanity/studio';
 
 import config from '@/lib/sanity/sanity.config';
 
-const StudioPage = () => <NextStudio config={config} />;
+function StudioPage() {
+    return <NextStudio config={config} />;
+}
 
 export default StudioPage;

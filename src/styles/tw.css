@@ -57,6 +57,6 @@
 
     button, a[type='button'] {
         @apply focus:outline-none;
-        @apply focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-brand-600/75;
+        @apply focus-visible:ring focus-visible:ring-offset-2;
     }
 }

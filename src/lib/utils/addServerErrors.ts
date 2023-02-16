@@ -1,11 +1,11 @@
-export const addServerErrors = <T>(
+export function addServerErrors<T>(
     errors: { [P in string]?: string[] }, // FIXME: introduce a better key type for auto-complete
     setError: (
         fieldName: keyof T,
         error: { type: string; message: string }
     ) => void,
     dataKeys: string[]
-) => {
+) {
     const errorKeys = Object.keys(errors);
     const accumulatedErrors = errorKeys.map(key => ({
         key,
@@ -30,4 +30,4 @@ export const addServerErrors = <T>(
             .map(e => e.errors.join(' '))
             .join(' '),
     });
-};
+}

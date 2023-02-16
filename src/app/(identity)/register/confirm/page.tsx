@@ -11,17 +11,14 @@ import {
 import { CryptoService } from '@/lib/services/crypto.worker';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
-import { Dialog, Transition } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { wrap } from 'comlink';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import qrcode from 'qrcode';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import colors from 'tailwindcss/colors';
 import zod from 'zod';
 
 type ConfirmFormInputs = {
@@ -41,7 +38,7 @@ const confirmSchema = zod
 
 const RESEND_TIME = 30;
 
-const Confirm = () => {
+function Confirm() {
     const { push } = useRouter();
     const searchParams = useSearchParams();
 
@@ -53,7 +50,7 @@ const Confirm = () => {
     } = useForm<ConfirmFormInputs>({
         resolver: zodResolver(confirmSchema),
         defaultValues: {
-            email: searchParams.get('email') ?? undefined,
+            email: searchParams?.get('email') ?? undefined,
         },
     });
 
@@ -64,6 +61,9 @@ const Confirm = () => {
         state => state.setAsymmetricEncKeyPair
     );
     const setSigningKeyPair = useAuthStore(state => state.setSigningKeyPair);
+    const setRecoveryKeyMnemonic = useAuthStore(
+        state => state.setRecoveryKeyMnemonic
+    );
     const setStatus = useAuthStore(state => state.setStatus);
 
     const [resendTimer, setResendTimer] = useState(RESEND_TIME);
@@ -89,7 +89,7 @@ const Confirm = () => {
     const resendCode = async () => {
         const result = await registerApi(
             apiRoutes.identity.register,
-            searchParams.get('email') as string
+            searchParams?.get('email') as string
         );
 
         if (!result.success) {
@@ -110,23 +110,6 @@ const Confirm = () => {
             Object.keys({ errors: undefined })
         );
     });
-
-    const [isRecoveryKeyModalOpen, setIsRecoveryKeyModalOpen] = useState(false);
-    const [recoveryMnemonic, setRecoveryMnemonic] = useState('');
-    const [recoveryQr, setRecoveryQr] = useState('');
-
-    const openRecoveryKeyModal = async (recoveryKeyMnemonic: string) => {
-        setRecoveryMnemonic(recoveryKeyMnemonic);
-        const recoveryQrCode = await qrcode.toDataURL(recoveryMnemonic, {
-            color: {
-                dark: colors.indigo[600],
-                light: colors.white,
-            },
-        });
-        setRecoveryQr(recoveryQrCode);
-        setIsRecoveryKeyModalOpen(true);
-        document.title = 'Recovery Key';
-    };
 
     const onSubmit = async (data: ConfirmFormInputs) => {
         const pwStrengthResult = checkPasswordStrength(
@@ -175,7 +158,8 @@ const Confirm = () => {
                 keys.signingKeyBundle.publicKey,
                 keys.signingPrivateKey
             );
-            await openRecoveryKeyModal(keys.recoveryMnemonic);
+            setRecoveryKeyMnemonic(keys.recoveryMnemonic);
+            push(clientRoutes.identity.recoveryQr);
             return;
         }
 
@@ -190,94 +174,6 @@ const Confirm = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>
-            {/* eslint-disable-next-line react/no-unknown-property */}
-            <style jsx global>
-                {`
-                    @media print {
-                        html,
-                        body {
-                            overflow: hidden;
-                        }
-                    }
-                `}
-            </style>
-            <Transition appear show={isRecoveryKeyModalOpen} as={Fragment}>
-                <Dialog as='div' className='relative z-50' onClose={() => {}}>
-                    <Transition.Child
-                        as={Fragment}
-                        enter='ease-out duration-300'
-                        enterFrom='opacity-0'
-                        enterTo='opacity-100'
-                        leave='ease-in duration-200'
-                        leaveFrom='opacity-100'
-                        leaveTo='opacity-0'>
-                        <div className='fixed inset-0 bg-black bg-opacity-25' />
-                    </Transition.Child>
-                    <div className='fixed inset-0 overflow-y-auto'>
-                        <div className='flex min-h-full items-center justify-center p-4 text-center'>
-                            <Transition.Child
-                                as={Fragment}
-                                enter='ease-out duration-300'
-                                enterFrom='opacity-0 scale-95'
-                                enterTo='opacity-100 scale-100'
-                                leave='ease-in duration-200'
-                                leaveFrom='opacity-100 scale-100'
-                                leaveTo='opacity-0 scale-95'>
-                                <Dialog.Panel className='w-full max-w-md transform space-y-4 overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all'>
-                                    <Dialog.Title
-                                        as='h3'
-                                        className='text-center text-lg font-bold leading-6 text-gray-900 print:text-xl'>
-                                        Recovery Key
-                                    </Dialog.Title>
-
-                                    <div className='space-y-2 text-gray-600 print:hidden'>
-                                        <p>
-                                            This is your recovery key, please
-                                            print it and save it somewhere safe.
-                                        </p>
-                                        <p>
-                                            We do not have access to your
-                                            password and your master key, so
-                                            this key is the only way to recover
-                                            your account if you lose your
-                                            password.
-                                        </p>
-                                    </div>
-
-                                    <div className='flex items-center justify-center'>
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={recoveryQr}
-                                            alt='Recovery QR Code.'
-                                            className='rounded-lg border-2 border-gray-300'
-                                        />
-                                    </div>
-
-                                    <div className='rounded-lg border-2 border-gray-300 p-4'>
-                                        <code>{recoveryMnemonic}</code>
-                                    </div>
-
-                                    <button
-                                        type='button'
-                                        onClick={() => window.print()}
-                                        className='button button-primary text-white print:hidden'>
-                                        Print
-                                    </button>
-
-                                    <button
-                                        type='button'
-                                        onClick={() =>
-                                            push(clientRoutes.drive.index)
-                                        }
-                                        className='button button-secondary print:hidden'>
-                                        Continue to Drive
-                                    </button>
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </div>
-                </Dialog>
-            </Transition>
             <div className='space-y-1 text-center print:hidden'>
                 <h1 className='text-2xl font-bold'>One last step</h1>
                 <div className='text-sm text-slate-600'>
@@ -285,7 +181,7 @@ const Confirm = () => {
                 </div>
             </div>
             <form
-                className='mt-8 space-y-3'
+                className='mt-4 space-y-3'
                 onSubmit={handleSubmit(data =>
                     confirmMutation.mutateAsync(data)
                 )}>
@@ -376,7 +272,7 @@ const Confirm = () => {
                     )}>
                     <span>Continue</span>
                     <Loader
-                        size={6}
+                        size={16}
                         className={clsx(
                             'animate-spin',
                             !confirmMutation.isLoading && 'hidden'
@@ -386,6 +282,6 @@ const Confirm = () => {
             </form>
         </motion.div>
     );
-};
+}
 
 export default Confirm;

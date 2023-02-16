@@ -5,13 +5,13 @@ import { useSanityPreview } from '@/lib/sanity/sanity.preview';
 import { Post } from '@/lib/sanity/types';
 import { notFound } from 'next/navigation';
 
-export const PreviewSinglePost = ({
+export function PreviewSinglePost({
     query,
     slug,
 }: {
     query: string;
     slug: string;
-}) => {
+}) {
     const post = useSanityPreview<Post | null>(query, { slug });
 
     if (!post) {
@@ -19,4 +19,4 @@ export const PreviewSinglePost = ({
     }
 
     return <SinglePost post={post} />;
-};
+}

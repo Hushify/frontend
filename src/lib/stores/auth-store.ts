@@ -17,6 +17,7 @@ export type AuthState = {
     asymmetricEncPublicKey?: string;
     signingPublicKey?: string;
     signingPrivateKey?: string;
+    recoveryKeyMnemonic?: string;
     status: AuthStatus;
 };
 
@@ -31,6 +32,7 @@ export type AuthActions = {
         signingPublicKey: string | undefined,
         signingPrivateKey: string | undefined
     ) => void;
+    setRecoveryKeyMnemonic: (recoveryKeyMnemonic: string | undefined) => void;
     setStatus: (status: AuthStatus) => void;
     logout: () => Promise<void>;
 };
@@ -67,6 +69,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 signingPublicKey: string | undefined,
                 signingPrivateKey: string | undefined
             ) => set({ signingPublicKey, signingPrivateKey }),
+
+            setRecoveryKeyMnemonic: recoveryKeyMnemonic =>
+                set({ recoveryKeyMnemonic }),
 
             setStatus: (status: AuthStatus) => set({ status }),
 

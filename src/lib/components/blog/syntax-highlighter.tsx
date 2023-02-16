@@ -3,14 +3,16 @@
 import { Prism } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-export const SyntaxHighlighter = ({
+export function SyntaxHighlighter({
     code,
     language,
 }: {
     code: string;
     language: string;
-}) => (
-    <Prism language={language} style={oneDark}>
-        {code}
-    </Prism>
-);
+}) {
+    return (
+        <Prism language={language} style={oneDark}>
+            {code}
+        </Prism>
+    );
+}

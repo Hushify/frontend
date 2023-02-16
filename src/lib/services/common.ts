@@ -12,10 +12,10 @@ export type ErrorResponse<T> = {
 
 export type ResponseMessage<T, U> = SuccessResponse<U> | ErrorResponse<T>;
 
-export const getErrors = async <T>(
+export async function getErrors<T>(
     response: Response,
     defaultError = 'Something went wrong!'
-): Promise<Errors<T>> => {
+): Promise<Errors<T>> {
     const isJsonProblem = response.headers
         .get('Content-Type')
         ?.includes('application/problem+json');
@@ -25,4 +25,4 @@ export const getErrors = async <T>(
     };
 
     return responseErrors;
-};
+}

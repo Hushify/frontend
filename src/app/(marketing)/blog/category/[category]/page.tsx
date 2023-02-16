@@ -79,12 +79,13 @@ const previewQuery = groq`
     }[0]
 `;
 
-const getCategoryWithPosts = (category: string) =>
-    client.fetch<CategoryPosts>(query, { category });
+function getCategoryWithPosts(category: string) {
+    return client.fetch<CategoryPosts>(query, { category });
+}
 
 export const revalidate = 3600;
 
-export const generateStaticParams = async () => {
+export async function generateStaticParams() {
     const categories = await client.fetch<{ slug: { current: string } }[]>(groq`
         *[_type == "category"] {
             slug { current }
@@ -94,13 +95,13 @@ export const generateStaticParams = async () => {
     return categories.map(({ slug }) => ({
         category: slug.current,
     }));
-};
+}
 
-const CategoryPage = async ({
+async function CategoryPage({
     params: { category },
 }: {
     params: { category: string };
-}) => {
+}) {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
@@ -112,6 +113,6 @@ const CategoryPage = async ({
     const categoryWithPosts = await getCategoryWithPosts(category);
 
     return <CategoryList categoryWithPosts={categoryWithPosts} />;
-};
+}
 
 export default CategoryPage;

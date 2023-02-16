@@ -11,10 +11,10 @@ const usePreview = definePreview({
     onPublicAccessOnly,
 });
 
-export const useSanityPreview = <T = any>(query: string, params?: Params) => {
+export function useSanityPreview<T = any>(query: string, params?: Params) {
     const sanityAuthToken = JSON.parse(
         localStorage.getItem(`__studio_auth_token_${projectId}`) ?? 'null'
     ) as { token: string } | null;
 
     return usePreview(sanityAuthToken?.token ?? null, query, params) as T;
-};
+}

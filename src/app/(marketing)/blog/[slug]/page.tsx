@@ -68,11 +68,13 @@ const previewQuery = groq`
     }[0]
 `;
 
-const getPost = (slug: string) => client.fetch<Post | null>(query, { slug });
+function getPost(slug: string) {
+    return client.fetch<Post | null>(query, { slug });
+}
 
 export const revalidate = 3600;
 
-export const generateStaticParams = async () => {
+export async function generateStaticParams() {
     const slugs = await client.fetch<{ slug: { current: string } }[]>(groq`
         *[_type == "post" && site->title in ["Hushify", "All"]] {
             slug { current }
@@ -82,9 +84,9 @@ export const generateStaticParams = async () => {
     return slugs.map(({ slug }) => ({
         slug: slug.current,
     }));
-};
+}
 
-const PostPage = async ({ params: { slug } }: { params: { slug: string } }) => {
+async function PostPage({ params: { slug } }: { params: { slug: string } }) {
     if (previewData()) {
         return (
             <PreviewSuspense fallback={<Loader />}>
@@ -100,6 +102,6 @@ const PostPage = async ({ params: { slug } }: { params: { slug: string } }) => {
     }
 
     return <SinglePost post={post} />;
-};
+}
 
 export default PostPage;

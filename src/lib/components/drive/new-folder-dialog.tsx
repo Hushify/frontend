@@ -1,6 +1,5 @@
 'use client';
 
-import { useAlertStore } from '@/lib/components/alert';
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
@@ -10,6 +9,7 @@ import {
     DriveList,
     FolderNodeDecrypted,
 } from '@/lib/services/drive';
+import { useAlertStore } from '@/lib/stores/alert-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { Dialog, Transition } from '@headlessui/react';
@@ -47,13 +47,13 @@ const newFolderSchema = zod
     })
     .required();
 
-export const NewFolderDialog = ({
+export function NewFolderDialog({
     isNewFolderOpen,
     setIsNewFolderOpen,
 }: {
     isNewFolderOpen: boolean;
     setIsNewFolderOpen: Dispatch<SetStateAction<boolean>>;
-}) => {
+}) {
     const queryClient = useQueryClient();
     const currentFolder = queryClient.getQueryData<string | null>([
         'currentFolder',
@@ -280,4 +280,4 @@ export const NewFolderDialog = ({
             </Dialog>
         </Transition>
     );
-};
+}

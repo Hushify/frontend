@@ -3,41 +3,42 @@
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
-import { register as registerApi } from '@/lib/services/auth';
+import { resetPassword } from '@/lib/services/auth';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import zod from 'zod';
+import { z } from 'zod';
 
-type RegisterFormInputs = {
+type ResetPasswordFormInputs = {
     errors: string;
     email: string;
 };
 
-const registerSchema = zod
+const resetPasswordSchema = z
     .object({
-        email: zod.string().email('Please check your email.'),
+        email: z.string().email('Please check your email.'),
     })
     .required();
 
-function Register() {
+export default function ResetPassword() {
     const {
         register,
         handleSubmit,
         setError,
         formState: { errors },
-    } = useForm<RegisterFormInputs>({ resolver: zodResolver(registerSchema) });
+    } = useForm<ResetPasswordFormInputs>({
+        resolver: zodResolver(resetPasswordSchema),
+    });
 
     const { push } = useRouter();
 
-    const onSubmit = async (data: RegisterFormInputs) => {
-        const result = await registerApi<RegisterFormInputs>(
-            apiRoutes.identity.register,
+    const onSubmit = async (data: ResetPasswordFormInputs) => {
+        const result = await resetPassword<ResetPasswordFormInputs>(
+            apiRoutes.identity.resetPassword,
             data.email
         );
 
@@ -61,16 +62,8 @@ function Register() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>
-            <div className='space-y-1 text-center'>
-                <h1 className='text-2xl font-bold'>Sign Up</h1>
-                <div className='text-sm text-slate-600'>
-                    Already have an account?{' '}
-                    <Link
-                        href={clientRoutes.identity.login}
-                        className='text-brand-600 underline'>
-                        Login
-                    </Link>
-                </div>
+            <div className='text-center'>
+                <h1 className='text-2xl font-bold'>Reset Password</h1>
             </div>
 
             <form
@@ -106,28 +99,6 @@ function Register() {
                     />
                 </button>
             </form>
-
-            <div className='my-6 flex justify-center'>
-                <hr className='w-1/2 border-gray-400' />
-            </div>
-
-            <div className='mx-auto max-w-[300px] text-center text-sm text-gray-600'>
-                By clicking continue, you agree to our{' '}
-                <Link
-                    href={clientRoutes.terms}
-                    className='text-brand-600 underline'>
-                    Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link
-                    href={clientRoutes.privacy}
-                    className='text-brand-600 underline'>
-                    Privacy Policy
-                </Link>
-                .
-            </div>
         </motion.div>
     );
 }
-
-export default Register;

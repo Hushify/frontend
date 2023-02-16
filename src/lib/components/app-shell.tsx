@@ -21,7 +21,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
     Fragment,
-    PropsWithChildren,
+    ReactNode,
     SVGProps,
     useCallback,
     useMemo,
@@ -52,18 +52,18 @@ const navigation = [
         icon: (props: any) => <Star {...props} />,
     },
     {
-        href: '/trash',
+        href: clientRoutes.drive.trash,
         name: 'Trash',
         icon: (props: any) => <Trash {...props} />,
     },
     {
-        href: '/settings',
+        href: clientRoutes.settings,
         name: 'Settings',
         icon: (props: any) => <Settings {...props} />,
     },
 ];
 
-export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
+export function AppShell({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarDesktopOpen, setSidebarDesktopOpen] = useState(true);
     const path = usePathname();
@@ -86,7 +86,7 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
     }, [accessToken]);
 
     return (
-        <div className='h-full'>
+        <div className='flex h-full flex-col'>
             <Transition.Root show={sidebarOpen} as={Fragment}>
                 <Dialog
                     as='div'
@@ -188,21 +188,42 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
                 </Dialog>
             </Transition.Root>
 
-            <div
-                className={clsx(
-                    'hidden',
-                    sidebarDesktopOpen &&
-                        'md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col',
-                    !sidebarDesktopOpen && 'hidden'
-                )}>
-                <div className='flex min-h-0 flex-1 flex-col bg-gray-800'>
-                    <div className='flex h-16 flex-shrink-0 items-center space-x-3 bg-gray-900 px-4 text-white'>
-                        <Logo height={32} width={32} />
-                        <span className='text-xl font-semibold'>
+            <div className='flex h-16 shrink-0 bg-gray-900 shadow'>
+                <button
+                    type='button'
+                    className='px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:hidden'
+                    onClick={() => setSidebarOpen(true)}>
+                    <span className='sr-only'>Open sidebar</span>
+                    <MenuIcon className='h-6 w-6' aria-hidden='true' />
+                </button>
+                <button
+                    type='button'
+                    className='hidden px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:inline-block'
+                    onClick={() => setSidebarDesktopOpen(prev => !prev)}>
+                    <span className='sr-only'>Toggle sidebar</span>
+                    <MenuIcon className='h-6 w-6' aria-hidden='true' />
+                </button>
+                <div className='flex flex-1 justify-between'>
+                    {/* Page Title */}
+                    <div className='flex flex-1 items-center'>
+                        <h1 className='text-xl font-semibold text-white md:text-2xl'>
                             Hushify Drive
-                        </span>
+                        </h1>
                     </div>
-                    <div className='flex flex-1 flex-col overflow-y-auto'>
+                    <div className='ml-4 flex items-center md:ml-6'>
+                        <button
+                            type='button'
+                            className='cursor-pointer rounded-full bg-gray-800 p-1 text-white hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2'>
+                            <span className='sr-only'>Search</span>
+                            <Search size={24} aria-hidden='true' />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className='flex h-full flex-auto'>
+                <div className='hidden min-w-[256px] shrink-0 flex-col md:flex'>
+                    <div className='flex flex-1 flex-col overflow-y-auto bg-gray-800'>
                         <nav className='flex-1 space-y-1 px-2 py-4'>
                             {navigation.map(item => (
                                 <Link
@@ -237,58 +258,11 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
                                 <span>Logout</span>
                             </button>
                         </nav>
-                        <div className='text-md group flex w-full items-center justify-center break-all bg-brand-600 px-2 py-3 text-center font-medium text-white'>
-                            {name}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                className={clsx(
-                    'flex h-full flex-col',
-                    sidebarDesktopOpen && 'md:pl-64',
-                    !sidebarDesktopOpen && 'md:pl-0'
-                )}>
-                <div className='sticky top-0 z-20 flex h-16 flex-shrink-0 bg-gray-900 shadow'>
-                    <button
-                        type='button'
-                        className='px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:hidden'
-                        onClick={() => setSidebarOpen(true)}>
-                        <span className='sr-only'>Open sidebar</span>
-                        <MenuIcon className='h-6 w-6' aria-hidden='true' />
-                    </button>
-                    <button
-                        type='button'
-                        className='hidden px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:inline-block'
-                        onClick={() => setSidebarDesktopOpen(prev => !prev)}>
-                        <span className='sr-only'>Toggle sidebar</span>
-                        <MenuIcon className='h-6 w-6' aria-hidden='true' />
-                    </button>
-                    <div className='flex flex-1 justify-between px-4'>
-                        {/* Page Title */}
-                        <div className='flex flex-1 items-center'>
-                            <h1 className='text-xl font-semibold text-white md:text-2xl'>
-                                Drive
-                            </h1>
-                        </div>
-                        <div className='ml-4 flex items-center md:ml-6'>
-                            <button
-                                type='button'
-                                className='cursor-pointer rounded-full bg-gray-800 p-1 text-white hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2'>
-                                <span className='sr-only'>Search</span>
-                                <Search size={24} aria-hidden='true' />
-                            </button>
-                        </div>
                     </div>
                 </div>
 
-                <main className='flex-1'>
-                    <div className='mx-auto h-[calc(100%-8rem)] px-4 pt-4 sm:px-6 lg:px-8'>
-                        {children}
-                    </div>
-                </main>
+                <main className='flex-auto'>{children}</main>
             </div>
         </div>
     );
-};
+}

@@ -28,11 +28,11 @@ const loginSchema = zod
     })
     .required();
 
-const Login = ({
+function Login({
     searchParams: _sp,
 }: {
     searchParams?: { [key: string]: string | string[] | undefined };
-}) => {
+}) {
     const {
         register,
         handleSubmit,
@@ -134,18 +134,18 @@ const Login = ({
             </div>
 
             <div>
-                <button
-                    onClick={() => push(clientRoutes.identity.register)}
+                <Link
                     type='button'
+                    href={clientRoutes.identity.register}
                     className={clsx(
-                        'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
+                        'flex w-full items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
                         'bg-gray-600 text-white focus-visible:ring-gray-600/75'
                     )}>
                     Register
-                </button>
+                </Link>
             </div>
         </motion.div>
     );
-};
+}
 
 export default Login;

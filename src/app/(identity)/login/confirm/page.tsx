@@ -32,7 +32,7 @@ const confirmSchema = zod
     })
     .required();
 
-const Confirm = () => {
+function Confirm() {
     const { push } = useRouter();
     const searchParams = useSearchParams();
 
@@ -44,7 +44,7 @@ const Confirm = () => {
     } = useForm<ConfirmFormInputs>({
         resolver: zodResolver(confirmSchema),
         defaultValues: {
-            email: searchParams.get('email') ?? undefined,
+            email: searchParams?.get('email') ?? undefined,
         },
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +79,7 @@ const Confirm = () => {
     const resendCode = async () => {
         const result = await initiateLogin(
             apiRoutes.identity.initiateLogin,
-            searchParams.get('email') as string
+            searchParams?.get('email') as string
         );
 
         if (!result.success) {
@@ -161,17 +161,6 @@ const Confirm = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>
-            {/* eslint-disable-next-line react/no-unknown-property */}
-            <style jsx global>
-                {`
-                    @media print {
-                        html,
-                        body {
-                            overflow: hidden;
-                        }
-                    }
-                `}
-            </style>
             <div className='space-y-1 text-center print:hidden'>
                 <h1 className='text-2xl font-bold'>Enter Your Credentials</h1>
                 <div className='text-sm text-slate-600'>
@@ -276,6 +265,6 @@ const Confirm = () => {
             </form>
         </motion.div>
     );
-};
+}
 
 export default Confirm;

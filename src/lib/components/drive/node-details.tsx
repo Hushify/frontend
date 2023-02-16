@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Fragment } from 'react';
 
-export const NodeDetails = ({
+export function NodeDetails({
     id,
     close,
     show,
@@ -13,7 +13,7 @@ export const NodeDetails = ({
     id: string | undefined;
     close: () => void;
     show: boolean;
-}) => {
+}) {
     const queryClient = useQueryClient();
     const currentFolder = queryClient.getQueryData<string | null>([
         'currentFolder',
@@ -111,4 +111,4 @@ export const NodeDetails = ({
             </Dialog>
         </Transition>
     );
-};
+}
