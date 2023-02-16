@@ -65,7 +65,7 @@ const navigation = [
 
 export function AppShell({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [sidebarDesktopOpen, setSidebarDesktopOpen] = useState(true);
+    const [, setSidebarDesktopOpen] = useState(true);
     const path = usePathname();
 
     const logoutFromAuthStore = useAuthStore(state => state.logout);

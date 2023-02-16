@@ -34,7 +34,8 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
     }
 
     if (accessToken && status === 'authenticated') {
-        return children;
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        return <>{children}</>;
     }
 
     return (
