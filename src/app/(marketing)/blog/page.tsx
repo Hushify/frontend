@@ -7,6 +7,10 @@ import { Post } from '@/lib/sanity/types';
 import { groq } from 'next-sanity';
 import { previewData } from 'next/headers';
 
+export const metadata = {
+    title: 'Hushify Blog',
+};
+
 export const revalidate = 3600;
 
 const query = groq`

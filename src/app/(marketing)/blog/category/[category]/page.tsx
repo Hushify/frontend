@@ -4,8 +4,45 @@ import { Loader } from '@/lib/components/loader';
 import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { CategoryPosts } from '@/lib/sanity/types';
+import { Metadata } from 'next';
 import { groq } from 'next-sanity';
 import { previewData } from 'next/headers';
+
+export async function generateMetadata({
+    params: { category },
+}: {
+    params: { category: string };
+}): Promise<Metadata> {
+    const cat = await client.fetch<{
+        title: string;
+        description?: string;
+    }>(
+        groq`
+            *[_type == "category" && slug.current == $category] {
+                title,
+                description,
+            }[0]
+        `,
+        { category }
+    );
+
+    const metadata: Metadata = {};
+
+    if (cat.title) {
+        metadata.keywords = cat.title;
+        metadata.title = cat.title;
+        metadata.openGraph = { title: cat.title };
+        metadata.twitter = { title: cat.title };
+    }
+
+    if (cat.description) {
+        metadata.description = cat.description;
+        metadata.openGraph = { description: cat.description };
+        metadata.twitter = { description: cat.description };
+    }
+
+    return metadata;
+}
 
 const query = groq`
     *[_type == "category" && slug.current == $category] {
