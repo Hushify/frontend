@@ -1,40 +1,66 @@
 'use client';
 
+import Breadcrumbs from '@/lib/components/drive/breadcrumbs';
+import {
+    ContextMenuItem,
+    ContextMenuSeparator,
+    DriveContextMenu,
+} from '@/lib/components/drive/context-menu';
+import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
+import {
+    DriveToolbar,
+    ToolbarItem,
+    ToolbarSeparator,
+} from '@/lib/components/drive/toolbar';
 import { UploadProgressBox } from '@/lib/components/drive/upload-progress';
 import { FullscreenUpload } from '@/lib/components/fullscreen-upload';
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
-import { deleteFolder, list } from '@/lib/services/drive';
-import { useAlertStore } from '@/lib/stores/alert-store';
+import { useClickDirect } from '@/lib/hooks/use-click-direct';
+import CryptoWorker from '@/lib/services/comlink-crypto';
+import {
+    BreadcrumbDecrypted,
+    deleteNodes,
+    FileNode,
+    FolderMetadata,
+    FolderNodeDecrypted,
+    list,
+} from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { Float } from '@headlessui-float/react';
-import { Menu } from '@headlessui/react';
-import { PencilIcon } from '@heroicons/react/24/outline';
+import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { format, isToday } from 'date-fns';
 import {
-    ArrowDown,
+    ChevronsUpDown,
+    ChevronUp,
     Copy,
-    Download,
     Folder,
-    Info,
+    FolderUp,
     Loader,
     Menu as MenuIcon,
     Move,
-    Star,
-    Trash,
+    Plus,
+    Trash2,
+    Upload,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { FileWithPath, useDropzone } from 'react-dropzone';
+import { toast } from 'react-hot-toast';
 import useMeasure from 'react-use-measure';
 
-const TAGS = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-);
-
 function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
+    const router = useRouter();
+
     const currentFolder = slug?.at(0);
 
     const url = currentFolder
@@ -45,16 +71,11 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const masterKey = useAuthStore(state => state.masterKey)!;
 
     const { data, status, refetch } = useQuery([url], () =>
-        list(url, accessToken, masterKey)
+        list(url, accessToken, masterKey, CryptoWorker.cryptoWorker)
     );
 
-    const currentFolderQuery = useQuery(
-        ['currentFolder'],
-        () => currentFolder ?? null
-    );
-    useEffect(() => {
-        currentFolderQuery.refetch();
-    }, [currentFolder, currentFolderQuery]);
+    const currentFolderId = currentFolder ?? null;
+    const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
 
     const onDrop = useCallback(
         (acceptedFiles: FileWithPath[]) => acceptedFiles.forEach(_file => {}),
@@ -70,23 +91,309 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
     const inputProps = useMemo(() => getInputProps(), [getInputProps]);
 
-    const addAlert = useAlertStore(state => state.addAlert);
-    const mutation = useMutation({
+    const [ref, bounds] = useMeasure();
+    const [refRest, boundsRest] = useMeasure();
+
+    const selectAllRef = useRef<HTMLInputElement>(null);
+
+    const [selectedNodes, setSelectedNodes] = useState<
+        (
+            | { node: FolderNodeDecrypted; type: 'folder' }
+            | { node: FileNode; type: 'file' }
+        )[]
+    >([]);
+
+    useEffect(() => {
+        setSelectedNodes([]);
+    }, [currentFolderId]);
+
+    const selectAll = useCallback(() => {
+        if (!selectAllRef.current) {
+            return;
+        }
+
+        if (!data) {
+            return;
+        }
+
+        if (!selectAllRef.current.checked) {
+            setSelectedNodes([]);
+            return;
+        }
+
+        setSelectedNodes([
+            ...data.folders.map(node => ({
+                node,
+                type: 'folder' as const,
+            })),
+            ...data.files.map(node => ({ node, type: 'file' as const })),
+        ]);
+    }, [data]);
+
+    const selectNode = useCallback(
+        (node: FolderNodeDecrypted | FileNode, type: 'folder' | 'file') => {
+            setSelectedNodes(prev => {
+                const selected = prev.find(n => n.node.id === node.id);
+                if (selected) {
+                    return prev.filter(n => n.node.id !== node.id);
+                }
+
+                if (type === 'folder') {
+                    return [
+                        ...prev,
+                        {
+                            node: node as FolderNodeDecrypted,
+                            type: 'folder',
+                        },
+                    ];
+                }
+
+                return [
+                    ...prev,
+                    {
+                        node: node as FileNode,
+                        type: 'file',
+                    },
+                ];
+            });
+        },
+        []
+    );
+
+    const deleteNodesMutation = useMutation({
         mutationKey: [],
-        mutationFn: async (id: string) => {
-            await deleteFolder(
-                `${apiRoutes.drive.deleteFolder}/${id}`,
-                accessToken
-            );
+        mutationFn: async ({
+            folderIds,
+            fileIds,
+        }: {
+            folderIds: string[];
+            fileIds: string[];
+        }) => {
+            const result = await deleteNodes(folderIds, fileIds, accessToken);
+            if (!result.success) {
+                throw new Error('Deletion failed!');
+            }
         },
         onSuccess: () => {
-            addAlert('Folder deleted!', 'info');
+            toast.success('Deleted!');
+            setSelectedNodes([]);
             refetch();
+        },
+        onError: () => {
+            toast.error('Deletion failed!');
         },
     });
 
-    const [ref, bounds] = useMeasure();
-    const [refRest, boundsRest] = useMeasure();
+    useLayoutEffect(() => {
+        if (!selectAllRef.current) {
+            return;
+        }
+
+        if (selectedNodes.length <= 0) {
+            selectAllRef.current.indeterminate = false;
+            selectAllRef.current.checked = false;
+            return;
+        }
+
+        if (
+            selectedNodes.length ===
+            (data?.folders.length ?? 0) + (data?.files.length ?? 0)
+        ) {
+            selectAllRef.current.indeterminate = false;
+            selectAllRef.current.checked = true;
+            return;
+        }
+
+        selectAllRef.current.indeterminate = true;
+    }, [data?.files.length, data?.folders.length, selectedNodes.length]);
+
+    const toolbarItems: (ToolbarItem | ToolbarSeparator)[] = useMemo(
+        () =>
+            selectedNodes.length <= 0
+                ? [
+                      {
+                          type: 'item',
+                          name: 'Create Folder',
+                          action: () => setIsNewFolderOpen(true),
+                          icon: Plus,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'secondary',
+                      },
+                      {
+                          type: 'item',
+                          name: 'Upload File',
+                          action: undefined,
+                          icon: Upload,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'secondary',
+                      },
+                      {
+                          type: 'item',
+                          name: 'Upload Folder',
+                          action: undefined,
+                          icon: FolderUp,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'secondary',
+                      },
+                  ]
+                : [
+                      {
+                          type: 'item',
+                          name: 'Copy',
+                          action: undefined,
+                          icon: Copy,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'secondary',
+                      },
+                      {
+                          type: 'item',
+                          name: 'Move',
+                          action: undefined,
+                          icon: Move,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'secondary',
+                      },
+                      {
+                          type: 'separator',
+                          id: '1',
+                      },
+                      {
+                          type: 'item',
+                          name: 'Delete',
+                          action: () =>
+                              deleteNodesMutation.mutateAsync({
+                                  folderIds: selectedNodes
+                                      .filter(n => n.type === 'folder')
+                                      .map(n => n.node.id),
+                                  fileIds: selectedNodes
+                                      .filter(n => n.type === 'file')
+                                      .map(n => n.node.id),
+                              }),
+                          icon: Trash2,
+                          iconOnly: false,
+                          textOnly: false,
+                          variant: 'danger',
+                      },
+                  ],
+        [deleteNodesMutation, selectedNodes]
+    );
+
+    const contextItems: (ContextMenuItem | ContextMenuSeparator)[] = useMemo(
+        () =>
+            selectedNodes.length <= 0
+                ? [
+                      {
+                          type: 'item',
+                          name: 'Create Folder',
+                          action: () => setIsNewFolderOpen(true),
+                          icon: Plus,
+                          textOnly: false,
+                          variant: 'primary',
+                          disabled: false,
+                      },
+                      {
+                          type: 'item',
+                          name: 'Upload File',
+                          action: undefined,
+                          icon: Upload,
+                          textOnly: false,
+                          variant: 'primary',
+                          disabled: false,
+                      },
+                      {
+                          type: 'item',
+                          name: 'Upload Folder',
+                          action: undefined,
+                          icon: FolderUp,
+                          textOnly: false,
+                          variant: 'primary',
+                          disabled: false,
+                      },
+                  ]
+                : [
+                      {
+                          type: 'item',
+                          name: 'Copy',
+                          action: undefined,
+                          icon: Copy,
+                          textOnly: false,
+                          variant: 'primary',
+                          disabled: false,
+                      },
+                      {
+                          type: 'item',
+                          name: 'Move',
+                          action: undefined,
+                          icon: Move,
+                          textOnly: false,
+                          variant: 'primary',
+                          disabled: false,
+                      },
+                      {
+                          type: 'separator',
+                          id: '1',
+                      },
+                      {
+                          type: 'item',
+                          name: 'Delete',
+                          action: () =>
+                              deleteNodesMutation.mutateAsync({
+                                  folderIds: selectedNodes
+                                      .filter(n => n.type === 'folder')
+                                      .map(n => n.node.id),
+                                  fileIds: selectedNodes
+                                      .filter(n => n.type === 'file')
+                                      .map(n => n.node.id),
+                              }),
+                          icon: Trash2,
+                          textOnly: false,
+                          variant: 'danger',
+                          disabled: deleteNodesMutation.isLoading,
+                      },
+                  ],
+        [deleteNodesMutation, selectedNodes]
+    );
+
+    // TODO: Remove string and replace it with keyof FileMetadata
+    const [sortKey, setSortKey] = useState<keyof FolderMetadata | string>(
+        'name'
+    );
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+    const folders = useMemo(
+        () =>
+            data?.folders.sort((a, b) => {
+                let internalSortKey = sortKey;
+                if (!Object.keys(a).includes(sortKey)) {
+                    internalSortKey = 'name';
+                }
+
+                const aMetadata =
+                    a.metadata[internalSortKey as keyof FolderMetadata];
+                const bMetadata =
+                    b.metadata[internalSortKey as keyof FolderMetadata];
+
+                if (sortOrder === 'asc') {
+                    return aMetadata.localeCompare(bMetadata, undefined, {
+                        numeric: true,
+                    });
+                }
+
+                return bMetadata.localeCompare(aMetadata, undefined, {
+                    numeric: true,
+                });
+            }) ?? [],
+        [data?.folders, sortKey, sortOrder]
+    );
+
+    const divRef = useRef<HTMLDivElement>(null);
+    const clearSelection = useCallback(() => setSelectedNodes([]), []);
+    useClickDirect(divRef, clearSelection);
 
     return (
         <div className='h-full w-full' {...getRootProps()}>
@@ -114,7 +421,21 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 )}
 
                 <div ref={refRest}>
-                    <div>TODO: Toolbar</div>
+                    <div className='relative z-10'>
+                        <NewFolderDialog
+                            currentFolderId={currentFolderId}
+                            isNewFolderOpen={isNewFolderOpen}
+                            setIsNewFolderOpen={setIsNewFolderOpen}
+                        />
+                    </div>
+
+                    <DriveToolbar items={toolbarItems} />
+
+                    <Breadcrumbs
+                        items={
+                            data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])
+                        }
+                    />
                 </div>
 
                 <ScrollArea.Root
@@ -125,238 +446,343 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                             boundsRest.height,
                     }}
                     className='w-full overflow-hidden'>
-                    <ScrollArea.Viewport className='h-full w-full rounded'>
-                        <div className='py-[15px] px-5'>
-                            <div className='font-medium leading-[18px]'>
-                                Tags
-                            </div>
-                            {TAGS.map(tag => (
-                                <div
-                                    className='mt-2.5 pt-2.5 text-[13px] leading-[18px]'
-                                    key={tag}>
-                                    {tag}
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea.Viewport>
-                    <ScrollArea.Scrollbar
-                        className='flex touch-none select-none bg-blackA6 p-0.5 transition-colors duration-[160ms] ease-out hover:bg-blackA8 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                        orientation='vertical'>
-                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-mauve10 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-                    </ScrollArea.Scrollbar>
-                    <ScrollArea.Scrollbar
-                        className='flex touch-none select-none bg-blackA6 p-0.5 transition-colors duration-[160ms] ease-out hover:bg-blackA8 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                        orientation='horizontal'>
-                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-mauve10 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-                    </ScrollArea.Scrollbar>
-                    <ScrollArea.Corner className='bg-blackA8' />
-                </ScrollArea.Root>
-
-                <table className='hidden h-full w-full divide-y divide-gray-300'>
-                    <div>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Dolorum similique qui magnam voluptas nemo deserunt
-                        praesentium, in incidunt, recusandae totam quo, odio
-                        impedit at. Harum necessitatibus assumenda quasi culpa
-                        nam?
-                    </div>
-                    <div>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Dolorum similique qui magnam voluptas nemo deserunt
-                        praesentium, in incidunt, recusandae totam quo, odio
-                        impedit at. Harum necessitatibus assumenda quasi culpa
-                        nam?
-                    </div>
-                    <thead className='select-none'>
-                        <tr>
-                            <th
-                                scope='col'
-                                className='w-16 py-3 text-center text-gray-900'>
-                                <label
-                                    className='sr-only'
-                                    htmlFor='SelectAllOrNone'>
-                                    Select All
-                                </label>
-                                <input
-                                    type='checkbox'
-                                    className='-mt-1 rounded'
-                                    id='SelectAllOrNone'
-                                />
-                            </th>
-                            <th
-                                scope='col'
-                                className='py-3 text-left text-sm font-semibold text-gray-900'>
-                                <div className='flex cursor-pointer items-center gap-1'>
-                                    <span>Name</span>
-                                    <ArrowDown className='h-4' />
-                                </div>
-                            </th>
-                            <th
-                                scope='col'
-                                className='w-16 py-3 text-sm font-semibold text-gray-900'>
-                                <Star size={20} className='mx-3' />
-                            </th>
-                            <th
-                                scope='col'
-                                className='w-48 py-3 text-left text-sm font-semibold text-gray-900'>
-                                <div className='flex cursor-pointer items-center gap-1'>
-                                    <span>Modified</span>
-                                    <ArrowDown className='h-4' />
-                                </div>
-                            </th>
-                            <th
-                                scope='col'
-                                className='w-40 py-3 text-left text-sm font-semibold text-gray-900'>
-                                <div className='flex cursor-pointer items-center gap-1'>
-                                    <span>Size</span>
-                                    <ArrowDown className='h-4' />
-                                </div>
-                            </th>
-                            <th scope='col' className='w-16 text-left 2xl:w-12'>
-                                <span className='sr-only'>Actions</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    {status === 'success' && (
-                        <tbody className='divide-y divide-gray-200'>
-                            {data.folders.map(folder => (
-                                <tr
-                                    key={folder.id}
-                                    className='bg-white text-gray-900 hover:bg-gray-200'>
-                                    <td className='py-3 text-center'>
-                                        <label
-                                            className='sr-only'
-                                            htmlFor='checkbox'>
-                                            Select
-                                        </label>
-                                        <input
-                                            className='-mt-1 rounded'
-                                            type='checkbox'
-                                            id='checkbox'
-                                        />
-                                    </td>
-                                    <td className='max-w-[300px] whitespace-nowrap py-3 text-left'>
-                                        <div className='flex items-center gap-2'>
-                                            <Folder
-                                                className='shrink-0 fill-brand-600 text-brand-600'
-                                                size={16}
-                                            />
-                                            <Link
-                                                href={`${clientRoutes.drive.index}/${folder.id}`}
-                                                className='truncate text-sm'>
-                                                {folder.metadata.name}
-                                            </Link>
-                                        </div>
-                                    </td>
-                                    <td
-                                        className='py-3 text-sm text-gray-500'
-                                        title='Toggle Starred'>
-                                        <button type='button'>
-                                            <Star
-                                                size={20}
-                                                className={clsx(
-                                                    'mx-3 cursor-pointer',
-                                                    !folder.id
-                                                        ? 'fill-yellow-500 text-yellow-500'
-                                                        : 'fill-none'
-                                                )}
-                                            />
-                                        </button>
-                                    </td>
-                                    <td className='py-3 text-left text-sm'>
-                                        {isToday(
-                                            new Date(folder.metadata.modified)
-                                        )
-                                            ? format(
-                                                  new Date(
-                                                      folder.metadata.modified
-                                                  ),
-                                                  'h:mm:ss b'
-                                              )
-                                            : format(
-                                                  new Date(
-                                                      folder.metadata.modified
-                                                  ),
-                                                  'MMM d, y, h:mm b'
-                                              )}
-                                    </td>
-                                    <td className='py-3 text-left text-sm'>
-                                        -
-                                    </td>
-                                    <td className='py-3 text-left'>
-                                        <Menu>
-                                            <Float
-                                                flip
-                                                offset={6}
-                                                zIndex={10}
-                                                strategy='fixed'
-                                                enter='transition duration-100 ease-out'
-                                                enterFrom='transform scale-95 opacity-0'
-                                                enterTo='transform scale-100 opacity-100'
-                                                leave='transition duration-75 ease-out'
-                                                leaveFrom='transform scale-100 opacity-100'
-                                                leaveTo='transform scale-95 opacity-0'>
-                                                <Menu.Button className='px-3 2xl:px-1'>
-                                                    <span className='sr-only'>
-                                                        Menu
-                                                    </span>
-                                                    <MenuIcon
-                                                        size={16}
-                                                        className='cursor-pointer'
-                                                    />
-                                                </Menu.Button>
-                                                <Menu.Items className='mr-1 flex w-36 flex-col items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg focus:outline-none'>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <PencilIcon className='h-4 w-4' />
-                                                        <span>Rename</span>
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <Copy size={16} />
-                                                        <span>Copy</span>
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <Move size={16} />
-                                                        <span>Move</span>
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        onClick={() => {}}
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <Info size={16} />
-                                                        <span>Details</span>
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-brand-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <Download size={16} />
-                                                        <span>Download</span>
-                                                    </Menu.Item>
-                                                    <Menu.Item
-                                                        as='button'
-                                                        onClick={() =>
-                                                            mutation.mutate(
-                                                                folder.id
-                                                            )
+                    <ContextMenu.Root>
+                        <ContextMenu.Trigger asChild>
+                            <ScrollArea.Viewport
+                                className='h-full w-full rounded'
+                                ref={divRef}>
+                                <table className='w-full'>
+                                    <thead className='sticky top-0 select-none border-b border-b-gray-400 bg-white text-sm text-gray-600'>
+                                        <tr>
+                                            <th
+                                                scope='col'
+                                                className='w-16 py-3 text-center font-light'>
+                                                <label
+                                                    className='sr-only'
+                                                    htmlFor='SelectAllOrNone'>
+                                                    Select All
+                                                </label>
+                                                <input
+                                                    type='checkbox'
+                                                    className='-mt-1 cursor-pointer rounded'
+                                                    id='SelectAllOrNone'
+                                                    onChange={selectAll}
+                                                    ref={selectAllRef}
+                                                />
+                                            </th>
+                                            <th
+                                                scope='col'
+                                                className='py-3 text-left'>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => {
+                                                        if (
+                                                            sortKey === 'name'
+                                                        ) {
+                                                            setSortOrder(prev =>
+                                                                prev === 'asc'
+                                                                    ? 'desc'
+                                                                    : 'asc'
+                                                            );
+                                                        } else {
+                                                            setSortKey('name');
+                                                            setSortOrder('asc');
                                                         }
-                                                        className='flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium ui-active:bg-red-600 ui-active:text-white ui-not-active:bg-white ui-not-active:text-gray-900'>
-                                                        <Trash size={16} />
-                                                        <span>Delete</span>
-                                                    </Menu.Item>
-                                                </Menu.Items>
-                                            </Float>
-                                        </Menu>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    )}
-                </table>
+                                                    }}
+                                                    className='flex items-center gap-1'>
+                                                    <span>Name</span>
+                                                    {sortKey === 'name' ? (
+                                                        <ChevronUp
+                                                            className={clsx(
+                                                                'h-4',
+                                                                {
+                                                                    'rotate-180':
+                                                                        sortOrder ===
+                                                                        'desc',
+                                                                }
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <ChevronsUpDown className='h-4' />
+                                                    )}
+                                                </button>
+                                            </th>
+                                            <th
+                                                scope='col'
+                                                className='w-24 py-3 text-left md:w-48'>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => {
+                                                        if (
+                                                            sortKey ===
+                                                            'modified'
+                                                        ) {
+                                                            setSortOrder(prev =>
+                                                                prev === 'asc'
+                                                                    ? 'desc'
+                                                                    : 'asc'
+                                                            );
+                                                        } else {
+                                                            setSortKey(
+                                                                'modified'
+                                                            );
+                                                            setSortOrder('asc');
+                                                        }
+                                                    }}
+                                                    className='flex items-center gap-1'>
+                                                    <span>Modified</span>
+                                                    {sortKey === 'modified' ? (
+                                                        <ChevronUp
+                                                            className={clsx(
+                                                                'h-4',
+                                                                {
+                                                                    'rotate-180':
+                                                                        sortOrder ===
+                                                                        'desc',
+                                                                }
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <ChevronsUpDown className='h-4' />
+                                                    )}
+                                                </button>
+                                            </th>
+                                            <th
+                                                scope='col'
+                                                className='hidden w-40 py-3 text-left md:table-cell'>
+                                                <button
+                                                    type='button'
+                                                    onClick={() => {
+                                                        if (
+                                                            sortKey === 'size'
+                                                        ) {
+                                                            setSortOrder(prev =>
+                                                                prev === 'asc'
+                                                                    ? 'desc'
+                                                                    : 'asc'
+                                                            );
+                                                        } else {
+                                                            setSortKey('size');
+                                                            setSortOrder('asc');
+                                                        }
+                                                    }}
+                                                    className='flex items-center gap-1'>
+                                                    <span>Size</span>
+                                                    {sortKey === 'size' ? (
+                                                        <ChevronUp
+                                                            className={clsx(
+                                                                'h-4',
+                                                                {
+                                                                    'rotate-180':
+                                                                        sortOrder ===
+                                                                        'desc',
+                                                                }
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        <ChevronsUpDown className='h-4' />
+                                                    )}
+                                                </button>
+                                            </th>
+                                            <th
+                                                scope='col'
+                                                className='hidden w-16 py-3 text-left md:table-cell 2xl:w-12'>
+                                                <span className='sr-only'>
+                                                    Actions
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    {status === 'success' && (
+                                        <tbody className='divide-y divide-gray-200'>
+                                            {folders.map(folder => (
+                                                <tr
+                                                    key={folder.id}
+                                                    draggable
+                                                    onDrag={() => {}}
+                                                    onDragStart={() => {}}
+                                                    onDragEnter={() => {}}
+                                                    onDragLeave={() => {}}
+                                                    onDrop={() => {}}
+                                                    className={clsx(
+                                                        'text-gray-900',
+                                                        {
+                                                            'bg-gray-300':
+                                                                selectedNodes.findIndex(
+                                                                    n =>
+                                                                        n.node
+                                                                            .id ===
+                                                                        folder.id
+                                                                ) >= 0,
+                                                            'hover:bg-gray-200':
+                                                                selectedNodes.findIndex(
+                                                                    n =>
+                                                                        n.node
+                                                                            .id ===
+                                                                        folder.id
+                                                                ) < 0,
+                                                        }
+                                                    )}
+                                                    onClick={() =>
+                                                        setSelectedNodes(
+                                                            prev => {
+                                                                const selected =
+                                                                    prev.find(
+                                                                        n =>
+                                                                            n
+                                                                                .node
+                                                                                .id ===
+                                                                            folder.id
+                                                                    );
+                                                                if (selected) {
+                                                                    return prev.filter(
+                                                                        n =>
+                                                                            n
+                                                                                .node
+                                                                                .id !==
+                                                                            folder.id
+                                                                    );
+                                                                }
+
+                                                                return [
+                                                                    ...prev,
+                                                                    {
+                                                                        node: folder as FolderNodeDecrypted,
+                                                                        type: 'folder',
+                                                                    },
+                                                                ];
+                                                            }
+                                                        )
+                                                    }
+                                                    onContextMenu={() =>
+                                                        setSelectedNodes(
+                                                            prev => {
+                                                                const selected =
+                                                                    prev.find(
+                                                                        n =>
+                                                                            n
+                                                                                .node
+                                                                                .id ===
+                                                                            folder.id
+                                                                    );
+                                                                if (selected) {
+                                                                    return prev;
+                                                                }
+
+                                                                return [
+                                                                    {
+                                                                        node: folder as FolderNodeDecrypted,
+                                                                        type: 'folder',
+                                                                    },
+                                                                ];
+                                                            }
+                                                        )
+                                                    }>
+                                                    <td className='py-2 text-center'>
+                                                        <label
+                                                            htmlFor={`checkbox-${folder.id}`}
+                                                            className='sr-only'>
+                                                            Select
+                                                        </label>
+                                                        <input
+                                                            onClick={e =>
+                                                                e.stopPropagation()
+                                                            }
+                                                            onChange={() =>
+                                                                selectNode(
+                                                                    folder,
+                                                                    'folder'
+                                                                )
+                                                            }
+                                                            checked={
+                                                                selectedNodes.findIndex(
+                                                                    n =>
+                                                                        n.node
+                                                                            .id ===
+                                                                        folder.id
+                                                                ) >= 0
+                                                            }
+                                                            className='-mt-1 cursor-pointer rounded'
+                                                            type='checkbox'
+                                                            id={`checkbox-${folder.id}`}
+                                                        />
+                                                    </td>
+                                                    <td
+                                                        className='max-w-[300px] whitespace-nowrap py-2 text-left'
+                                                        onDoubleClick={() =>
+                                                            router.push(
+                                                                `${clientRoutes.drive}/${folder.id}`
+                                                            )
+                                                        }>
+                                                        <div className='flex items-center gap-2'>
+                                                            <Folder className='h-4 w-4 shrink-0' />
+                                                            <Link
+                                                                onClick={e =>
+                                                                    e.stopPropagation()
+                                                                }
+                                                                href={`${clientRoutes.drive}/${folder.id}`}
+                                                                className='truncate text-sm'>
+                                                                {
+                                                                    folder
+                                                                        .metadata
+                                                                        .name
+                                                                }
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                    <td className='py-2 text-left text-sm'>
+                                                        {isToday(
+                                                            new Date(
+                                                                folder.metadata.modified
+                                                            )
+                                                        )
+                                                            ? format(
+                                                                  new Date(
+                                                                      folder.metadata.modified
+                                                                  ),
+                                                                  'h:mm:ss b'
+                                                              )
+                                                            : format(
+                                                                  new Date(
+                                                                      folder.metadata.modified
+                                                                  ),
+                                                                  'MMM d, y, h:mm b'
+                                                              )}
+                                                    </td>
+                                                    <td className='hidden py-2 text-left text-sm md:table-cell'>
+                                                        -
+                                                    </td>
+                                                    <td className='hidden py-2 text-left md:table-cell'>
+                                                        <button
+                                                            type='button'
+                                                            className='px-3 2xl:px-1'>
+                                                            <MenuIcon className='h-4 w-4' />
+                                                            <span className='sr-only'>
+                                                                Menu
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    )}
+                                </table>
+                            </ScrollArea.Viewport>
+                        </ContextMenu.Trigger>
+                        <DriveContextMenu items={contextItems} />
+                    </ContextMenu.Root>
+                    <ScrollArea.Scrollbar
+                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-[160ms] ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                        orientation='vertical'>
+                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
+                    </ScrollArea.Scrollbar>
+                    <ScrollArea.Scrollbar
+                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-[160ms] ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                        orientation='horizontal'>
+                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
+                    </ScrollArea.Scrollbar>
+                    <ScrollArea.Corner className='bg-gray-500' />
+                </ScrollArea.Root>
             </div>
         </div>
     );

@@ -1,32 +1,17 @@
 'use client';
 
-import { Logo } from '@/lib/components/logo';
 import { clientRoutes } from '@/lib/data/routes';
 import { getClaim } from '@/lib/services/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { Dialog, Transition } from '@headlessui/react';
+import { usePrefStore } from '@/lib/stores/pref-store';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import {
-    Home,
-    LogOut,
-    Menu as MenuIcon,
-    Search,
-    Settings,
-    Star,
-    Trash,
-    X,
-} from 'lucide-react';
+import { HardDrive, LogOut, Menu, Settings, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-    Fragment,
-    ReactNode,
-    SVGProps,
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import { ReactNode, SVGProps, useCallback, useMemo, useState } from 'react';
 
 export interface Navigation {
     name: string;
@@ -42,30 +27,26 @@ export interface UserNavigation {
 
 const navigation = [
     {
-        href: clientRoutes.drive.index,
+        href: clientRoutes.drive,
         name: 'Drive',
-        icon: (props: any) => <Home {...props} />,
+        icon: HardDrive,
     },
     {
-        href: '/starred',
-        name: 'Starred',
-        icon: (props: any) => <Star {...props} />,
-    },
-    {
-        href: clientRoutes.drive.trash,
+        href: clientRoutes.trash,
         name: 'Trash',
-        icon: (props: any) => <Trash {...props} />,
+        icon: Trash2,
     },
     {
         href: clientRoutes.settings,
         name: 'Settings',
-        icon: (props: any) => <Settings {...props} />,
+        icon: Settings,
     },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [, setSidebarDesktopOpen] = useState(true);
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+    const sidebarOpen = usePrefStore(state => state.sidebarOpen);
+    const setSidebarOpen = usePrefStore(state => state.setSidebarOpen);
     const path = usePathname();
 
     const logoutFromAuthStore = useAuthStore(state => state.logout);
@@ -87,178 +68,201 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     return (
         <div className='flex h-full flex-col'>
-            <Transition.Root show={sidebarOpen} as={Fragment}>
-                <Dialog
-                    as='div'
-                    className='fixed inset-0 z-40 flex md:hidden'
-                    onClose={setSidebarOpen}>
-                    <Transition.Child
-                        as={Fragment}
-                        enter='transition-opacity ease-linear duration-300'
-                        enterFrom='opacity-0'
-                        enterTo='opacity-100'
-                        leave='transition-opacity ease-linear duration-300'
-                        leaveFrom='opacity-100'
-                        leaveTo='opacity-0'>
-                        <Dialog.Overlay className='fixed inset-0 bg-gray-600 bg-opacity-75' />
-                    </Transition.Child>
-                    <Transition.Child
-                        as={Fragment}
-                        enter='transition ease-in-out duration-300 transform'
-                        enterFrom='-translate-x-full'
-                        enterTo='translate-x-0'
-                        leave='transition ease-in-out duration-300 transform'
-                        leaveFrom='translate-x-0'
-                        leaveTo='-translate-x-full'>
-                        <div className='relative flex w-full max-w-xs flex-1 flex-col bg-gray-800 pb-4'>
-                            <Transition.Child
-                                as={Fragment}
-                                enter='ease-in-out duration-300'
-                                enterFrom='opacity-0'
-                                enterTo='opacity-100'
-                                leave='ease-in-out duration-300'
-                                leaveFrom='opacity-100'
-                                leaveTo='opacity-0'>
-                                <div className='absolute top-0 right-0 -mr-12 pt-2'>
-                                    <button
-                                        type='button'
-                                        className='ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white'
-                                        onClick={() => setSidebarOpen(false)}>
-                                        <span className='sr-only'>
-                                            Close sidebar
-                                        </span>
-                                        <X
-                                            className='h-6 w-6 text-white'
-                                            aria-hidden='true'
-                                        />
-                                    </button>
-                                </div>
-                            </Transition.Child>
-                            <div className='flex h-16 flex-shrink-0 items-center space-x-3 bg-gray-900 px-4 text-white'>
-                                <Logo height={32} width={32} />
-                                <span className='text-xl font-semibold'>
-                                    Hushify Drive
-                                </span>
-                            </div>
-                            <div className='mt-5 h-0 flex-1 overflow-y-auto'>
-                                <nav className='space-y-1 px-2'>
-                                    {navigation.map(item => (
-                                        <Link
-                                            href={item.href}
-                                            key={item.name}
-                                            className={clsx(
-                                                path?.startsWith(item.href)
-                                                    ? 'bg-gray-900 text-white'
-                                                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                                'group flex items-center rounded-md px-2 py-2 text-base font-medium'
-                                            )}
-                                            onClick={() =>
-                                                setSidebarOpen(false)
-                                            }>
-                                            <item.icon
-                                                className={clsx(
-                                                    path?.startsWith(item.href)
-                                                        ? 'text-gray-300'
-                                                        : 'text-gray-400 group-hover:text-gray-300',
-                                                    'mr-4 h-6 w-6 flex-shrink-0'
-                                                )}
-                                                aria-hidden='true'
-                                            />
-                                            {item.name}
-                                        </Link>
-                                    ))}
-                                    <button
-                                        type='button'
-                                        className='group flex w-full items-center rounded-md px-2 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
-                                        onClick={logout}>
-                                        <LogOut
-                                            size={20}
-                                            className='mr-4 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300'
-                                            aria-hidden='true'
-                                        />
-                                        <span>Logout ({name})</span>
-                                    </button>
-                                </nav>
-                            </div>
-                        </div>
-                    </Transition.Child>
-                    <div className='w-14 flex-shrink-0' aria-hidden='true'>
-                        {/* Dummy element to force sidebar to shrink to fit close icon */}
-                    </div>
-                </Dialog>
-            </Transition.Root>
-
-            <div className='flex h-16 shrink-0 bg-gray-900 shadow'>
-                <button
-                    type='button'
-                    className='px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:hidden'
-                    onClick={() => setSidebarOpen(true)}>
-                    <span className='sr-only'>Open sidebar</span>
-                    <MenuIcon className='h-6 w-6' aria-hidden='true' />
-                </button>
-                <button
-                    type='button'
-                    className='hidden px-4 text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600 md:inline-block'
-                    onClick={() => setSidebarDesktopOpen(prev => !prev)}>
-                    <span className='sr-only'>Toggle sidebar</span>
-                    <MenuIcon className='h-6 w-6' aria-hidden='true' />
-                </button>
-                <div className='flex flex-1 justify-between'>
-                    {/* Page Title */}
-                    <div className='flex flex-1 items-center'>
-                        <h1 className='text-xl font-semibold text-white md:text-2xl'>
-                            Hushify Drive
-                        </h1>
-                    </div>
-                    <div className='ml-4 flex items-center md:ml-6'>
+            <div className='flex h-16 shrink-0 border-b bg-white shadow'>
+                <Dialog.Root
+                    open={mobileSidebarOpen}
+                    onOpenChange={setMobileSidebarOpen}>
+                    <Dialog.Trigger asChild>
                         <button
                             type='button'
-                            className='cursor-pointer rounded-full bg-gray-800 p-1 text-white hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2'>
-                            <span className='sr-only'>Search</span>
-                            <Search size={24} aria-hidden='true' />
+                            className='px-4 text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 md:hidden'
+                            onClick={() => setMobileSidebarOpen(true)}>
+                            <span className='sr-only'>Open sidebar</span>
+                            <Menu
+                                className='h-5 w-5 shrink-0'
+                                aria-hidden='true'
+                            />
                         </button>
-                    </div>
+                    </Dialog.Trigger>
+
+                    <Dialog.Portal>
+                        <Dialog.Overlay className='fixed inset-0 bg-gray-600 bg-opacity-75 data-[state=open]:animate-overlayShow' />
+                        <Dialog.Content className='fixed inset-0 flex w-full max-w-xs data-[state=open]:animate-sidebarContentShow md:hidden'>
+                            <div className='flex flex-1 flex-col bg-white'>
+                                <div className='flex h-16 shrink-0 items-center justify-between gap-3 px-4'>
+                                    <Dialog.Title className='text-lg font-semibold'>
+                                        Menu
+                                    </Dialog.Title>
+                                    <Dialog.Close asChild>
+                                        <button
+                                            type='button'
+                                            className='rounded-full border border-gray-600 p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600'
+                                            onClick={() =>
+                                                setMobileSidebarOpen(false)
+                                            }>
+                                            <span className='sr-only'>
+                                                Close sidebar
+                                            </span>
+                                            <X
+                                                className='h-5 w-5'
+                                                aria-hidden='true'
+                                            />
+                                        </button>
+                                    </Dialog.Close>
+                                </div>
+                                <div className='flex h-0 flex-1 flex-col justify-between overflow-y-auto'>
+                                    <nav className='space-y-1'>
+                                        {navigation.map(item => (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                className={clsx(
+                                                    path?.startsWith(item.href)
+                                                        ? 'border-l-4 border-brand-600 bg-brand-50 text-brand-600'
+                                                        : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
+                                                    'flex items-center gap-2 px-3 py-2 text-sm font-semibold'
+                                                )}
+                                                onClick={() =>
+                                                    setMobileSidebarOpen(false)
+                                                }>
+                                                <item.icon
+                                                    className='h-5 w-5 shrink-0'
+                                                    aria-hidden='true'
+                                                />
+                                                {item.name}
+                                            </Link>
+                                        ))}
+                                        <button
+                                            type='button'
+                                            className='flex w-full items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+                                            onClick={logout}>
+                                            <LogOut
+                                                className='h-5 w-5 shrink-0'
+                                                aria-hidden='true'
+                                            />
+                                            <span>Logout</span>
+                                        </button>
+                                    </nav>
+                                    <div className='break-all bg-brand-600 px-3 py-2 font-semibold text-white'>
+                                        {name}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Dummy element to force sidebar to shrink to fit close icon */}
+                            <Dialog.Close asChild>
+                                <div
+                                    className='w-14 shrink-0'
+                                    aria-hidden='true'
+                                />
+                            </Dialog.Close>
+                        </Dialog.Content>
+                    </Dialog.Portal>
+                </Dialog.Root>
+                <button
+                    type='button'
+                    className='hidden px-4 text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 md:inline-block'
+                    onClick={() => setSidebarOpen(!sidebarOpen)}>
+                    <span className='sr-only'>Toggle sidebar</span>
+                    <Menu className='h-5 w-5 shrink-0' aria-hidden='true' />
+                </button>
+                <div className='flex flex-1 items-center justify-between pr-4'>
+                    <h1 className='text-lg font-semibold text-gray-800 md:text-2xl'>
+                        Hushify Drive
+                    </h1>
+                    <div className='hidden md:block'>{name}</div>
                 </div>
             </div>
 
             <div className='flex h-full flex-auto'>
-                <div className='hidden min-w-[256px] shrink-0 flex-col md:flex'>
-                    <div className='flex flex-1 flex-col overflow-y-auto bg-gray-800'>
-                        <nav className='flex-1 space-y-1 px-2 py-4'>
-                            {navigation.map(item => (
+                <div className='hidden shrink-0 flex-col overflow-y-auto border-r bg-white md:flex'>
+                    <nav
+                        className={clsx(
+                            'flex flex-1 flex-col items-center gap-1',
+                            {
+                                'min-w-[16rem]': sidebarOpen,
+                            }
+                        )}>
+                        {navigation.map(item => {
+                            const LinkComp = (
                                 <Link
-                                    key={item.name}
                                     href={item.href}
                                     className={clsx(
                                         path?.startsWith(item.href)
-                                            ? 'bg-brand-600 text-white'
-                                            : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                                        'group flex items-center rounded-md px-2 py-2 text-sm font-medium'
+                                            ? 'bg-brand-50 text-brand-600'
+                                            : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
+                                        'flex w-full items-center gap-2 p-3 text-sm font-semibold'
                                     )}>
                                     <item.icon
-                                        className={clsx(
-                                            path?.startsWith(item.href)
-                                                ? 'text-gray-300'
-                                                : 'text-gray-400 group-hover:text-gray-300',
-                                            'mr-3 h-6 w-6 flex-shrink-0'
-                                        )}
+                                        className='h-5 w-5 shrink-0'
                                         aria-hidden='true'
                                     />
-                                    {item.name}
+                                    <span
+                                        className={clsx({
+                                            'sr-only': !sidebarOpen,
+                                        })}>
+                                        {item.name}
+                                    </span>
                                 </Link>
-                            ))}
+                            );
+
+                            return sidebarOpen ? (
+                                LinkComp
+                            ) : (
+                                <Tooltip.Root key={item.name}>
+                                    <Tooltip.Trigger asChild>
+                                        {LinkComp}
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Portal>
+                                        <Tooltip.Content
+                                            side='right'
+                                            className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade'
+                                            sideOffset={5}>
+                                            {item.name}
+                                            <Tooltip.Arrow className='fill-brand-600' />
+                                        </Tooltip.Content>
+                                    </Tooltip.Portal>
+                                </Tooltip.Root>
+                            );
+                        })}
+
+                        {sidebarOpen ? (
                             <button
                                 type='button'
-                                className='group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white'
+                                className='flex w-full items-center gap-2 p-3 text-sm font-semibold text-gray-600 hover:bg-brand-100 hover:text-brand-600'
                                 onClick={logout}>
                                 <LogOut
-                                    className='mr-3 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300'
-                                    size={20}
+                                    className='h-5 w-5 shrink-0'
+                                    aria-hidden='true'
                                 />
                                 <span>Logout</span>
                             </button>
-                        </nav>
-                    </div>
+                        ) : (
+                            <Tooltip.Root>
+                                <Tooltip.Trigger asChild>
+                                    <button
+                                        type='button'
+                                        className='flex w-full items-center gap-2 p-3 text-sm font-semibold text-gray-600 hover:bg-brand-100 hover:text-brand-600'
+                                        onClick={logout}>
+                                        <LogOut
+                                            className='h-5 w-5 shrink-0'
+                                            aria-hidden='true'
+                                        />
+                                        <span className='sr-only'>Logout</span>
+                                    </button>
+                                </Tooltip.Trigger>
+                                <Tooltip.Portal>
+                                    <Tooltip.Content
+                                        side='right'
+                                        className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade'
+                                        sideOffset={5}>
+                                        Logout
+                                        <Tooltip.Arrow className='fill-brand-600' />
+                                    </Tooltip.Content>
+                                </Tooltip.Portal>
+                            </Tooltip.Root>
+                        )}
+                    </nav>
                 </div>
 
                 <main className='flex-auto'>{children}</main>

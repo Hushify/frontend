@@ -23,10 +23,8 @@ export const clientRoutes = {
         resetPassword: '/reset-password',
         resetPasswordSuccess: '/reset-password/success',
     },
-    drive: {
-        index: '/drive',
-        trash: '/drive/trash',
-    },
+    drive: '/drive',
+    trash: '/trash',
     settings: '/settings',
 };
 
@@ -49,7 +47,7 @@ const nakedApiRoutes = {
     drive: {
         list: '/drive/list',
         createFolder: '/drive/create-folder',
-        deleteFolder: '/drive/delete-folder',
+        deleteNodes: '/drive/delete-nodes',
     },
 };
 
@@ -70,7 +68,7 @@ export const apiRoutes = {
     drive: {
         list: apiUrl + nakedApiRoutes.drive.list,
         createFolder: apiUrl + nakedApiRoutes.drive.createFolder,
-        deleteFolder: apiUrl + nakedApiRoutes.drive.deleteFolder,
+        deleteNodes: apiUrl + nakedApiRoutes.drive.deleteNodes,
     },
 };
 

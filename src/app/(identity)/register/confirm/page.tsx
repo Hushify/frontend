@@ -8,12 +8,11 @@ import {
     register as registerApi,
     registerConfirm,
 } from '@/lib/services/auth';
-import { CryptoService } from '@/lib/services/crypto.worker';
+import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
-import { wrap } from 'comlink';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -125,14 +124,7 @@ function Confirm() {
             return;
         }
 
-        const worker = new Worker(
-            new URL('@/lib/services/crypto.worker', import.meta.url),
-            {
-                type: 'module',
-                name: 'hushify-crypto-worker',
-            }
-        );
-        const crypto = wrap<typeof CryptoService>(worker);
+        const crypto = CryptoWorker.cryptoWorker;
         const keys = await crypto.generateRequiredKeys(data.password);
 
         const result = await registerConfirm<ConfirmFormInputs>(

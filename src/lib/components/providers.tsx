@@ -1,11 +1,12 @@
 'use client';
 
-import { AlertList } from '@/lib/components/alert-list';
 import { useCheckAuth } from '@/lib/hooks/use-check-auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
 import { ReactNode } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -17,11 +18,13 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: { children: ReactNode }) {
     return (
-        <QueryClientProvider client={queryClient}>
-            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-            <AlertList />
-            {children}
-        </QueryClientProvider>
+        <Tooltip.Provider>
+            <QueryClientProvider client={queryClient}>
+                {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+                <Toaster />
+                {children}
+            </QueryClientProvider>
+        </Tooltip.Provider>
     );
 }
 
@@ -37,6 +40,19 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
         // eslint-disable-next-line react/jsx-no-useless-fragment
         return <>{children}</>;
     }
+
+    // if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    //     window.addEventListener('load', () => {
+    //         navigator.serviceWorker
+    //             .register('/sw.js')
+    //             .then(reg => {
+    //                 reg.update();
+    //             })
+    //             .catch(regErr => {
+    //                 console.error('SW registration failed:', regErr);
+    //             });
+    //     });
+    // }
 
     return (
         <div className='grid h-full w-full place-items-center'>

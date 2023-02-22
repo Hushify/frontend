@@ -55,7 +55,7 @@ function Login({
             authState.signingPrivateKey &&
             authState.status === 'authenticated'
         ) {
-            push(clientRoutes.drive.index);
+            push(clientRoutes.drive);
         }
     }, [authState, push]);
 

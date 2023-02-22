@@ -88,7 +88,7 @@ export default function RecoveryQr() {
 
                 <Link
                     type='button'
-                    href={clientRoutes.drive.index}
+                    href={clientRoutes.drive}
                     className={clsx(
                         'flex w-full items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
                         'bg-gray-600 text-white focus-visible:ring-gray-600/75 print:hidden'

@@ -1,5 +1,5 @@
+import { List } from '@/lib/components/blog/list';
 import { CategoryPosts } from '@/lib/sanity/types';
-import { List } from './list';
 
 export function CategoryList({
     categoryWithPosts,

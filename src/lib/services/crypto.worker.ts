@@ -1,10 +1,9 @@
 import { entropyToMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { expose } from 'comlink';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 
 export const CryptoService = {
-    // Register
     generateRequiredKeys: async (password: string) => {
         await sodium.ready;
 
@@ -198,23 +197,6 @@ export const CryptoService = {
         };
     },
 
-    encryptMetadata: async (folderKey: Uint8Array, metadata: unknown) => {
-        await sodium.ready;
-
-        const nonce = sodium.randombytes_buf(
-            sodium.crypto_secretbox_NONCEBYTES
-        );
-
-        const encMetadata = sodium.crypto_secretbox_easy(
-            JSON.stringify(metadata),
-            nonce,
-            folderKey,
-            'base64'
-        );
-
-        return { encMetadata, nonce: sodium.to_base64(nonce) };
-    },
-
     decryptFolderKey: async (
         key: string,
         encryptedFolderKey: string,
@@ -232,8 +214,25 @@ export const CryptoService = {
         return folderKey;
     },
 
-    decryptFolderMetadata: async (
-        folderKey: string,
+    encryptMetadata: async <T>(key: Uint8Array, metadata: T) => {
+        await sodium.ready;
+
+        const nonce = sodium.randombytes_buf(
+            sodium.crypto_secretbox_NONCEBYTES
+        );
+
+        const encMetadata = sodium.crypto_secretbox_easy(
+            JSON.stringify(metadata),
+            nonce,
+            key,
+            'base64'
+        );
+
+        return { encMetadata, nonce: sodium.to_base64(nonce) };
+    },
+
+    decryptMetadata: async (
+        key: string,
         encryptedMetadata: string,
         metadataNonce: string
     ) => {
@@ -242,12 +241,10 @@ export const CryptoService = {
         const decryptedMetadata = sodium.crypto_secretbox_open_easy(
             sodium.from_base64(encryptedMetadata),
             sodium.from_base64(metadataNonce),
-            sodium.from_base64(folderKey)
+            sodium.from_base64(key)
         );
 
-        const metadata = sodium.to_string(decryptedMetadata);
-
-        return metadata;
+        return sodium.to_string(decryptedMetadata);
     },
 };
 

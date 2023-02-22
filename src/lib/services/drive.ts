@@ -1,7 +1,8 @@
 import { getErrors, ResponseMessage } from '@/lib/services/common';
 import { CryptoService } from '@/lib/services/crypto.worker';
 import axios from 'axios';
-import { wrap } from 'comlink';
+import { Remote } from 'comlink';
+import { apiRoutes } from '../data/routes';
 
 export type MetadataBundle = {
     nonce: string;
@@ -74,22 +75,14 @@ export type DriveList = {
 export async function list(
     url: string,
     accessToken: string,
-    masterKey: string
+    masterKey: string,
+    crypto: Remote<typeof CryptoService>
 ): Promise<DriveList> {
     const { data } = await axios.get<DriveListResponse>(url, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
     });
-
-    const worker = new Worker(
-        new URL('@/lib/services/crypto.worker', import.meta.url),
-        {
-            type: 'module',
-            name: 'hushify-crypto-worker',
-        }
-    );
-    const crypto = wrap<typeof CryptoService>(worker);
 
     const breadcrumbs: BreadcrumbDecrypted[] = [];
     await data.breadcrumbs.reduce(async (promise, crumb, index) => {
@@ -101,7 +94,7 @@ export async function list(
             crumb.folderKey.nonce
         );
 
-        const metadata = await crypto.decryptFolderMetadata(
+        const metadata = await crypto.decryptMetadata(
             key,
             crumb.metadataBundle.metadata,
             crumb.metadataBundle.nonce
@@ -125,7 +118,7 @@ export async function list(
                 f.folderKey.nonce
             );
 
-            const metadata = await crypto.decryptFolderMetadata(
+            const metadata = await crypto.decryptMetadata(
                 folderKey,
                 f.metadataBundle.metadata,
                 f.metadataBundle.nonce
@@ -139,23 +132,16 @@ export async function list(
         })
     );
 
-    folders.sort((a, b) =>
-        a.metadata.name.localeCompare(b.metadata.name, undefined, {
-            numeric: true,
-        })
-    );
-
     return { ...data, folders, breadcrumbs };
 }
 
 export async function createFolder<T>(
-    url: string,
     accessToken: string,
     parentFolderId: string | null,
     metadataBundle: MetadataBundle,
     folderKeyBundle: SecretKeyBundle
 ): Promise<ResponseMessage<T, { id: string }>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.drive.createFolder, {
         method: 'POST',
         body: JSON.stringify({
             parentFolderId,
@@ -177,12 +163,14 @@ export async function createFolder<T>(
     return { success: false, errors };
 }
 
-export async function deleteFolder<T>(
-    url: string,
+export async function deleteNodes<T>(
+    folderIds: string[],
+    fileIds: string[],
     accessToken: string
-): Promise<ResponseMessage<T, { id: string }>> {
-    const response = await fetch(url, {
-        method: 'DELETE',
+): Promise<ResponseMessage<T, { folderIds: string[]; fileIds: string[] }>> {
+    const response = await fetch(apiRoutes.drive.deleteNodes, {
+        method: 'POST',
+        body: JSON.stringify({ folderIds, fileIds }),
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,

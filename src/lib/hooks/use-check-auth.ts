@@ -2,9 +2,8 @@
 
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
 import { isTokenExpired, refreshToken } from '@/lib/services/auth';
-import { CryptoService } from '@/lib/services/crypto.worker';
+import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { wrap } from 'comlink';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { shallow } from 'zustand/shallow';
@@ -60,15 +59,7 @@ export function useCheckAuth() {
                     return;
                 }
 
-                const worker = new Worker(
-                    new URL('@/lib/services/crypto.worker', import.meta.url),
-                    {
-                        type: 'module',
-                        name: 'hushify-crypto-worker',
-                    }
-                );
-
-                const crypto = wrap<typeof CryptoService>(worker);
+                const crypto = CryptoWorker.cryptoWorker;
 
                 const decryptedAccessToken = await crypto.decryptAccessToken(
                     result.data.encAccessToken,
