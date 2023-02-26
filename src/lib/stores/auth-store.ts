@@ -1,8 +1,9 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
 import { apiRoutes } from '@/lib/data/routes';
 import { logout } from '@/lib/services/auth';
 import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export type AuthStatus =
     | 'unauthenticated'

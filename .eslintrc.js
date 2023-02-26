@@ -1,22 +1,14 @@
 module.exports = {
     root: true,
     extends: [
-        'eslint:recommended',
-        'plugin:react/recommended',
-        'next',
         'next/core-web-vitals',
-        'airbnb',
-        'airbnb-typescript',
-        'plugin:react/jsx-runtime',
-        'plugin:import/recommended',
-        'plugin:import/typescript',
         'prettier',
-        'plugin:jsx-a11y/recommended',
+        'plugin:tailwindcss/recommended',
     ],
-    plugins: ['@typescript-eslint', 'import', 'jsx-a11y'],
+    plugins: ['unused-imports', 'tailwindcss'],
     settings: {
-        'import/parsers': {
-            '@typescript-eslint/parser': ['.ts', '.tsx'],
+        tailwindcss: {
+            callees: ['cn', 'clsx'],
         },
     },
     rules: {
@@ -25,17 +17,15 @@ module.exports = {
         'react/require-default-props': 'off',
         'react/jsx-props-no-spreading': 'off',
         semi: ['error', 'always'],
-        'import/prefer-default-export': 'off',
-        '@typescript-eslint/no-unused-vars': [
-            'error',
-            { argsIgnorePattern: '^_' },
-        ],
+        'unused-imports/no-unused-imports': 'error',
         'jsx-a11y/label-has-associated-control': [
             2,
             {
                 depth: 3,
             },
         ],
+        'tailwindcss/no-custom-classname': 'off',
+        'tailwindcss/classnames-order': 'error',
     },
     ignorePatterns: [
         '**/*.js',

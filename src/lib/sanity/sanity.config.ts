@@ -1,12 +1,13 @@
-import { defaultDocumentNode } from '@/lib/sanity/default-document-node';
-import { dataset, projectId } from '@/lib/sanity/sanity-client';
-import { schemaTypes } from '@/lib/sanity/schemas';
 import { codeInput } from '@sanity/code-input';
 import { visionTool } from '@sanity/vision';
 import { defineConfig } from 'sanity';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { media } from 'sanity-plugin-media';
 import { deskTool } from 'sanity/desk';
+
+import { defaultDocumentNode } from '@/lib/sanity/default-document-node';
+import { dataset, projectId } from '@/lib/sanity/sanity-client';
+import { schemaTypes } from '@/lib/sanity/schemas';
 
 export default defineConfig({
     name: 'Hushify_CMS',

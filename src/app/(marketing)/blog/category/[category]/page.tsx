@@ -1,12 +1,13 @@
+import { Metadata } from 'next';
+import { previewData } from 'next/headers';
+import { groq } from 'next-sanity';
+
 import { CategoryList } from '@/lib/components/blog/category-list';
 import { PreviewCategory } from '@/lib/components/blog/preview/preview-category';
 import { Loader } from '@/lib/components/loader';
 import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { CategoryPosts } from '@/lib/sanity/types';
-import { Metadata } from 'next';
-import { groq } from 'next-sanity';
-import { previewData } from 'next/headers';
 
 export async function generateMetadata({
     params: { category },

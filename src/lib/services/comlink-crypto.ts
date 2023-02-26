@@ -1,7 +1,7 @@
 import 'client-only';
+import { Remote, wrap } from 'comlink';
 
 import { CryptoService } from '@/lib/services/crypto.worker';
-import { Remote, wrap } from 'comlink';
 
 class CryptoWorker {
     public cryptoWorker!: Remote<typeof CryptoService>;
@@ -23,4 +23,5 @@ class CryptoWorker {
     }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default new CryptoWorker();

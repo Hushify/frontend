@@ -1,5 +1,6 @@
-import { Navbar } from '@/lib/components/navbar';
 import { ReactNode } from 'react';
+
+import { Navbar } from '@/lib/components/navbar';
 
 function RootLayout({ children }: { children: ReactNode }) {
     return (

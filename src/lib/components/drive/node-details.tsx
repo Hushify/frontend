@@ -1,9 +1,10 @@
-import { apiRoutes } from '@/lib/data/routes';
-import { DriveList } from '@/lib/services/drive';
+import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Fragment } from 'react';
+
+import { apiRoutes } from '@/lib/data/routes';
+import { DriveList } from '@/lib/services/drive';
 
 export function NodeDetails({
     id,
@@ -37,7 +38,7 @@ export function NodeDetails({
                     leave='ease-in duration-200'
                     leaveFrom='opacity-100'
                     leaveTo='opacity-0'>
-                    <div className='fixed inset-0 bg-black bg-opacity-25' />
+                    <div className='fixed inset-0 bg-black/25' />
                 </Transition.Child>
                 <div className='fixed inset-0 overflow-y-auto'>
                     <div className='flex min-h-full items-center justify-center p-4 text-center'>
@@ -49,7 +50,7 @@ export function NodeDetails({
                             leave='ease-in duration-200'
                             leaveFrom='opacity-100 scale-100'
                             leaveTo='opacity-0 scale-95'>
-                            <Dialog.Panel className='w-full max-w-md transform space-y-4 overflow-hidden rounded-lg bg-white p-4 px-12 text-left align-middle shadow-xl transition-all md:p-6'>
+                            <Dialog.Panel className='w-full max-w-md space-y-4 overflow-hidden rounded-lg bg-white p-4 px-12 text-left align-middle shadow-xl transition-all md:p-6'>
                                 <Dialog.Title
                                     as='h3'
                                     className='text-md font-bold leading-6 text-gray-900 md:text-lg'>

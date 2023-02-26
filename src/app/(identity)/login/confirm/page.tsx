@@ -1,5 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { motion } from 'framer-motion';
+import { Loader } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import zod from 'zod';
+
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
@@ -7,14 +15,7 @@ import { authenticate, initiateLogin } from '@/lib/services/auth';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
-import { zodResolver } from '@hookform/resolvers/zod';
-import clsx from 'clsx';
-import { motion } from 'framer-motion';
-import { Loader } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import zod from 'zod';
+import { cn } from '@/lib/utils/cn';
 
 type ConfirmFormInputs = {
     errors: string;
@@ -189,7 +190,7 @@ function Confirm() {
                         autoComplete='current-password'
                         minLength={10}
                         maxLength={64}
-                        className={clsx(
+                        className={cn(
                             'h-9 bg-transparent placeholder:text-slate-400',
                             !!errors.password && 'border-red-600'
                         )}
@@ -239,15 +240,15 @@ function Confirm() {
                 <button
                     type='submit'
                     disabled={mutation.isLoading}
-                    className={clsx(
+                    className={cn(
                         'flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
-                        'disabled:cursor-not-allowed disabled:bg-opacity-80',
+                        'disabled:cursor-not-allowed disabled:bg-brand-600/80',
                         'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                     )}>
                     <span>Continue</span>
                     <Loader
                         size={16}
-                        className={clsx(
+                        className={cn(
                             'animate-spin',
                             !mutation.isLoading && 'hidden'
                         )}

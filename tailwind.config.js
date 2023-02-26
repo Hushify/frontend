@@ -3,7 +3,7 @@ const colors = require('tailwindcss/colors');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    darkMode: 'class',
+    darkMode: ['class', '[data-theme="dark"]'],
     content: [path.join(__dirname, 'src/**/*.(jsx|tsx)')],
     theme: {
         extend: {
@@ -68,7 +68,7 @@ module.exports = {
         },
     },
     plugins: [
-        require('@tailwindcss/container-queries'),
+        require('tailwindcss-animate'),
         require('@tailwindcss/typography'),
         require('@tailwindcss/forms'),
         require('@tailwindcss/line-clamp'),

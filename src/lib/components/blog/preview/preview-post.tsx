@@ -1,9 +1,10 @@
 'use client';
 
+import { notFound } from 'next/navigation';
+
 import { SinglePost } from '@/lib/components/blog/post';
 import { useSanityPreview } from '@/lib/sanity/sanity.preview';
 import { Post } from '@/lib/sanity/types';
-import { notFound } from 'next/navigation';
 
 export function PreviewSinglePost({
     query,

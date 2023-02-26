@@ -1,12 +1,13 @@
 'use client';
 
+import { useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { shallow } from 'zustand/shallow';
+
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
 import { isTokenExpired, refreshToken } from '@/lib/services/auth';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
 
 export function useCheckAuth() {
     const {

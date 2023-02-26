@@ -1,11 +1,12 @@
+import { previewData } from 'next/headers';
+import { groq } from 'next-sanity';
+
 import { List } from '@/lib/components/blog/list';
 import { PreviewList } from '@/lib/components/blog/preview/preview-list';
 import { Loader } from '@/lib/components/loader';
 import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { Post } from '@/lib/sanity/types';
-import { groq } from 'next-sanity';
-import { previewData } from 'next/headers';
 
 export const metadata = {
     title: 'Hushify Blog',

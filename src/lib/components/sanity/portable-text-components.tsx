@@ -1,9 +1,10 @@
-import { SyntaxHighlighter } from '@/lib/components/blog/syntax-highlighter';
-import { urlFor } from '@/lib/sanity/url-for';
-import { PortableTextReactComponents } from '@portabletext/react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { HTMLAttributeAnchorTarget } from 'react';
+import { PortableTextReactComponents } from '@portabletext/react';
+
+import { SyntaxHighlighter } from '@/lib/components/blog/syntax-highlighter';
+import { urlFor } from '@/lib/sanity/url-for';
 
 export const PortableTextComponents: Partial<PortableTextReactComponents> = {
     types: {

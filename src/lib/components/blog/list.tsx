@@ -1,9 +1,11 @@
 /* eslint-disable no-underscore-dangle */
-import { Post } from '@/lib/sanity/types';
-import { urlFor } from '@/lib/sanity/url-for';
-import { getImageDimensions } from '@sanity/asset-utils';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { getImageDimensions } from '@sanity/asset-utils';
+
+import { Post } from '@/lib/sanity/types';
+import { urlFor } from '@/lib/sanity/url-for';
 
 export function List({ posts }: { posts: Post[] }) {
     return (

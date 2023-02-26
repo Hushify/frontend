@@ -1,5 +1,6 @@
+import { Params, definePreview } from 'next-sanity/preview';
+
 import { dataset, projectId } from '@/lib/sanity/sanity-client';
-import { definePreview, Params } from 'next-sanity/preview';
 
 function onPublicAccessOnly() {
     throw new Error(`Unable to load preview as you're not logged in`);

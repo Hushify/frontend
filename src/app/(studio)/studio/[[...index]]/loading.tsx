@@ -1,7 +1,8 @@
 'use client';
 
-import config from '@/lib/sanity/sanity.config';
 import { NextStudioLoading } from 'next-sanity/studio/loading';
+
+import config from '@/lib/sanity/sanity.config';
 
 function Loading() {
     return <NextStudioLoading config={config} />;

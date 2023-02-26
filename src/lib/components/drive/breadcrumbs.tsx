@@ -1,8 +1,9 @@
+import Link from 'next/link';
+import { Folder, HardDrive } from 'lucide-react';
+
 import { clientRoutes } from '@/lib/data/routes';
 import { BreadcrumbDecrypted } from '@/lib/services/drive';
-import clsx from 'clsx';
-import { Folder, HardDrive } from 'lucide-react';
-import Link from 'next/link';
+import { cn } from '@/lib/utils/cn';
 
 type BreadcrumbsProps = {
     items: BreadcrumbDecrypted[];
@@ -14,7 +15,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             <li>
                 <Link
                     href={clientRoutes.drive}
-                    className={clsx('flex items-center gap-1', {
+                    className={cn('flex items-center gap-1', {
                         'text-brand-600': items.length === 0,
                     })}>
                     <HardDrive className='h-4 w-4' />
@@ -25,7 +26,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                 <li key={item.id}>
                     <Link
                         href={`${clientRoutes.drive}/${item.id}`}
-                        className={clsx(
+                        className={cn(
                             'flex items-center gap-1 before:mx-2 before:text-gray-400 before:content-["/"]',
                             {
                                 'text-brand-600': idx === items.length - 1,

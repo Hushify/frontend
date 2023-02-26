@@ -1,14 +1,15 @@
 'use client';
 
-import Loader from '@/app/loading';
-import { clientRoutes } from '@/lib/data/routes';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import Loader from '@/app/loading';
 import qrcode from 'qrcode';
-import { useEffect, useState } from 'react';
+
+import { clientRoutes } from '@/lib/data/routes';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { cn } from '@/lib/utils/cn';
 
 export default function RecoveryQr() {
     const recoveryKeyMnemonic = useAuthStore(
@@ -79,7 +80,7 @@ export default function RecoveryQr() {
                 <button
                     type='button'
                     onClick={() => window.print()}
-                    className={clsx(
+                    className={cn(
                         'flex w-full items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
                         'bg-brand-600 text-white focus-visible:ring-brand-600/75 print:hidden'
                     )}>
@@ -89,7 +90,7 @@ export default function RecoveryQr() {
                 <Link
                     type='button'
                     href={clientRoutes.drive}
-                    className={clsx(
+                    className={cn(
                         'flex w-full items-center justify-center gap-2 rounded-lg py-1.5 font-medium',
                         'bg-gray-600 text-white focus-visible:ring-gray-600/75 print:hidden'
                     )}>

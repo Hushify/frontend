@@ -2,7 +2,7 @@ import { File, RefreshCw, X } from 'lucide-react';
 
 export function UploadProgressBox() {
     return (
-        <div className='fixed bottom-4 right-4 z-20 space-y-4 rounded-lg bg-white px-2 py-4 shadow-2xl ring ring-gray-900 ring-opacity-75'>
+        <div className='fixed bottom-4 right-4 z-20 space-y-4 rounded-lg bg-white px-2 py-4 shadow-2xl ring ring-gray-900/75'>
             <div className='max-h-40 overflow-y-auto'>
                 <ul className='space-y-3 px-2'>
                     <li className='space-y-2'>

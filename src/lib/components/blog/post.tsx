@@ -1,10 +1,11 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { PortableText } from '@portabletext/react';
+import { getImageDimensions } from '@sanity/asset-utils';
+
 import { PortableTextComponents } from '@/lib/components/sanity/portable-text-components';
 import { Post } from '@/lib/sanity/types';
 import { urlFor } from '@/lib/sanity/url-for';
-import { PortableText } from '@portabletext/react';
-import { getImageDimensions } from '@sanity/asset-utils';
-import Image from 'next/image';
-import Link from 'next/link';
 
 export function SinglePost({ post }: { post: Post }) {
     return (

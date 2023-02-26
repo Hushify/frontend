@@ -1,5 +1,6 @@
+import { UseMutationOptions, useMutation } from '@tanstack/react-query';
+
 import { addServerErrors } from '@/lib/utils/addServerErrors';
-import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 export function useFormMutation<T, U>(
     onSubmit: (data: T) => Promise<U>,

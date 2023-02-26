@@ -1,13 +1,15 @@
-import clsx from 'clsx';
 import {
     DetailedHTMLProps,
-    forwardRef,
     ForwardRefExoticComponent,
     InputHTMLAttributes,
     PropsWithChildren,
+    ReactNode,
     RefAttributes,
+    forwardRef,
 } from 'react';
 import { FieldError } from 'react-hook-form';
+
+import { cn } from '../utils/cn';
 
 export const InputWithLabel: ForwardRefExoticComponent<
     PropsWithChildren<
@@ -17,6 +19,7 @@ export const InputWithLabel: ForwardRefExoticComponent<
         > & {
             error: FieldError | undefined;
             labelClassName?: string;
+            children?: ReactNode | undefined;
         } & RefAttributes<HTMLInputElement>
     >
 > = forwardRef(
@@ -24,7 +27,7 @@ export const InputWithLabel: ForwardRefExoticComponent<
         <div className='flex flex-col gap-1'>
             <label
                 htmlFor={id}
-                className={clsx(
+                className={cn(
                     'flex items-center justify-between text-sm tracking-wide',
                     labelClassName
                 )}>
@@ -33,7 +36,7 @@ export const InputWithLabel: ForwardRefExoticComponent<
             <input
                 id={id}
                 {...props}
-                className={clsx(
+                className={cn(
                     'h-9 bg-transparent placeholder:text-slate-400',
                     className,
                     !!error && 'border-red-600'
@@ -44,3 +47,5 @@ export const InputWithLabel: ForwardRefExoticComponent<
         </div>
     )
 );
+
+InputWithLabel.displayName = 'InputWithLabel';

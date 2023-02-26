@@ -1,17 +1,18 @@
 'use client';
 
+import { ReactNode, SVGProps, useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { useQueryClient } from '@tanstack/react-query';
+import { HardDrive, LogOut, Menu, Settings, Trash2, X } from 'lucide-react';
+
 import { clientRoutes } from '@/lib/data/routes';
 import { getClaim } from '@/lib/services/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePrefStore } from '@/lib/stores/pref-store';
-import * as Dialog from '@radix-ui/react-dialog';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { useQueryClient } from '@tanstack/react-query';
-import clsx from 'clsx';
-import { HardDrive, LogOut, Menu, Settings, Trash2, X } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ReactNode, SVGProps, useCallback, useMemo, useState } from 'react';
+import { cn } from '../utils/cn';
 
 export interface Navigation {
     name: string;
@@ -86,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </Dialog.Trigger>
 
                     <Dialog.Portal>
-                        <Dialog.Overlay className='fixed inset-0 bg-gray-600 bg-opacity-75 data-[state=open]:animate-overlayShow' />
+                        <Dialog.Overlay className='fixed inset-0 bg-gray-600/75 data-[state=open]:animate-overlayShow' />
                         <Dialog.Content className='fixed inset-0 flex w-full max-w-xs data-[state=open]:animate-sidebarContentShow md:hidden'>
                             <div className='flex flex-1 flex-col bg-white'>
                                 <div className='flex h-16 shrink-0 items-center justify-between gap-3 px-4'>
@@ -116,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                             <Link
                                                 key={item.name}
                                                 href={item.href}
-                                                className={clsx(
+                                                className={cn(
                                                     path?.startsWith(item.href)
                                                         ? 'border-l-4 border-brand-600 bg-brand-50 text-brand-600'
                                                         : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
@@ -177,7 +178,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className='flex h-full flex-auto'>
                 <div className='hidden shrink-0 flex-col overflow-y-auto border-r bg-white md:flex'>
                     <nav
-                        className={clsx(
+                        className={cn(
                             'flex flex-1 flex-col items-center gap-1',
                             {
                                 'min-w-[16rem]': sidebarOpen,
@@ -187,7 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                             const LinkComp = (
                                 <Link
                                     href={item.href}
-                                    className={clsx(
+                                    className={cn(
                                         path?.startsWith(item.href)
                                             ? 'bg-brand-50 text-brand-600'
                                             : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
@@ -198,7 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                         aria-hidden='true'
                                     />
                                     <span
-                                        className={clsx({
+                                        className={cn({
                                             'sr-only': !sidebarOpen,
                                         })}>
                                         {item.name}

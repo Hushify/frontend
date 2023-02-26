@@ -71,8 +71,3 @@ export const apiRoutes = {
         deleteNodes: apiUrl + nakedApiRoutes.drive.deleteNodes,
     },
 };
-
-export default {
-    api: apiRoutes,
-    client: clientRoutes,
-};

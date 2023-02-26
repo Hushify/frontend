@@ -1,5 +1,6 @@
-import { Logo } from '@/lib/components/logo';
 import { ReactNode } from 'react';
+
+import { Logo } from '@/lib/components/logo';
 
 export const metadata = {
     title: 'Identity',

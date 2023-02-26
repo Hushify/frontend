@@ -1,6 +1,7 @@
-import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
+import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
 
 export type PrefState = {
     sidebarOpen?: boolean;

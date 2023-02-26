@@ -1,7 +1,7 @@
 import {
-    getErrors,
     ResponseMessage,
     SuccessResponse,
+    getErrors,
 } from '@/lib/services/common';
 import { zxcvbn } from '@/lib/utils/zxcvbn';
 

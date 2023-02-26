@@ -1,3 +1,8 @@
+import { Metadata } from 'next';
+import { previewData } from 'next/headers';
+import { notFound } from 'next/navigation';
+import { groq } from 'next-sanity';
+
 import { SinglePost } from '@/lib/components/blog/post';
 import { PreviewSinglePost } from '@/lib/components/blog/preview/preview-post';
 import { Loader } from '@/lib/components/loader';
@@ -5,10 +10,6 @@ import { PreviewSuspense } from '@/lib/components/sanity/preview-suspense';
 import { client } from '@/lib/sanity/sanity-client';
 import { Image, Post } from '@/lib/sanity/types';
 import { urlFor } from '@/lib/sanity/url-for';
-import { Metadata } from 'next';
-import { groq } from 'next-sanity';
-import { previewData } from 'next/headers';
-import { notFound } from 'next/navigation';
 
 export async function generateMetadata({
     params: { slug },
