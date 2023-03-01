@@ -1,5 +1,4 @@
 import * as Toolbar from '@radix-ui/react-toolbar';
-import * as Tooltip from '@radix-ui/react-tooltip';
 
 import { MenuItem, MenuSeparator } from '@/lib/components/drive/types/menu';
 import { cn } from '@/lib/utils/cn';
@@ -23,65 +22,6 @@ export function DriveToolbar({
                     );
                 }
 
-                if (item.textOnly) {
-                    return (
-                        <Tooltip.Root key={item.name}>
-                            <Tooltip.Trigger asChild>
-                                <Toolbar.Button
-                                    onClick={item.action}
-                                    className={cn(
-                                        'inline-flex shrink-0 grow-0 basis-auto items-center justify-center rounded px-2.5 py-1.5 text-sm leading-none text-white outline-none focus:relative focus:shadow',
-                                        {
-                                            'bg-red-600 hover:bg-red-800 focus:shadow-red-400':
-                                                item.variant === 'danger',
-                                            'bg-gray-600 hover:bg-gray-800 focus:shadow-gray-400':
-                                                item.variant === 'secondary',
-                                            'bg-brand-600 hover:bg-brand-800 focus:shadow-brand-400':
-                                                !item.variant ||
-                                                item.variant === 'primary',
-                                        }
-                                    )}>
-                                    <item.icon
-                                        className={cn('h-4 w-4', {
-                                            hidden: item.textOnly,
-                                        })}
-                                    />
-                                    <span>{item.name}</span>
-                                </Toolbar.Button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                                <Tooltip.Content
-                                    className={cn(
-                                        'select-none rounded-[4px] px-4 py-2.5 leading-none text-white shadow will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade',
-                                        {
-                                            'bg-red-600':
-                                                item.variant === 'danger',
-                                            'bg-gray-600':
-                                                item.variant === 'secondary',
-                                            'bg-brand-600':
-                                                !item.variant ||
-                                                item.variant === 'primary',
-                                        }
-                                    )}
-                                    sideOffset={5}>
-                                    {item.name}
-                                    <Tooltip.Arrow
-                                        className={cn({
-                                            'fill-red-600':
-                                                item.variant === 'danger',
-                                            'fill-gray-600':
-                                                item.variant === 'secondary',
-                                            'fill-brand-600':
-                                                !item.variant ||
-                                                item.variant === 'primary',
-                                        })}
-                                    />
-                                </Tooltip.Content>
-                            </Tooltip.Portal>
-                        </Tooltip.Root>
-                    );
-                }
-
                 return (
                     <Toolbar.Button
                         key={item.name}
@@ -97,7 +37,11 @@ export function DriveToolbar({
                                     !item.variant || item.variant === 'primary',
                             }
                         )}>
-                        <item.icon className='h-4 w-4' />
+                        <item.icon
+                            className={cn('h-4 w-4', {
+                                ['hidden']: item.textOnly,
+                            })}
+                        />
                         <span>{item.name}</span>
                     </Toolbar.Button>
                 );

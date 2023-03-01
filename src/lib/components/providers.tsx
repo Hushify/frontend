@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -31,15 +31,21 @@ export function Providers({ children }: { children: ReactNode }) {
 }
 
 export function AuthStateProvider({ children }: { children: ReactNode }) {
+    const [loaded, setLoaded] = useState(false);
     const status = useCheckAuth();
-    const accessToken = useAuthStore(state => state.accessToken);
+    const hasRequiredKeys = useAuthStore(state => state.hasRequiredKeys);
+
+    useEffect(() => setLoaded(true), []);
+
+    if (!loaded) {
+        return null;
+    }
 
     if (status === 'unauthenticated') {
         return null;
     }
 
-    if (accessToken && status === 'authenticated') {
-        // eslint-disable-next-line react/jsx-no-useless-fragment
+    if (hasRequiredKeys() && status === 'authenticated') {
         return <>{children}</>;
     }
 

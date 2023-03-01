@@ -12,7 +12,7 @@ export function useClickDirect(
     useEffect(() => {
         const listener = (event: any) => {
             if (!ref.current) {
-                return;
+                return null;
             }
 
             if (ref.current === event.target) {

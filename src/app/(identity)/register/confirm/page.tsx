@@ -56,15 +56,7 @@ function Confirm() {
 
     const [showPassword, setShowPassword] = useState(false);
 
-    const setMasterKey = useAuthStore(state => state.setMasterKey);
-    const setAsymmetricEncKeyPair = useAuthStore(
-        state => state.setAsymmetricEncKeyPair
-    );
-    const setSigningKeyPair = useAuthStore(state => state.setSigningKeyPair);
-    const setRecoveryKeyMnemonic = useAuthStore(
-        state => state.setRecoveryKeyMnemonic
-    );
-    const setStatus = useAuthStore(state => state.setStatus);
+    const setData = useAuthStore(state => state.setData);
 
     const [resendTimer, setResendTimer] = useState(RESEND_TIME);
 
@@ -94,7 +86,7 @@ function Confirm() {
 
         if (!result.success) {
             addServerErrors(result.errors, setError, ['errors', 'email']);
-            return;
+            return null;
         }
 
         setResendTimer(60);
@@ -122,7 +114,7 @@ function Confirm() {
                 type: 'zxcvbn',
                 message: pwStrengthResult.error,
             });
-            return;
+            return null;
         }
 
         const crypto = CryptoWorker.cryptoWorker;
@@ -141,19 +133,17 @@ function Confirm() {
         );
 
         if (result.success) {
-            setStatus('authenticated');
-            setMasterKey(keys.masterKey);
-            setAsymmetricEncKeyPair(
-                keys.asymmetricEncKeyBundle.publicKey,
-                keys.asymmetricEncPrivateKey
-            );
-            setSigningKeyPair(
-                keys.signingKeyBundle.publicKey,
-                keys.signingPrivateKey
-            );
-            setRecoveryKeyMnemonic(keys.recoveryMnemonic);
+            setData({
+                status: 'authenticated',
+                masterKey: keys.masterKey,
+                publicKey: keys.asymmetricEncKeyBundle.publicKey,
+                privateKey: keys.asymmetricEncPrivateKey,
+                signingPublicKey: keys.signingKeyBundle.publicKey,
+                signingPrivateKey: keys.signingPrivateKey,
+                recoveryKeyMnemonic: keys.recoveryMnemonic,
+            });
             push(clientRoutes.identity.recoveryQr);
-            return;
+            return null;
         }
 
         addServerErrors(result.errors, setError, Object.keys(data));

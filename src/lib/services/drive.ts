@@ -1,9 +1,9 @@
-import axios from 'axios';
 import { Remote } from 'comlink';
 
+import { apiRoutes } from '@/lib/data/routes';
 import { ResponseMessage, getErrors } from '@/lib/services/common';
 import { CryptoService } from '@/lib/services/crypto.worker';
-import { apiRoutes } from '../data/routes';
+import { authenticatedAxiosInstance } from '@/lib/services/http';
 
 export type MetadataBundle = {
     nonce: string;
@@ -27,6 +27,7 @@ export type FileNode = {
     encryptedSize: number;
     fileKey: SecretKeyBundle;
     fileUrl: string;
+    nonce?: string;
 };
 
 export type FolderNode = {
@@ -51,10 +52,25 @@ export type FolderMetadata = {
     created: string;
 };
 
+export type FileMetadata = {
+    name: string;
+    size: number;
+    created: string;
+    modified: string;
+    mimeType: string;
+};
+
 export type FolderNodeDecrypted = {
     id: string;
     metadata: FolderMetadata;
     folderKey: string;
+};
+
+export type FileNodeDecrypted = {
+    id: string;
+    metadata: FileMetadata;
+    fileKey: string;
+    fileUrl: string;
 };
 
 export type BreadcrumbDecrypted = {
@@ -69,7 +85,7 @@ export type DriveList = {
 
     breadcrumbs: BreadcrumbDecrypted[];
 
-    files: FileNode[];
+    files: FileNodeDecrypted[];
     folders: FolderNodeDecrypted[];
 };
 
@@ -79,11 +95,14 @@ export async function list(
     masterKey: string,
     crypto: Remote<typeof CryptoService>
 ): Promise<DriveList> {
-    const { data } = await axios.get<DriveListResponse>(url, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
+    const { data } = await authenticatedAxiosInstance.get<DriveListResponse>(
+        url,
+        {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+    );
 
     const breadcrumbs: BreadcrumbDecrypted[] = [];
     await data.breadcrumbs.reduce(async (promise, crumb, index) => {
@@ -133,7 +152,31 @@ export async function list(
         })
     );
 
-    return { ...data, folders, breadcrumbs };
+    const files: FileNodeDecrypted[] = await Promise.all(
+        data.files.map(async f => {
+            const fileKey = await crypto.decryptFileKey(
+                currentFolderKey,
+                f.fileKey.encKey,
+                f.fileKey.nonce
+            );
+
+            const metadata = await crypto.decryptMetadata(
+                fileKey,
+                f.metadataBundle.metadata,
+                f.metadataBundle.nonce
+            );
+
+            return {
+                id: f.id,
+                metadata: JSON.parse(metadata) as FileMetadata,
+                fileKey,
+                fileUrl: f.fileUrl,
+                nonce: f.nonce,
+            };
+        })
+    );
+
+    return { ...data, folders, files, breadcrumbs };
 }
 
 export async function createFolder<T>(
@@ -172,6 +215,53 @@ export async function deleteNodes<T>(
     const response = await fetch(apiRoutes.drive.deleteNodes, {
         method: 'POST',
         body: JSON.stringify({ folderIds, fileIds }),
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        return { success: true, data };
+    }
+
+    const errors = await getErrors<T>(response);
+    return { success: false, errors };
+}
+
+export async function stats<T>(
+    accessToken: string
+): Promise<ResponseMessage<T, { total: number; used: number }>> {
+    const response = await fetch(apiRoutes.drive.stats, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        return { success: true, data };
+    }
+
+    const errors = await getErrors<T>(response);
+    return { success: false, errors };
+}
+
+export async function updateMetadata<T>(
+    accessToken: string,
+    id: string,
+    type: 'folder' | 'file',
+    metadataBundle: MetadataBundle
+): Promise<ResponseMessage<T, { id: string }>> {
+    const response = await fetch(apiRoutes.drive.updateMetadata, {
+        method: 'POST',
+        body: JSON.stringify({
+            id,
+            type,
+            metadataBundle,
+        }),
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,

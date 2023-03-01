@@ -214,7 +214,48 @@ export const CryptoService = {
         return folderKey;
     },
 
-    encryptMetadata: async <T>(key: Uint8Array, metadata: T) => {
+    generateFileKey: async (folderKey: string) => {
+        await sodium.ready;
+
+        const fileKey = sodium.crypto_secretstream_xchacha20poly1305_keygen();
+
+        const nonce = sodium.randombytes_buf(
+            sodium.crypto_secretbox_NONCEBYTES
+        );
+
+        const encFileKey = sodium.crypto_secretbox_easy(
+            fileKey,
+            nonce,
+            sodium.from_base64(folderKey),
+            'base64'
+        );
+
+        return {
+            fileKey,
+            fileKeyB64: sodium.to_base64(fileKey),
+            encFileKey,
+            nonce: sodium.to_base64(nonce),
+        };
+    },
+
+    decryptFileKey: async (
+        folderKey: string,
+        encryptedFileKey: string,
+        fileKeyNonce: string
+    ) => {
+        await sodium.ready;
+
+        const fileKey = sodium.crypto_secretbox_open_easy(
+            sodium.from_base64(encryptedFileKey),
+            sodium.from_base64(fileKeyNonce),
+            sodium.from_base64(folderKey),
+            'base64'
+        );
+
+        return fileKey;
+    },
+
+    encryptMetadata: async (key: Uint8Array | string, metadata: unknown) => {
         await sodium.ready;
 
         const nonce = sodium.randombytes_buf(
@@ -224,7 +265,7 @@ export const CryptoService = {
         const encMetadata = sodium.crypto_secretbox_easy(
             JSON.stringify(metadata),
             nonce,
-            key,
+            typeof key === 'string' ? sodium.from_base64(key) : key,
             'base64'
         );
 
@@ -245,6 +286,84 @@ export const CryptoService = {
         );
 
         return sodium.to_string(decryptedMetadata);
+    },
+
+    getNonce: async () => {
+        const nonce = sodium.randombytes_buf(
+            sodium.crypto_secretbox_NONCEBYTES
+        );
+        return { nonce, nonceB64: sodium.to_base64(nonce) };
+    },
+
+    encryptFile: async (
+        key: Uint8Array,
+        file: Uint8Array,
+        nonce: Uint8Array
+    ) => {
+        await sodium.ready;
+        return sodium.crypto_secretbox_easy(file, nonce, key);
+    },
+
+    decryptFile: async (key: string, data: Uint8Array, nonce: string) => {
+        await sodium.ready;
+        return sodium.crypto_secretbox_open_easy(
+            data,
+            sodium.from_base64(nonce),
+            sodium.from_base64(key)
+        );
+    },
+
+    streamingEncryptionInit: async (key: string) => {
+        await sodium.ready;
+        return sodium.crypto_secretstream_xchacha20poly1305_init_push(
+            sodium.from_base64(key)
+        );
+    },
+
+    streamingEncryptionPush: async (
+        state: sodium.StateAddress,
+        data: Uint8Array,
+        isFinal: boolean
+    ) => {
+        await sodium.ready;
+        return sodium.crypto_secretstream_xchacha20poly1305_push(
+            state,
+            data,
+            null,
+            isFinal
+                ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
+                : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+        );
+    },
+
+    streamingDecryptionInit: async (header: Uint8Array, key: string) => {
+        await sodium.ready;
+        return sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+            header,
+            sodium.from_base64(key)
+        );
+    },
+
+    streamingDecryptionPull: async (
+        state: sodium.StateAddress,
+        cipher: Uint8Array
+    ) => {
+        await sodium.ready;
+        return sodium.crypto_secretstream_xchacha20poly1305_pull(
+            state,
+            cipher,
+            null
+        );
+    },
+
+    pad: async (data: Uint8Array, blockSize: number) => {
+        await sodium.ready;
+        return sodium.pad(data, blockSize);
+    },
+
+    unpad: async (data: Uint8Array, blockSize: number) => {
+        await sodium.ready;
+        return sodium.unpad(data, blockSize);
     },
 };
 

@@ -13,15 +13,17 @@ import { useRouter } from 'next/navigation';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { downloadZip } from 'client-zip';
 import { format, isToday } from 'date-fns';
+import { orderBy } from 'lodash';
 import {
     ChevronUp,
     ChevronsUpDown,
-    Copy,
+    Download,
+    File,
     Folder,
-    FolderUp,
     Loader,
-    Move,
+    Pencil,
     Plus,
     Trash2,
     Upload,
@@ -33,6 +35,7 @@ import useMeasure from 'react-use-measure';
 import Breadcrumbs from '@/lib/components/drive/breadcrumbs';
 import { DriveContextMenu } from '@/lib/components/drive/context-menu';
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
+import { RenameDialog } from '@/lib/components/drive/rename-dialog';
 import { DriveToolbar } from '@/lib/components/drive/toolbar';
 import { MenuItem, MenuSeparator } from '@/lib/components/drive/types/menu';
 import { UploadProgressBox } from '@/lib/components/drive/upload-progress';
@@ -42,14 +45,19 @@ import { useClickDirect } from '@/lib/hooks/use-click-direct';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import {
     BreadcrumbDecrypted,
-    FileNode,
+    FileMetadata,
+    FileNodeDecrypted,
     FolderMetadata,
     FolderNodeDecrypted,
     deleteNodes,
     list,
 } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { FileWithVersion, useUploadStore } from '@/lib/stores/upload-store';
 import { cn } from '@/lib/utils/cn';
+import humanFileSize from '@/lib/utils/humanizedFileSize';
+import { streamSaver } from '@/lib/utils/stream-saver';
+import StreamSlicer, { StreamDecrypter } from '@/lib/utils/stream-slicer';
 
 function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const router = useRouter();
@@ -69,32 +77,131 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
     const currentFolderId = currentFolder ?? null;
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
+    const [isRenameOpen, setIsRenameOpen] = useState(false);
 
-    const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
-        const map = new Map();
+    const currentFolderKey = useMemo(
+        () =>
+            data && data.breadcrumbs.length > 0
+                ? data?.breadcrumbs.find(c => c.id === currentFolderId)?.key ??
+                  masterKey
+                : masterKey,
+        [currentFolderId, data, masterKey]
+    );
 
-        acceptedFiles.forEach(f => {
-            if (f.path!.includes('/')) {
-                map.set(
-                    f
-                        .path!.slice(0, f.path!.lastIndexOf('/'))
-                        .split('/')
-                        .slice(1)
-                        .join('/'),
-                    crypto.randomUUID()
-                );
+    const queueForUpload = useUploadStore(state => state.queueForUpload);
+
+    const onDrop = useCallback(
+        (acceptedFiles: FileWithPath[]) => {
+            if (!data) {
+                return;
             }
-        });
-    }, []);
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+            // type Folder = {
+            //     name: string;
+            //     key: string | null;
+            // };
+
+            // type Subfolder = {
+            //     name: string;
+            //     key: string | null;
+            //     children: Subfolder[];
+            // };
+
+            // const folderMap = new Map<Folder, Subfolder>();
+
+            // acceptedFiles.forEach(f => {
+            //     if (!f.path || !f.path.includes('/')) {
+            //         return;
+            //     }
+
+            //     // remove file name, split path and set folderMap with children
+            //     const path = f.path.slice(0, f.path.lastIndexOf('/')).slice(1);
+            //     const pathArray = path.split('/');
+            //     const folderName = pathArray[0];
+            //     const folderKey =
+            //         data.folders.find(f => f.metadata.name === folderName)
+            //             ?.folderKey ?? null;
+
+            //     const folder: Folder = {
+            //         name: folderName,
+            //         key: folderKey,
+            //     };
+
+            //     const subfolder: Subfolder = {
+            //         name: pathArray[1],
+            //         key: null,
+            //         children: [],
+            //     };
+
+            //     if (folderMap.has(folder)) {
+            //         folderMap.get(folder)?.children.push(subfolder);
+            //     } else {
+            //         folderMap.set(folder, subfolder);
+            //     }
+            // });
+
+            // console.log(folderMap);
+
+            // return;
+
+            // for (const [key, _] of folderMap) {
+            //     const folder = data.folders.find(
+            //         f =>
+            //             key.slice(
+            //                 0,
+            //                 key.includes('/') ? key.indexOf('/') : undefined
+            //             ) === f.metadata.name
+            //     );
+
+            //     if (folder) {
+            //         toast.error(
+            //             'Folder with the same name already exists. Please rename the folder and try again.'
+            //         );
+            //         return;
+            //     }
+            // }
+
+            const files: FileWithVersion[] = acceptedFiles.map(file => ({
+                file,
+                previousVersionId: data.files.find(
+                    f => f.metadata.name === file.name
+                )?.id,
+            }));
+
+            queueForUpload(
+                // folderMap,
+                files,
+                data.currentFolderId,
+                currentFolderKey,
+                accessToken,
+                refetch
+            );
+        },
+        [accessToken, currentFolderKey, data, queueForUpload, refetch]
+    );
+
+    const {
+        getRootProps,
+        getInputProps,
+        isDragActive,
+        inputRef: fileRef,
+    } = useDropzone({
         onDrop,
         multiple: true,
         noClick: true,
         noKeyboard: true,
     });
 
-    const inputProps = useMemo(() => getInputProps(), [getInputProps]);
+    const { getInputProps: getFolderInputProps, inputRef: folderRef } =
+        useDropzone({
+            onDrop,
+            multiple: true,
+            noClick: true,
+            noKeyboard: true,
+            noDrag: true,
+        });
+
+    const inputProps = useMemo(getInputProps, [getInputProps]);
 
     const [ref, bounds] = useMeasure();
     const [refRest, boundsRest] = useMeasure();
@@ -104,7 +211,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const [selectedNodes, setSelectedNodes] = useState<
         (
             | { node: FolderNodeDecrypted; type: 'folder' }
-            | { node: FileNode; type: 'file' }
+            | { node: FileNodeDecrypted; type: 'file' }
         )[]
     >([]);
 
@@ -114,16 +221,16 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
     const selectAll = useCallback(() => {
         if (!selectAllRef.current) {
-            return;
+            return null;
         }
 
         if (!data) {
-            return;
+            return null;
         }
 
         if (!selectAllRef.current.checked) {
             setSelectedNodes([]);
-            return;
+            return null;
         }
 
         setSelectedNodes([
@@ -136,7 +243,10 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     }, [data]);
 
     const selectNode = useCallback(
-        (node: FolderNodeDecrypted | FileNode, type: 'folder' | 'file') => {
+        (
+            node: FolderNodeDecrypted | FileNodeDecrypted,
+            type: 'folder' | 'file'
+        ) => {
             setSelectedNodes(prev => {
                 const selected = prev.find(n => n.node.id === node.id);
                 if (selected) {
@@ -156,7 +266,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 return [
                     ...prev,
                     {
-                        node: node as FileNode,
+                        node: node as FileNodeDecrypted,
                         type: 'file',
                     },
                 ];
@@ -212,112 +322,197 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
         selectAllRef.current.indeterminate = true;
     }, [data?.files.length, data?.folders.length, selectedNodes.length]);
 
-    const menuItems: (MenuItem | MenuSeparator)[] = useMemo(
-        () =>
-            selectedNodes.length <= 0
-                ? [
-                      {
-                          type: 'item',
-                          name: 'Create Folder',
-                          action: () => setIsNewFolderOpen(true),
-                          icon: Plus,
-                          textOnly: false,
-                          variant: 'secondary',
-                          disabled: false,
-                      },
-                      {
-                          type: 'item',
-                          name: 'Upload File',
-                          action: undefined,
-                          icon: Upload,
-                          textOnly: false,
-                          variant: 'secondary',
-                          disabled: false,
-                      },
-                      {
-                          type: 'item',
-                          name: 'Upload Folder',
-                          action: undefined,
-                          icon: FolderUp,
-                          textOnly: false,
-                          variant: 'secondary',
-                          disabled: false,
-                      },
-                  ]
-                : [
-                      {
-                          type: 'item',
-                          name: 'Copy',
-                          action: undefined,
-                          icon: Copy,
-                          textOnly: false,
-                          variant: 'secondary',
-                          disabled: false,
-                      },
-                      {
-                          type: 'item',
-                          name: 'Move',
-                          action: undefined,
-                          icon: Move,
-                          textOnly: false,
-                          variant: 'secondary',
-                          disabled: false,
-                      },
-                      {
-                          type: 'separator',
-                          id: '1',
-                      },
-                      {
-                          type: 'item',
-                          name: 'Delete',
-                          action: () =>
-                              deleteNodesMutation.mutateAsync({
-                                  folderIds: selectedNodes
-                                      .filter(n => n.type === 'folder')
-                                      .map(n => n.node.id),
-                                  fileIds: selectedNodes
-                                      .filter(n => n.type === 'file')
-                                      .map(n => n.node.id),
-                              }),
-                          icon: Trash2,
-                          textOnly: false,
-                          variant: 'danger',
-                          disabled: false,
-                      },
-                  ],
-        [deleteNodesMutation, selectedNodes]
-    );
+    const downloadFile = async (node: FileNodeDecrypted) => {
+        const responseStream = await fetch(node.fileUrl);
+        if (!responseStream.body) {
+            return;
+        }
 
-    // TODO: Remove string and replace it with keyof FileMetadata
-    const [sortKey, setSortKey] = useState<keyof FolderMetadata | string>(
-        'name'
-    );
+        const stream = streamSaver.createWriteStream(node.metadata.name, {
+            size: node.metadata.size,
+        });
+
+        responseStream.body
+            .pipeThrough(new TransformStream(new StreamSlicer()))
+            .pipeThrough(new TransformStream(new StreamDecrypter(node.fileKey)))
+            .pipeTo(stream);
+    };
+
+    async function* downloadGenerator(nodes: FileNodeDecrypted[]) {
+        for (const node of nodes)
+            yield {
+                input: await fetch(node.fileUrl).then(response =>
+                    response.body
+                        ?.pipeThrough(new TransformStream(new StreamSlicer()))
+                        .pipeThrough(
+                            new TransformStream(
+                                new StreamDecrypter(node.fileKey)
+                            )
+                        )
+                ),
+                name: node.metadata.name,
+            };
+    }
+
+    const downloadMultiple = useCallback(() => {
+        const { body } = downloadZip(
+            downloadGenerator(
+                selectedNodes
+                    .filter(f => f.type === 'file')
+                    .map(f => f.node as FileNodeDecrypted)
+            )
+        );
+
+        const stream = streamSaver.createWriteStream('download.zip');
+
+        body?.pipeTo(stream);
+    }, [selectedNodes]);
+
+    const menuItems: (MenuItem | MenuSeparator)[] = useMemo(() => {
+        if (selectedNodes.length <= 0) {
+            return [
+                {
+                    type: 'item',
+                    name: 'Create Folder',
+                    action: () => setIsNewFolderOpen(true),
+                    icon: Plus,
+                    textOnly: false,
+                    variant: 'secondary',
+                    disabled: false,
+                },
+                {
+                    type: 'item',
+                    name: 'Upload Folder',
+                    action: () => {
+                        if (!folderRef.current) {
+                            return;
+                        }
+
+                        folderRef.current.click();
+                    },
+                    icon: Folder,
+                    textOnly: false,
+                    variant: 'secondary',
+                    disabled: false,
+                },
+                {
+                    type: 'item',
+                    name: 'Upload Files',
+                    action: () => {
+                        if (!fileRef.current) {
+                            return;
+                        }
+
+                        fileRef.current.click();
+                    },
+                    icon: Upload,
+                    textOnly: false,
+                    variant: 'secondary',
+                    disabled: false,
+                },
+            ];
+        }
+
+        const items: (MenuItem | MenuSeparator)[] = [
+            {
+                type: 'item',
+                name: 'Download',
+                action: () => {
+                    if (selectedNodes.length === 1) {
+                        const urls = selectedNodes
+                            .filter(n => n.type === 'file')
+                            .map(n => (n.node as FileNodeDecrypted).fileUrl);
+                        // downloadMultiple(urls);
+                        downloadFile(
+                            selectedNodes[0].node as FileNodeDecrypted
+                        );
+                    } else {
+                        downloadMultiple();
+                    }
+                },
+                icon: Download,
+                textOnly: false,
+                variant: 'primary',
+                disabled: false,
+            },
+            {
+                type: 'separator',
+                id: '1',
+            },
+        ];
+
+        if (selectedNodes.length == 1) {
+            items.push({
+                type: 'item' as const,
+                name: 'Rename',
+                action: () => setIsRenameOpen(true),
+                icon: Pencil,
+                textOnly: false,
+                variant: 'secondary',
+                disabled: false,
+            });
+        }
+
+        items.push({
+            type: 'item',
+            name: 'Delete',
+            action: () =>
+                deleteNodesMutation.mutateAsync({
+                    folderIds: selectedNodes
+                        .filter(n => n.type === 'folder')
+                        .map(n => n.node.id),
+                    fileIds: selectedNodes
+                        .filter(n => n.type === 'file')
+                        .map(n => n.node.id),
+                }),
+            icon: Trash2,
+            textOnly: false,
+            variant: 'danger',
+            disabled: false,
+        });
+
+        return items;
+    }, [
+        deleteNodesMutation,
+        downloadMultiple,
+        fileRef,
+        folderRef,
+        selectedNodes,
+    ]);
+
+    const [sortKey, setSortKey] = useState<
+        keyof FolderMetadata | keyof FileMetadata
+    >('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
     const folders = useMemo(
         () =>
-            data?.folders.sort((a, b) => {
-                let internalSortKey = sortKey;
-                if (!Object.keys(a).includes(sortKey)) {
-                    internalSortKey = 'name';
-                }
+            data
+                ? orderBy(
+                      data.folders,
+                      f =>
+                          Object.keys(f.metadata).includes(sortKey)
+                              ? f.metadata[sortKey as keyof FolderMetadata]
+                              : f.metadata.name,
+                      [sortOrder]
+                  )
+                : [],
+        [data, sortKey, sortOrder]
+    );
 
-                const aMetadata =
-                    a.metadata[internalSortKey as keyof FolderMetadata];
-                const bMetadata =
-                    b.metadata[internalSortKey as keyof FolderMetadata];
-
-                if (sortOrder === 'asc') {
-                    return aMetadata.localeCompare(bMetadata, undefined, {
-                        numeric: true,
-                    });
-                }
-
-                return bMetadata.localeCompare(aMetadata, undefined, {
-                    numeric: true,
-                });
-            }) ?? [],
-        [data?.folders, sortKey, sortOrder]
+    const files = useMemo(
+        () =>
+            data
+                ? orderBy(
+                      data.files,
+                      f =>
+                          Object.keys(f.metadata).includes(sortKey)
+                              ? f.metadata[sortKey as keyof FileMetadata]
+                              : f.metadata.name,
+                      [sortOrder]
+                  )
+                : [],
+        [data, sortKey, sortOrder]
     );
 
     const divRef = useRef<HTMLDivElement>(null);
@@ -331,7 +526,16 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 inputProps={inputProps}
             />
 
-            {false && <UploadProgressBox />}
+            <input
+                {...getFolderInputProps()}
+                // @ts-expect-error
+                webkitdirectory=''
+                mozdirectory=''
+                nwdirectory=''
+                directory=''
+            />
+
+            <UploadProgressBox />
 
             <div className='relative h-full bg-white' ref={ref}>
                 {status === 'error' && (
@@ -352,10 +556,28 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 <div ref={refRest}>
                     <div className='relative z-10'>
                         <NewFolderDialog
+                            folders={data?.folders}
                             currentFolderId={currentFolderId}
+                            currentFolderKey={currentFolderKey}
                             isNewFolderOpen={isNewFolderOpen}
                             setIsNewFolderOpen={setIsNewFolderOpen}
                         />
+
+                        {selectedNodes.length === 1 && (
+                            <RenameDialog
+                                nodes={
+                                    selectedNodes.at(0)!.type === 'folder'
+                                        ? folders
+                                        : files
+                                }
+                                type={selectedNodes.at(0)!.type}
+                                node={selectedNodes.at(0)!.node}
+                                isRenameOpen={isRenameOpen}
+                                setIsRenameOpen={setIsRenameOpen}
+                                currentFolderId={currentFolderId}
+                                currentFolderKey={currentFolderKey}
+                            />
+                        )}
                     </div>
 
                     <DriveToolbar items={menuItems} />
@@ -648,6 +870,135 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                         </td>
                                                         <td className='hidden py-2 text-sm md:table-cell'>
                                                             -
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {files.map(file => {
+                                                const isSelected =
+                                                    selectedNodes.findIndex(
+                                                        n =>
+                                                            n.node.id ===
+                                                            file.id
+                                                    ) >= 0;
+
+                                                return (
+                                                    <tr
+                                                        key={file.id}
+                                                        className={cn(
+                                                            'text-gray-900',
+                                                            {
+                                                                'bg-gray-300':
+                                                                    isSelected,
+                                                                'hover:bg-gray-200':
+                                                                    !isSelected,
+                                                            }
+                                                        )}
+                                                        onClick={() =>
+                                                            setSelectedNodes(
+                                                                prev => {
+                                                                    if (
+                                                                        isSelected
+                                                                    ) {
+                                                                        return prev.filter(
+                                                                            n =>
+                                                                                n
+                                                                                    .node
+                                                                                    .id !==
+                                                                                file.id
+                                                                        );
+                                                                    }
+
+                                                                    return [
+                                                                        ...prev,
+                                                                        {
+                                                                            node: file as FileNodeDecrypted,
+                                                                            type: 'file',
+                                                                        },
+                                                                    ];
+                                                                }
+                                                            )
+                                                        }
+                                                        onContextMenu={() =>
+                                                            setSelectedNodes(
+                                                                prev => {
+                                                                    if (
+                                                                        isSelected
+                                                                    ) {
+                                                                        return prev;
+                                                                    }
+
+                                                                    return [
+                                                                        {
+                                                                            node: file as FileNodeDecrypted,
+                                                                            type: 'file',
+                                                                        },
+                                                                    ];
+                                                                }
+                                                            )
+                                                        }>
+                                                        <td className='py-2 text-center'>
+                                                            <label
+                                                                htmlFor={`checkbox-${file.id}`}
+                                                                className='sr-only'>
+                                                                Select
+                                                            </label>
+                                                            <input
+                                                                onClick={e =>
+                                                                    e.stopPropagation()
+                                                                }
+                                                                onChange={() =>
+                                                                    selectNode(
+                                                                        file,
+                                                                        'file'
+                                                                    )
+                                                                }
+                                                                checked={
+                                                                    isSelected
+                                                                }
+                                                                className='-mt-1 cursor-pointer rounded'
+                                                                type='checkbox'
+                                                                id={`checkbox-${file.id}`}
+                                                            />
+                                                        </td>
+                                                        <td className='max-w-[300px] whitespace-nowrap py-2 text-left'>
+                                                            <div className='flex items-center gap-2'>
+                                                                <File className='h-4 w-4 shrink-0' />
+                                                                <span className='truncate text-sm'>
+                                                                    {
+                                                                        file
+                                                                            .metadata
+                                                                            .name
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className='py-2 text-left text-sm'>
+                                                            {isToday(
+                                                                new Date(
+                                                                    file.metadata.modified
+                                                                )
+                                                            )
+                                                                ? format(
+                                                                      new Date(
+                                                                          file.metadata.modified
+                                                                      ),
+                                                                      'h:mm:ss b'
+                                                                  )
+                                                                : format(
+                                                                      new Date(
+                                                                          file.metadata.modified
+                                                                      ),
+                                                                      'MMM d, y, h:mm b'
+                                                                  )}
+                                                        </td>
+                                                        <td className='hidden py-2 text-sm md:table-cell'>
+                                                            {humanFileSize(
+                                                                file.metadata
+                                                                    .size,
+                                                                true,
+                                                                0
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 );

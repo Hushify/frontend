@@ -17,43 +17,45 @@ import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import {
     DriveList,
+    FileNodeDecrypted,
     FolderNodeDecrypted,
-    createFolder,
+    updateMetadata,
 } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
 import { cn } from '@/lib/utils/cn';
 
-type NewFolderInputs = {
+type RenameInputs = {
     errors: string;
-    folderName: string;
+    name: string;
 };
 
-const newFolderSchema = zod
+const renameSchema = zod
     .object({
-        folderName: zod
+        name: zod
             .string()
             .trim()
-            .min(1, 'Folder Name is required.')
-            .refine(
-                folderName => sanitize(folderName) === folderName,
-                'Folder Name is not valid.'
-            ),
+            .min(1, 'Name is required.')
+            .refine(name => sanitize(name) === name, 'Name is not valid.'),
     })
     .required();
 
-export function NewFolderDialog({
-    folders,
+export function RenameDialog({
+    node,
+    nodes,
     currentFolderId,
     currentFolderKey,
-    isNewFolderOpen,
-    setIsNewFolderOpen,
+    isRenameOpen,
+    setIsRenameOpen,
+    type,
 }: {
-    folders: undefined | FolderNodeDecrypted[];
+    node: FolderNodeDecrypted | FileNodeDecrypted;
+    nodes: undefined | FolderNodeDecrypted[] | FileNodeDecrypted[];
     currentFolderId: string | null;
     currentFolderKey: string;
-    isNewFolderOpen: boolean;
-    setIsNewFolderOpen: Dispatch<SetStateAction<boolean>>;
+    isRenameOpen: boolean;
+    setIsRenameOpen: Dispatch<SetStateAction<boolean>>;
+    type: 'folder' | 'file';
 }) {
     const queryClient = useQueryClient();
 
@@ -70,26 +72,39 @@ export function NewFolderDialog({
         clearErrors,
         formState: { errors },
         resetField,
-    } = useForm<NewFolderInputs>({
-        resolver: zodResolver(newFolderSchema),
+    } = useForm<RenameInputs>({
+        resolver: zodResolver(renameSchema),
+        defaultValues: {
+            name: node.metadata.name,
+        },
     });
 
     const resetForm = useCallback(() => {
-        resetField('folderName');
+        resetField('name');
         resetField('errors');
         clearErrors();
     }, [clearErrors, resetField]);
 
     const onSubmit = useCallback(
-        async (data: NewFolderInputs) => {
+        async (data: RenameInputs) => {
+            if (node.metadata.name === data.name) {
+                addServerErrors(
+                    {
+                        name: ['The name can not be same.'],
+                    },
+                    setError,
+                    Object.keys(data)
+                );
+                return null;
+            }
+
             if (
-                folders &&
-                folders.findIndex(f => f.metadata.name === data.folderName) !==
-                    -1
+                nodes &&
+                nodes.findIndex(f => f.metadata.name === data.name) !== -1
             ) {
                 addServerErrors(
                     {
-                        folderName: ['Folder already exists.'],
+                        name: [`A ${type} with that name already exists.`],
                     },
                     setError,
                     Object.keys(data)
@@ -99,48 +114,50 @@ export function NewFolderDialog({
 
             const crypto = CryptoWorker.cryptoWorker;
 
-            const keyBundle = await crypto.generateFolderKey(currentFolderKey);
+            node.metadata.name = data.name;
+            node.metadata.modified = new Date().toUTCString();
 
-            const metadata = {
-                name: data.folderName,
-                modified: new Date().toUTCString(),
-                created: new Date().toUTCString(),
-            };
+            let key = null;
+            if (type === 'file') {
+                key = (node as FileNodeDecrypted).fileKey;
+            } else {
+                key = (node as FolderNodeDecrypted).folderKey;
+            }
 
             const metadataBundle = await crypto.encryptMetadata(
-                keyBundle.folderKey,
-                metadata
+                key,
+                node.metadata
             );
 
-            const result = await createFolder(
-                accessToken,
-                currentFolderId ?? null,
-                {
-                    nonce: metadataBundle.nonce,
-                    metadata: metadataBundle.encMetadata,
-                },
-                {
-                    encKey: keyBundle.encFolderKey,
-                    nonce: keyBundle.nonce,
-                }
-            );
+            const result = await updateMetadata(accessToken, node.id, type, {
+                nonce: metadataBundle.nonce,
+                metadata: metadataBundle.encMetadata,
+            });
 
             if (result.success) {
-                setIsNewFolderOpen(false);
+                setIsRenameOpen(false);
                 resetForm();
-                toast.success('Folder created!');
+                toast.success('Node renamed!');
                 queryClient.setQueryData<DriveList>([queryKey], queryData => {
                     if (!queryData) {
                         return undefined;
                     }
 
+                    if (type === 'file') {
+                        const files: FileNodeDecrypted[] = [
+                            ...queryData.files.filter(f => f.id !== node.id),
+                            node as FileNodeDecrypted,
+                        ];
+
+                        return {
+                            ...queryData,
+                            files,
+                        };
+                    }
+
                     const folders: FolderNodeDecrypted[] = [
-                        ...queryData.folders,
-                        {
-                            id: result.data.id,
-                            folderKey: keyBundle.folderKeyB64,
-                            metadata,
-                        },
+                        ...queryData.folders.filter(f => f.id !== node.id),
+                        node as FolderNodeDecrypted,
                     ];
 
                     return {
@@ -156,35 +173,35 @@ export function NewFolderDialog({
             addServerErrors(result.errors, setError, Object.keys(data));
         },
         [
+            node,
+            nodes,
             accessToken,
-            currentFolderId,
-            currentFolderKey,
-            folders,
-            queryKey,
-            queryClient,
-            resetForm,
+            type,
             setError,
-            setIsNewFolderOpen,
+            setIsRenameOpen,
+            resetForm,
+            queryClient,
+            queryKey,
         ]
     );
 
     const mutation = useFormMutation(onSubmit, setError, () =>
-        toast.error('Folder creation failed!')
+        toast.error('Rename failed!')
     );
 
     return (
         <Dialog.Root
-            open={isNewFolderOpen}
+            open={isRenameOpen}
             onOpenChange={value => {
                 resetForm();
-                setIsNewFolderOpen(value);
+                setIsRenameOpen(value);
             }}>
             <Dialog.Portal>
                 <Dialog.Overlay className='fixed inset-0 bg-gray-700/50 data-[state=open]:animate-overlayShow' />
                 <Dialog.Content className='fixed top-1/2 left-1/2 max-h-[85vh] w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-contentShow'>
                     <div className='flex items-center justify-between'>
                         <Dialog.Title className='m-0 text-[17px] font-medium text-gray-900'>
-                            Create New Folder
+                            Rename {type}
                         </Dialog.Title>
                         <Dialog.Close asChild>
                             <button
@@ -200,17 +217,22 @@ export function NewFolderDialog({
                         onSubmit={handleSubmit(data =>
                             mutation.mutateAsync(data)
                         )}>
+                        <div className='flex items-center gap-2'>
+                            <span>Current Name:</span>
+                            <span>{node.metadata.name}</span>
+                        </div>
+
                         <small className='text-red-600'>
                             {errors.errors?.message}
                         </small>
 
                         <InputWithLabel
-                            error={errors.folderName}
+                            error={errors.name}
                             type='text'
-                            id='folderName'
-                            autoComplete='folderName'
-                            {...register('folderName')}>
-                            Folder Name
+                            id='name'
+                            autoComplete='name'
+                            {...register('name')}>
+                            New Name
                         </InputWithLabel>
 
                         <button
@@ -221,7 +243,7 @@ export function NewFolderDialog({
                                 'disabled:cursor-not-allowed disabled:bg-brand-600/80',
                                 'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                             )}>
-                            <span>Create</span>
+                            <span>Rename</span>
                             <Loader
                                 size={16}
                                 className={cn(

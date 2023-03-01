@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import zod from 'zod';
-import { shallow } from 'zustand/shallow';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes, clientRoutes } from '@/lib/data/routes';
@@ -43,22 +42,16 @@ function Login({
         resolver: zodResolver(loginSchema),
     });
 
-    const authState = useAuthStore(state => state, shallow);
+    const isLoggedIn = useAuthStore(state => state.isLoggedIn);
+    const logout = useAuthStore(state => state.logout);
 
     const { push } = useRouter();
 
     useEffect(() => {
-        if (
-            authState.masterKey &&
-            authState.asymmetricEncPrivateKey &&
-            authState.asymmetricEncPublicKey &&
-            authState.signingPublicKey &&
-            authState.signingPrivateKey &&
-            authState.status === 'authenticated'
-        ) {
+        if (isLoggedIn()) {
             push(clientRoutes.drive);
         }
-    }, [authState, push]);
+    }, [isLoggedIn, push]);
 
     const onSubmit = async (data: LoginFormInputs) => {
         const result = await initiateLogin(
@@ -68,7 +61,7 @@ function Login({
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
-            return;
+            return null;
         }
 
         const params = new URLSearchParams({
@@ -78,7 +71,7 @@ function Login({
         push(`${clientRoutes.identity.loginConfirm}?${params.toString()}`);
     };
 
-    const mutation = useFormMutation(onSubmit, setError, authState.logout);
+    const mutation = useFormMutation(onSubmit, setError, logout);
 
     return (
         <motion.div

@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
+import { apiRoutes } from '@/lib/data/routes';
 import {
     ResponseMessage,
     SuccessResponse,
@@ -228,7 +231,7 @@ export async function authenticate<T>(
     return { success: false, errors };
 }
 
-export async function refreshToken<T>(url: string): Promise<
+export async function refreshToken<T>(): Promise<
     ResponseMessage<
         T,
         {
@@ -238,7 +241,7 @@ export async function refreshToken<T>(url: string): Promise<
         }
     >
 > {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.refresh, {
         method: 'POST',
         credentials: 'include',
         mode: 'cors',

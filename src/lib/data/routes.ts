@@ -46,8 +46,15 @@ const nakedApiRoutes = {
     },
     drive: {
         list: '/drive/list',
+        stats: '/drive/stats',
         createFolder: '/drive/create-folder',
         deleteNodes: '/drive/delete-nodes',
+        updateMetadata: '/drive/update-metadata',
+        multipart: {
+            create: '/drive/create-multipart-upload',
+            commit: '/drive/commit-multipart-upload',
+            cancel: '/drive/cancel-multipart-upload',
+        },
     },
 };
 
@@ -67,7 +74,14 @@ export const apiRoutes = {
     },
     drive: {
         list: apiUrl + nakedApiRoutes.drive.list,
+        stats: apiUrl + nakedApiRoutes.drive.stats,
         createFolder: apiUrl + nakedApiRoutes.drive.createFolder,
         deleteNodes: apiUrl + nakedApiRoutes.drive.deleteNodes,
+        updateMetadata: apiUrl + nakedApiRoutes.drive.updateMetadata,
+        multipart: {
+            create: apiUrl + nakedApiRoutes.drive.multipart.create,
+            commit: apiUrl + nakedApiRoutes.drive.multipart.commit,
+            cancel: apiUrl + nakedApiRoutes.drive.multipart.cancel,
+        },
     },
 };

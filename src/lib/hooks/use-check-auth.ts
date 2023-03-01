@@ -1,104 +1,79 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { shallow } from 'zustand/shallow';
 
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
-import { isTokenExpired, refreshToken } from '@/lib/services/auth';
+import { clientRoutes } from '@/lib/data/routes';
+import { refreshToken } from '@/lib/services/auth';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 export function useCheckAuth() {
-    const {
-        logout,
-        setAccessToken,
-        setStatus,
-        status,
-        accessToken,
-        masterKey,
-        asymmetricEncPrivateKey,
-        asymmetricEncPublicKey,
-        signingPrivateKey,
-        signingPublicKey,
-    } = useAuthStore(state => state, shallow);
+    const forceRef = useRef(false);
+    const authState = useAuthStore(state => state, shallow);
     const { push } = useRouter();
 
-    const isSessionValid = useCallback(
-        async (forceRefresh = false) => {
-            if (
-                !masterKey ||
-                !asymmetricEncPrivateKey ||
-                !asymmetricEncPublicKey ||
-                !signingPrivateKey ||
-                !signingPublicKey
-            ) {
-                push(clientRoutes.identity.login);
-                return;
+    const getSession = useCallback(async () => {
+        if (typeof location === 'undefined') {
+            return null;
+        }
+
+        if (!authState.hasRequiredKeys()) {
+            await authState.logout();
+            push(clientRoutes.identity.login);
+            return null;
+        }
+
+        if (authState.status === 'loggingout') {
+            return null;
+        }
+
+        if (authState.status === 'unauthenticated') {
+            push(clientRoutes.identity.login);
+            return null;
+        }
+
+        if (authState.accessToken && !forceRef.current) {
+            forceRef.current = true;
+            authState.setData({ status: 'authenticated' });
+            return authState.accessToken;
+        }
+
+        try {
+            const result = await refreshToken();
+
+            if (!result.success) {
+                await authState.logout();
+                return null;
             }
 
-            if (status === 'loggingout') {
-                return;
-            }
+            const crypto = CryptoWorker.cryptoWorker;
 
-            if (status === 'unauthenticated') {
-                push(clientRoutes.identity.login);
-                return;
-            }
+            const decryptedAccessToken = await crypto.decryptAccessToken(
+                result.data.encAccessToken,
+                result.data.accessTokenNonce,
+                result.data.serverPublicKey,
+                authState.privateKey!
+            );
 
-            if (accessToken && !isTokenExpired(accessToken) && !forceRefresh) {
-                setStatus('authenticated');
-                return;
-            }
+            authState.setData({ accessToken: decryptedAccessToken });
+            authState.setData({ status: 'authenticated' });
+            forceRef.current = true;
 
-            try {
-                const result = await refreshToken(apiRoutes.identity.refresh);
+            return decryptedAccessToken;
+        } catch (e) {
+            await authState.logout();
+        }
+    }, [authState, push]);
 
-                if (!result.success) {
-                    await logout();
-                    push(clientRoutes.identity.login);
-                    return;
-                }
+    useQuery(['refreshToken'], getSession, {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchInterval: 1000 * 60 * 10,
+        refetchIntervalInBackground: true,
+    });
 
-                const crypto = CryptoWorker.cryptoWorker;
-
-                const decryptedAccessToken = await crypto.decryptAccessToken(
-                    result.data.encAccessToken,
-                    result.data.accessTokenNonce,
-                    result.data.serverPublicKey,
-                    asymmetricEncPrivateKey
-                );
-
-                setAccessToken(decryptedAccessToken);
-                setStatus('authenticated');
-            } catch (e) {
-                await logout();
-            }
-        },
-        [
-            accessToken,
-            asymmetricEncPrivateKey,
-            asymmetricEncPublicKey,
-            logout,
-            masterKey,
-            push,
-            setAccessToken,
-            setStatus,
-            signingPrivateKey,
-            signingPublicKey,
-            status,
-        ]
-    );
-
-    useEffect(() => {
-        isSessionValid();
-
-        const interval = setInterval(async () => {
-            await isSessionValid(true);
-        }, 1000 * 60 * 10);
-
-        return () => clearInterval(interval);
-    }, [isSessionValid]);
-
-    return status;
+    return authState.status;
 }

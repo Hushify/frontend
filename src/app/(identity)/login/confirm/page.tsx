@@ -48,13 +48,7 @@ function Confirm() {
         },
     });
     const [showPassword, setShowPassword] = useState(false);
-    const setAccessToken = useAuthStore(state => state.setAccessToken);
-    const setMasterKey = useAuthStore(state => state.setMasterKey);
-    const setAsymmetricEncKeyPair = useAuthStore(
-        state => state.setAsymmetricEncKeyPair
-    );
-    const setSigningKeyPair = useAuthStore(state => state.setSigningKeyPair);
-    const setStatus = useAuthStore(state => state.setStatus);
+    const setData = useAuthStore(state => state.setData);
 
     const [resendTimer, setResendTimer] = useState(30);
 
@@ -84,7 +78,7 @@ function Confirm() {
 
         if (!result.success) {
             addServerErrors(result.errors, setError, ['errors', 'email']);
-            return;
+            return null;
         }
 
         setResendTimer(30);
@@ -110,7 +104,7 @@ function Confirm() {
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
-            return;
+            return null;
         }
 
         const crypto = CryptoWorker.cryptoWorker;
@@ -133,14 +127,15 @@ function Confirm() {
             keys.asymmetricPrivateKey
         );
 
-        setStatus('authenticated');
-        setMasterKey(keys.masterKey);
-        setAsymmetricEncKeyPair(
-            result.data.asymmetricEncPublicKey,
-            keys.asymmetricPrivateKey
-        );
-        setSigningKeyPair(result.data.signingPublicKey, keys.signingPrivateKey);
-        setAccessToken(accessToken);
+        setData({
+            status: 'authenticated',
+            masterKey: keys.masterKey,
+            publicKey: result.data.asymmetricEncPublicKey,
+            privateKey: keys.asymmetricPrivateKey,
+            signingPublicKey: result.data.signingPublicKey,
+            signingPrivateKey: keys.signingPrivateKey,
+            accessToken,
+        });
 
         push(clientRoutes.drive);
     };

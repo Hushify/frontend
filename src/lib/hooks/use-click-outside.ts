@@ -13,7 +13,7 @@ export function useClickOutside(
     useEffect(() => {
         const listener = (event: any) => {
             if (!ref.current || ref.current.contains(event.target)) {
-                return;
+                return null;
             }
 
             clickOutsideHandler(event);

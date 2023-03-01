@@ -13,7 +13,7 @@ export function useClickBetween(
     useEffect(() => {
         const listener = (event: any) => {
             if (!outerRef.current || !innerRef.current) {
-                return;
+                return null;
             }
 
             if (

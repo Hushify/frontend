@@ -1,18 +1,36 @@
 'use client';
 
-import { ReactNode, SVGProps, useCallback, useMemo, useState } from 'react';
+import {
+    Fragment,
+    ReactNode,
+    SVGProps,
+    useCallback,
+    useMemo,
+    useState,
+} from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { useQueryClient } from '@tanstack/react-query';
-import { HardDrive, LogOut, Menu, Settings, Trash2, X } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+    HardDrive,
+    LogOut,
+    Mail,
+    Menu,
+    PieChart,
+    Settings,
+    Trash2,
+    X,
+} from 'lucide-react';
 
 import { clientRoutes } from '@/lib/data/routes';
 import { getClaim } from '@/lib/services/auth';
+import { stats } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePrefStore } from '@/lib/stores/pref-store';
-import { cn } from '../utils/cn';
+import { cn } from '@/lib/utils/cn';
+import humanFileSize from '@/lib/utils/humanizedFileSize';
 
 export interface Navigation {
     name: string;
@@ -42,6 +60,11 @@ const navigation = [
         name: 'Settings',
         icon: Settings,
     },
+    {
+        href: 'mailto:feedback@hushify.io',
+        name: 'Feedback',
+        icon: Mail,
+    },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -53,6 +76,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     const logoutFromAuthStore = useAuthStore(state => state.logout);
     const accessToken = useAuthStore(state => state.accessToken);
     const queryClient = useQueryClient();
+
+    const { data } = useQuery(['stats'], async () => await stats(accessToken!));
 
     const logout = useCallback(async () => {
         queryClient.clear();
@@ -87,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </Dialog.Trigger>
 
                     <Dialog.Portal>
-                        <Dialog.Overlay className='fixed inset-0 bg-gray-600/75 data-[state=open]:animate-overlayShow' />
+                        <Dialog.Overlay className='fixed inset-0 bg-gray-600/75 data-[state=open]:animate-overlayShow md:hidden' />
                         <Dialog.Content className='fixed inset-0 flex w-full max-w-xs data-[state=open]:animate-sidebarContentShow md:hidden'>
                             <div className='flex flex-1 flex-col bg-white'>
                                 <div className='flex h-16 shrink-0 items-center justify-between gap-3 px-4'>
@@ -143,6 +168,33 @@ export function AppShell({ children }: { children: ReactNode }) {
                                             />
                                             <span>Logout</span>
                                         </button>
+                                        {data?.success ? (
+                                            <div className='flex w-full items-center gap-2 px-3 py-2 text-center text-sm font-semibold text-gray-600'>
+                                                <PieChart
+                                                    className='h-5 w-5 shrink-0'
+                                                    aria-hidden='true'
+                                                />
+                                                <span>
+                                                    {humanFileSize(
+                                                        data.data.used,
+                                                        false,
+                                                        0
+                                                    )}{' '}
+                                                    /{' '}
+                                                    {humanFileSize(
+                                                        data.data.total,
+                                                        false,
+                                                        0
+                                                    )}{' '}
+                                                    (
+                                                    {(
+                                                        (data.data.used * 100) /
+                                                        data.data.total
+                                                    ).toFixed(2)}
+                                                    %)
+                                                </span>
+                                            </div>
+                                        ) : null}
                                     </nav>
                                     <div className='break-all bg-brand-600 px-3 py-2 font-semibold text-white'>
                                         {name}
@@ -168,8 +220,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <Menu className='h-5 w-5 shrink-0' aria-hidden='true' />
                 </button>
                 <div className='flex flex-1 items-center justify-between pr-4'>
-                    <h1 className='text-lg font-semibold text-gray-800 md:text-2xl'>
-                        Hushify Drive
+                    <h1 className='flex items-center gap-1 text-lg font-semibold text-gray-800 md:text-2xl'>
+                        <span>Hushify Drive</span>
+                        <span className='rounded bg-brand-600 py-px px-1 text-xs text-white md:text-sm'>
+                            Beta
+                        </span>
                     </h1>
                     <div className='hidden md:block'>{name}</div>
                 </div>
@@ -208,7 +263,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                             );
 
                             return sidebarOpen ? (
-                                LinkComp
+                                <Fragment key={item.name}>{LinkComp}</Fragment>
                             ) : (
                                 <Tooltip.Root key={item.name}>
                                     <Tooltip.Trigger asChild>
@@ -263,6 +318,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                                 </Tooltip.Portal>
                             </Tooltip.Root>
                         )}
+
+                        {data?.success && sidebarOpen ? (
+                            <div className='mt-auto p-2 text-center text-sm'>
+                                {humanFileSize(data.data.used, false, 0)} /{' '}
+                                {humanFileSize(data.data.total, false, 0)} (
+                                {(
+                                    (data.data.used * 100) /
+                                    data.data.total
+                                ).toFixed(2)}
+                                %)
+                            </div>
+                        ) : null}
                     </nav>
                 </div>
 

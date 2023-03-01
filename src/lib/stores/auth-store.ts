@@ -12,77 +12,58 @@ export type AuthStatus =
     | 'loggingout';
 
 export type AuthState = {
-    accessToken?: string;
-    masterKey?: string;
-    asymmetricEncPrivateKey?: string;
-    asymmetricEncPublicKey?: string;
-    signingPublicKey?: string;
-    signingPrivateKey?: string;
-    recoveryKeyMnemonic?: string;
+    accessToken: string | null;
+    masterKey: string | null;
+    privateKey: string | null;
+    publicKey: string | null;
+    signingPublicKey: string | null;
+    signingPrivateKey: string | null;
+    recoveryKeyMnemonic: string | null;
     status: AuthStatus;
 };
 
 export type AuthActions = {
-    setAccessToken: (accessToken: string | undefined) => void;
-    setMasterKey: (masterKey: string | undefined) => void;
-    setAsymmetricEncKeyPair: (
-        asymmetricEncPublicKey: string | undefined,
-        asymmetricEncPrivateKey: string | undefined
-    ) => void;
-    setSigningKeyPair: (
-        signingPublicKey: string | undefined,
-        signingPrivateKey: string | undefined
-    ) => void;
-    setRecoveryKeyMnemonic: (recoveryKeyMnemonic: string | undefined) => void;
-    setStatus: (status: AuthStatus) => void;
+    setData: (data: Partial<AuthState>) => void;
+    hasRequiredKeys: () => boolean;
+    isLoggedIn: () => boolean;
     logout: () => Promise<void>;
 };
 
 const initialAuthState: AuthState = {
-    accessToken: undefined,
-    masterKey: undefined,
+    accessToken: null,
+    masterKey: null,
 
-    asymmetricEncPrivateKey: undefined,
-    asymmetricEncPublicKey: undefined,
+    privateKey: null,
+    publicKey: null,
 
-    signingPublicKey: undefined,
-    signingPrivateKey: undefined,
+    signingPublicKey: null,
+    signingPrivateKey: null,
+
+    recoveryKeyMnemonic: null,
 
     status: 'unauthenticated',
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
     persist(
-        (set, _get) => ({
+        (set, get) => ({
             ...initialAuthState,
 
-            setAccessToken: (accessToken: string | undefined) =>
-                set({ accessToken }),
+            setData: data => set({ ...data }),
 
-            setMasterKey: (masterKey: string | undefined) => set({ masterKey }),
+            hasRequiredKeys: () => {
+                const { masterKey, privateKey, signingPrivateKey } = get();
+                return !!(masterKey && privateKey && signingPrivateKey);
+            },
 
-            setAsymmetricEncKeyPair: (
-                asymmetricEncPublicKey: string | undefined,
-                asymmetricEncPrivateKey: string | undefined
-            ) => set({ asymmetricEncPublicKey, asymmetricEncPrivateKey }),
-
-            setSigningKeyPair: (
-                signingPublicKey: string | undefined,
-                signingPrivateKey: string | undefined
-            ) => set({ signingPublicKey, signingPrivateKey }),
-
-            setRecoveryKeyMnemonic: recoveryKeyMnemonic =>
-                set({ recoveryKeyMnemonic }),
-
-            setStatus: (status: AuthStatus) => set({ status }),
+            isLoggedIn: () =>
+                get().hasRequiredKeys() && get().status === 'authenticated',
 
             logout: async () => {
                 set({ ...initialAuthState, status: 'loggingout' });
                 try {
                     await logout(apiRoutes.identity.logout);
-                } catch {
-                    /* empty */
-                }
+                } catch {}
                 set(initialAuthState);
             },
         }),
@@ -90,9 +71,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             name: 'auth-store',
             partialize: state => ({
                 masterKey: state.masterKey,
-                asymmetricEncPublicKey: state.asymmetricEncPublicKey,
-                asymmetricEncPrivateKey: state.asymmetricEncPrivateKey,
-                signingPublicKey: state.signingPublicKey,
+                privateKey: state.privateKey,
                 signingPrivateKey: state.signingPrivateKey,
                 status: state.status,
             }),

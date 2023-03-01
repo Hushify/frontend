@@ -13,13 +13,13 @@ export type ErrorResponse<T> = {
 export type ResponseMessage<T, U> = SuccessResponse<U> | ErrorResponse<T>;
 
 export async function getErrors<T>(
-    response: Response,
+    response: Response | undefined,
     defaultError = 'Something went wrong!'
 ): Promise<Errors<T>> {
-    const isJsonProblem = response.headers
+    const isJsonProblem = response?.headers
         .get('Content-Type')
         ?.includes('application/problem+json');
-    const data = isJsonProblem ? await response.json() : null;
+    const data = isJsonProblem ? await response?.json() : null;
     const responseErrors = data?.errors ?? {
         errors: [defaultError],
     };

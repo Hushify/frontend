@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { FieldError } from 'react-hook-form';
 
-import { cn } from '../utils/cn';
+import { cn } from '@/lib/utils/cn';
 
 export const InputWithLabel: ForwardRefExoticComponent<
     PropsWithChildren<

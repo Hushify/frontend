@@ -45,7 +45,7 @@ export default function ResetPassword() {
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
-            return;
+            return null;
         }
 
         const params = new URLSearchParams({

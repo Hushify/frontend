@@ -31,3 +31,10 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+**/public/workbox-*.js
+**/public/sw.js
+**/public/worker-*.js
+
+**/public/robots.txt
+**/public/sitemap*.xml

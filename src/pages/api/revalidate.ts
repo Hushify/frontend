@@ -18,14 +18,14 @@ export default async function revalidate(
         if (!isValidSignature) {
             const message = 'Invalid signature';
             res.status(401).json({ message });
-            return;
+            return null;
         }
 
         const slug = body.slug as { current: string } | undefined;
         if (!slug) {
             const message = 'No slug was provided';
             res.status(400).json({ message });
-            return;
+            return null;
         }
 
         const { _type: type } = body;
@@ -35,7 +35,7 @@ export default async function revalidate(
                 message: 'Invalid type',
                 type,
             });
-            return;
+            return null;
         }
 
         const baseRoute = '/blog';
@@ -50,7 +50,7 @@ export default async function revalidate(
 
         await res.revalidate(baseRoute);
         res.status(200).json({ message: 'Updated routes' });
-        return;
+        return null;
     } catch (err) {
         res.status(500).json({
             message: typeof err === 'string' ? err : (err as Error).message,
