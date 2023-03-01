@@ -77,8 +77,6 @@ export class StreamDecrypter {
         const worker = CryptoWorker.cryptoWorker;
 
         if (this.chunkIndex === 0) {
-            console.log(chunk.byteLength);
-
             const header = await worker.unpad(chunk, this.BLOCK_SIZE);
             this.state = await worker.streamingDecryptionInit(header, this.key);
             this.chunkIndex++;

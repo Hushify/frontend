@@ -145,7 +145,7 @@ export const UploadService = {
 
                             amzChunk.set(
                                 encryptedChunk,
-                                j + i === 0 ? paddedHeader.byteLength : 0
+                                j + (i === 0 ? paddedHeader.byteLength : 0)
                             );
                         }
 
