@@ -99,7 +99,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const queueForUpload = useUploadStore(state => state.queueForUpload);
 
     const onDrop = useCallback(
-        (acceptedFiles: FileWithPath[]) => {
+        async (acceptedFiles: FileWithPath[]) => {
             if (!data) {
                 return;
             }
@@ -176,7 +176,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 )?.id,
             }));
 
-            queueForUpload(
+            await queueForUpload(
                 // folderMap,
                 files,
                 data.currentFolderId,

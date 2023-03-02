@@ -92,17 +92,24 @@ export class StreamDecrypter {
         const worker = CryptoWorker.cryptoWorker;
 
         if (this.chunkIndex === 0) {
-            this.state = await worker.streamingDecryptionInit(chunk, this.key);
+            this.state = await worker.streamingDecryptionInit(
+                new Uint8Array(chunk),
+                this.key
+            );
             this.chunkIndex++;
             return;
         }
 
+        if (!this.state) {
+            throw new Error('Decryption failed, state missing.');
+        }
+
         const { message, tag } = await worker.streamingDecryptionPull(
-            this.state!,
-            chunk
+            this.state,
+            new Uint8Array(chunk)
         );
 
-        if (tag === undefined) {
+        if (tag === undefined || (tag !== 0 && tag !== 3)) {
             throw new Error('Decryption failed.');
         }
 

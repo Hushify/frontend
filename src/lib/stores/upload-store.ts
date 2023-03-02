@@ -1,9 +1,10 @@
+import { proxy } from 'comlink';
 import PQueue from 'p-queue';
 import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
 import CryptoWorker from '@/lib/services/comlink-crypto';
-import { UploadService } from '@/lib/services/upload';
+import UploadService from '@/lib/services/comlink-wrappers/comlink-uploader';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 const uploadQueue = new PQueue({
@@ -51,7 +52,7 @@ export type UploadActions = {
         currentFolderKey: string,
         accessToken: string,
         onUploadCb: () => void
-    ) => void;
+    ) => Promise<void>;
 
     setFileProperty: (
         trackingId: string,
@@ -72,7 +73,7 @@ const initialState: UploadState = {
     files: [],
 };
 
-export const useUploadStore = create<UploadState & UploadActions>()(
+export const useUploadStore = create<UploadState & UploadActions>(
     (set, get) => ({
         ...initialState,
 
@@ -105,17 +106,15 @@ export const useUploadStore = create<UploadState & UploadActions>()(
                 files: [...filesToAdd, ...get().files],
             });
 
+            const { setFileProperty } = get();
+
             for (const file of filesToAdd.filter(f => f.state === 'Pending')) {
                 uploadQueue.add(async () => {
-                    get().setFileProperty(
-                        file.trackingId,
-                        'state',
-                        'Uploading'
-                    );
+                    setFileProperty(file.trackingId, 'state', 'Uploading');
                     try {
                         const resp =
-                            await UploadService.prepareFileForMultipartUpload(
-                                file.abortController.signal,
+                            await UploadService.instance.prepareFileForMultipartUpload(
+                                // file.abortController.signal,
                                 parentFolderId,
                                 file.fileWithVersion.file.name,
                                 file.fileWithVersion.previousVersionId,
@@ -125,54 +124,51 @@ export const useUploadStore = create<UploadState & UploadActions>()(
                                 currentFolderKey
                             );
 
-                        await UploadService.uploadMultipart(
-                            file.abortController.signal,
+                        const onProgress = (uploaded: number) => {
+                            const currentFile = get().files.find(
+                                f => f.trackingId === file.trackingId
+                            );
+
+                            if (!currentFile) {
+                                return;
+                            }
+
+                            setFileProperty(
+                                file.trackingId,
+                                'progress',
+                                Math.min(
+                                    ((currentFile.uploaded + uploaded) * 100) /
+                                        currentFile.fileWithVersion.file.size,
+                                    100
+                                )
+                            );
+
+                            setFileProperty(
+                                file.trackingId,
+                                'uploaded',
+                                currentFile.uploaded + uploaded
+                            );
+                        };
+
+                        await UploadService.instance.uploadMultipart(
+                            // file.abortController.signal,
                             file.fileWithVersion.file,
                             resp.fileKey,
                             accessToken,
                             resp.data.fileId,
                             resp.data.parts,
-                            (uploaded: number) => {
-                                const currentFile = get().files.find(
-                                    f => f.trackingId === file.trackingId
-                                );
-                                if (!currentFile) {
-                                    return;
-                                }
-                                get().setFileProperty(
-                                    file.trackingId,
-                                    'progress',
-                                    Math.min(
-                                        ((currentFile.uploaded + uploaded) *
-                                            100) /
-                                            file.fileWithVersion.file.size,
-                                        100
-                                    )
-                                );
-                                get().setFileProperty(
-                                    file.trackingId,
-                                    'uploaded',
-                                    uploaded
-                                );
-                            }
+                            proxy(onProgress)
                         );
 
-                        get().setFileProperty(
-                            file.trackingId,
-                            'state',
-                            'Uploaded'
-                        );
+                        setFileProperty(file.trackingId, 'state', 'Uploaded');
 
-                        get().setFileProperty(file.trackingId, 'progress', 100);
+                        setFileProperty(file.trackingId, 'progress', 100);
 
                         onUploadCb();
                     } catch (error) {
-                        get().setFileProperty(
-                            file.trackingId,
-                            'state',
-                            'Failed'
-                        );
-                        get().setFileProperty(
+                        console.error(error);
+                        setFileProperty(file.trackingId, 'state', 'Failed');
+                        setFileProperty(
                             file.trackingId,
                             'error',
                             typeof error === 'string'
@@ -190,14 +186,14 @@ export const useUploadStore = create<UploadState & UploadActions>()(
             value: valueof<Omit<FileWithState, 'file'>>
         ) =>
             set(current => ({
-                files: current.files.map(f => {
-                    if (f.trackingId !== trackingId) {
-                        return f;
+                files: current.files.map((file: FileWithState) => {
+                    if (file.trackingId !== trackingId) {
+                        return file;
                     }
 
                     // @ts-ignore
-                    f[key] = value;
-                    return f;
+                    file[key] = value;
+                    return file;
                 }),
             })),
 
@@ -222,7 +218,7 @@ export const useUploadStore = create<UploadState & UploadActions>()(
                 currentFile.onUploadCb
             );
 
-            return set(current => ({
+            set(current => ({
                 files: current.files.filter(f => f.trackingId !== trackingId),
             }));
         },

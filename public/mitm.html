@@ -157,6 +157,7 @@
 
         // remove protocol
         let org = origin.replace(/(^\w+:|^)\/\//, '');
+        org = 'download.worker';
 
         // set the absolute pathname to the download url.
         data.url = new URL(`${scope + org}/${data.pathname}`).toString();

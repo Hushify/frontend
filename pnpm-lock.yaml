@@ -56,6 +56,7 @@ specifiers:
   eslint-plugin-tailwindcss: ^3.10.0
   eslint-plugin-unused-imports: ^2.0.0
   framer-motion: ^9.1.7
+  immer: ^9.0.19
   libsodium-wrappers-sumo: ^0.7.11
   lodash: ^4.17.21
   lucide-react: ^0.112.0
@@ -130,6 +131,7 @@ dependencies:
   comlink: 4.4.1
   date-fns: 2.29.3
   framer-motion: 9.1.7_biqbaboplfbrettd7655fr4n2y
+  immer: 9.0.19
   libsodium-wrappers-sumo: 0.7.11
   lodash: 4.17.21
   lucide-react: 0.112.0_react@18.2.0
@@ -158,7 +160,7 @@ dependencies:
   tailwindcss-animate: 1.0.5_tailwindcss@3.2.7
   web-streams-polyfill: 3.2.1
   zod: 3.20.6
-  zustand: 4.3.5_react@18.2.0
+  zustand: 4.3.5_immer@9.0.19+react@18.2.0
 
 devDependencies:
   '@babel/core': 7.21.0
@@ -9617,7 +9619,7 @@ packages:
     resolution: {integrity: sha512-oyu0m54SGCtzh6EClBVqDDlAYRz4jrVtKwQ7ZnsEmMI9HnzuZFj8QFwAY1M5uniIYACdGvv0PBWPF2kO0aNofA==}
     dev: false
 
-  /zustand/4.3.5_react@18.2.0:
+  /zustand/4.3.5_immer@9.0.19+react@18.2.0:
     resolution: {integrity: sha512-2iPUzfwx+g3f0PagOMz2vDO9mZzEp2puFpNe7vrAymVPOEIEUjCPkC4/zy84eAscxIWmTU4j9g6upXYkJdzEFQ==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
@@ -9629,6 +9631,7 @@ packages:
       react:
         optional: true
     dependencies:
+      immer: 9.0.19
       react: 18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false

@@ -1,10 +1,7 @@
 import axios from 'axios';
-import pQueue from 'p-queue';
 
 import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
-
-const queue = new pQueue({ concurrency: 5 });
 
 export const HEADER_SIZE = 24;
 export const AUTH_SIZE = 17;
@@ -25,7 +22,7 @@ export function getEncryptedSize(fileSize: number) {
 
 export const UploadService = {
     prepareFileForMultipartUpload: async (
-        signal: AbortSignal,
+        // signal: AbortSignal,
         parentFolderId: string,
         name: string,
         previousVersionId: string | undefined,
@@ -73,7 +70,7 @@ export const UploadService = {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
-                signal,
+                // signal,
             }
         )) as {
             data: {
@@ -87,7 +84,7 @@ export const UploadService = {
     },
 
     uploadMultipart: async (
-        signal: AbortSignal,
+        // signal: AbortSignal,
         file: File,
         fileKey: string,
         accessToken: string,
@@ -102,72 +99,220 @@ export const UploadService = {
 
         const eTags: { eTag: string; partNumber: number }[] = [];
 
-        try {
-            await Promise.all(
-                parts.map((part, i) =>
-                    queue.add(async () => {
-                        let amzChunk: Uint8Array =
-                            i === 0
-                                ? new Uint8Array(header)
-                                : new Uint8Array(0);
+        for (let i = 0; i < parts.length; i++) {
+            try {
+                const part = parts[i];
+                let amzChunk: Uint8Array | null = i === 0 ? header : null;
 
-                        for (
-                            let j = AMZ_MIN_CHUNK_SIZE * i;
-                            j < AMZ_MIN_CHUNK_SIZE * (i + 1);
-                            j += DEFAULT_CHUNK_SIZE
-                        ) {
-                            const chunk = file.slice(j, j + DEFAULT_CHUNK_SIZE);
+                for (
+                    let j = AMZ_MIN_CHUNK_SIZE * i;
+                    j < AMZ_MIN_CHUNK_SIZE * (i + 1);
+                    j += DEFAULT_CHUNK_SIZE
+                ) {
+                    const chunk = file.slice(j, j + DEFAULT_CHUNK_SIZE);
 
-                            if (chunk.size === 0) {
-                                break;
-                            }
+                    if (chunk.size === 0) {
+                        break;
+                    }
 
-                            const chunkArrayBuffer = await chunk.arrayBuffer();
-                            const encryptedChunk =
-                                await cryptoWorker.streamingEncryptionPush(
-                                    state,
-                                    new Uint8Array(chunkArrayBuffer),
-                                    i + 1 === parts.length &&
-                                        chunk.size < DEFAULT_CHUNK_SIZE
-                                );
-
-                            amzChunk = new Uint8Array([
-                                ...amzChunk,
-                                ...encryptedChunk,
-                            ]);
-
-                            onProgress(chunk.size);
-                        }
-
-                        const { headers, status } = await axios.put(
-                            part.preSignedUrl,
-                            amzChunk,
-                            {
-                                headers: {
-                                    'Content-Type': 'application/octet-stream',
-                                },
-                                signal,
-                            }
+                    const chunkArrayBuffer = await chunk.arrayBuffer();
+                    const encryptedChunk =
+                        await cryptoWorker.streamingEncryptionPush(
+                            state,
+                            new Uint8Array(chunkArrayBuffer),
+                            i + 1 === parts.length &&
+                                chunk.size < DEFAULT_CHUNK_SIZE
                         );
 
-                        if (status !== 200) {
-                            throw new Error('Upload failed');
-                        }
+                    if (amzChunk === null) {
+                        amzChunk = encryptedChunk;
+                    } else {
+                        amzChunk = new Uint8Array([
+                            ...amzChunk,
+                            ...encryptedChunk,
+                        ]);
+                    }
 
-                        if (!headers.etag) {
-                            throw new Error('Missing eTag');
-                        }
+                    onProgress(chunk.size);
+                }
 
-                        eTags.push({
-                            eTag: headers.etag.replace(/"/g, ''),
-                            partNumber: part.partNumber,
-                        });
-                    })
-                )
+                if (amzChunk === null) {
+                    throw new Error('Encryption failed.');
+                }
+
+                const { headers, status } = await axios.put(
+                    part.preSignedUrl,
+                    amzChunk,
+                    {
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                        },
+                        // signal,
+                    }
+                );
+
+                if (status !== 200) {
+                    throw new Error('Upload failed');
+                }
+
+                if (!headers.etag) {
+                    throw new Error('Missing eTag');
+                }
+
+                eTags.push({
+                    eTag: headers.etag.replace(/"/g, ''),
+                    partNumber: part.partNumber,
+                });
+            } catch (error) {
+                console.log(error);
+                throw error;
+            }
+        }
+
+        await axios.post(
+            `${apiRoutes.drive.multipart.commit}/${fileId}`,
+            {
+                parts: eTags,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+    },
+
+    uploadMultipartDbg: async (
+        file: File,
+        fileKey: string,
+        accessToken: string,
+        fileId: string,
+        parts: { partNumber: number; preSignedUrl: string }[],
+        onProgress: (uploaded: number) => void
+    ) => {
+        const cryptoWorker = CryptoWorker.cryptoWorker;
+        const { state, header } = await cryptoWorker.streamingEncryptionInit(
+            fileKey
+        );
+
+        const dstate = await cryptoWorker.streamingDecryptionInit(
+            header,
+            fileKey
+        );
+
+        const eTags: { eTag: string; partNumber: number }[] = [];
+
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            let amzChunk: Uint8Array | null = i === 0 ? header : null;
+
+            for (
+                let j = AMZ_MIN_CHUNK_SIZE * i;
+                j < AMZ_MIN_CHUNK_SIZE * (i + 1);
+                j += DEFAULT_CHUNK_SIZE
+            ) {
+                const chunk = file.slice(j, j + DEFAULT_CHUNK_SIZE);
+
+                if (chunk.size === 0) {
+                    break;
+                }
+
+                const chunkArrayBuffer = await chunk.arrayBuffer();
+                const encryptedChunk =
+                    await cryptoWorker.streamingEncryptionPush(
+                        state,
+                        new Uint8Array(chunkArrayBuffer),
+                        i + 1 === parts.length &&
+                            chunk.size < DEFAULT_CHUNK_SIZE
+                    );
+
+                if (amzChunk === null) {
+                    amzChunk = encryptedChunk;
+                } else {
+                    amzChunk = new Uint8Array([...amzChunk, ...encryptedChunk]);
+                }
+
+                onProgress(chunk.size);
+            }
+
+            if (amzChunk === null) {
+                throw new Error('Encryption failed.');
+            }
+
+            if (i === 0) {
+                for (
+                    let index = 0;
+                    index < AMZ_MIN_CHUNK_SIZE / (64 * 1024);
+                    index++
+                ) {
+                    const { message, tag } =
+                        await cryptoWorker.streamingDecryptionPull(
+                            dstate,
+                            amzChunk.slice(
+                                24 + (64 * 1024 + 17) * index,
+                                24 + (64 * 1024 + 17) * (index + 1)
+                            )
+                        );
+
+                    console.log({ message, tag });
+                }
+            }
+
+            if (i === 1) {
+                const { message, tag } =
+                    await cryptoWorker.streamingDecryptionPull(
+                        dstate,
+                        amzChunk.slice(0, 64 * 1024 + 17)
+                    );
+
+                console.log({ message, tag });
+            }
+
+            // if (i === 1) {
+            //     for (let index = 0; index < 4; index++) {
+            //         console.log(
+            //             amzChunk.slice(
+            //                 (64 * 1024 + 17) * index,
+            //                 (64 * 1024 + 17) * (index + 1)
+            //             )
+            //         );
+
+            //         const { message, tag } =
+            //             await cryptoWorker.streamingDecryptionPull(
+            //                 dstate,
+            //                 amzChunk.slice(
+            //                     (64 * 1024 + 17) * index,
+            //                     (64 * 1024 + 17) * (index + 1)
+            //                 )
+            //             );
+
+            //         console.log({ message, tag });
+            //     }
+            // }
+
+            const { headers, status } = await axios.put(
+                part.preSignedUrl,
+                amzChunk,
+                {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                    },
+                }
             );
-        } catch (error) {
-            console.log(error);
-            throw error;
+
+            if (status !== 200) {
+                throw new Error('Upload failed');
+            }
+
+            if (!headers.etag) {
+                throw new Error('Missing eTag');
+            }
+
+            eTags.push({
+                eTag: headers.etag.replace(/"/g, ''),
+                partNumber: part.partNumber,
+            });
         }
 
         await axios.post(

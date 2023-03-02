@@ -45,6 +45,7 @@
         "comlink": "^4.4.1",
         "date-fns": "^2.29.3",
         "framer-motion": "^9.1.7",
+        "immer": "^9.0.19",
         "libsodium-wrappers-sumo": "^0.7.11",
         "lodash": "^4.17.21",
         "lucide-react": "^0.112.0",
