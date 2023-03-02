@@ -805,9 +805,9 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                     {status === 'success' &&
                                         data.folders.length === 0 &&
                                         data.files.length === 0 && (
-                                            <div className='absolute inset-0 -left-48 flex items-center justify-center'>
+                                            <div className='absolute inset-0 flex items-center justify-center md:-left-48'>
                                                 <Image
-                                                    className='aspect-square w-1/4'
+                                                    className='aspect-square w-1/2 md:w-1/4'
                                                     src={undrawFileManager}
                                                     alt='File Manager'
                                                 />
