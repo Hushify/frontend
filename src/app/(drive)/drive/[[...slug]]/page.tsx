@@ -550,35 +550,52 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     >('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-    const folders = useMemo(
-        () =>
-            data
-                ? orderBy(
-                      data.folders,
-                      f =>
-                          Object.keys(f.metadata).includes(sortKey)
-                              ? f.metadata[sortKey as keyof FolderMetadata]
-                              : f.metadata.name,
-                      [sortOrder]
-                  )
-                : [],
-        [data, sortKey, sortOrder]
-    );
+    const folders = useMemo(() => {
+        if (!data) {
+            return [];
+        }
+        if (sortKey === 'name') {
+            return data.folders.sort((a, b) => {
+                return (
+                    a.metadata.name.localeCompare(b.metadata.name, 'en', {
+                        numeric: true,
+                    }) * (sortOrder === 'asc' ? 1 : -1)
+                );
+            });
+        }
+        return orderBy(
+            data.folders,
+            f =>
+                Object.keys(f.metadata).includes(sortKey)
+                    ? f.metadata[sortKey as keyof FolderMetadata]
+                    : f.metadata.name,
+            [sortOrder]
+        );
+    }, [data, sortKey, sortOrder]);
 
-    const files = useMemo(
-        () =>
-            data
-                ? orderBy(
-                      data.files,
-                      f =>
-                          Object.keys(f.metadata).includes(sortKey)
-                              ? f.metadata[sortKey as keyof FileMetadata]
-                              : f.metadata.name,
-                      [sortOrder]
-                  )
-                : [],
-        [data, sortKey, sortOrder]
-    );
+    const files = useMemo(() => {
+        if (!data) {
+            return [];
+        }
+
+        if (sortKey === 'name') {
+            return data.files.sort((a, b) => {
+                return (
+                    a.metadata.name.localeCompare(b.metadata.name, 'en', {
+                        numeric: true,
+                    }) * (sortOrder === 'asc' ? 1 : -1)
+                );
+            });
+        }
+        return orderBy(
+            data.files,
+            f =>
+                Object.keys(f.metadata).includes(sortKey)
+                    ? f.metadata[sortKey as keyof FileMetadata]
+                    : f.metadata.name,
+            [sortOrder]
+        );
+    }, [data, sortKey, sortOrder]);
 
     const divRef = useRef<HTMLDivElement>(null);
     const clearSelection = useCallback(() => setSelectedNodes([]), []);
