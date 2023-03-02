@@ -10,7 +10,7 @@ export function DriveToolbar({
 }) {
     return (
         <Toolbar.Root
-            className='flex w-full gap-2 overflow-x-auto border-b border-b-gray-300 p-2'
+            className='flex w-full gap-2 overflow-x-auto border-b border-b-gray-300 py-2 px-5'
             aria-label='Toolbar'>
             {items.map(item => {
                 if (item.type === 'separator') {

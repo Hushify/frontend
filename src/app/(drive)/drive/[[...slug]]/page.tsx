@@ -639,13 +639,16 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                         )}
                     </div>
 
-                    <DriveToolbar items={menuItems} />
+                    <div className='w-screen'>
+                        <DriveToolbar items={menuItems} />
 
-                    <Breadcrumbs
-                        items={
-                            data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])
-                        }
-                    />
+                        <Breadcrumbs
+                            items={
+                                data?.breadcrumbs ??
+                                ([] as BreadcrumbDecrypted[])
+                            }
+                        />
+                    </div>
                 </div>
 
                 <ScrollArea.Root

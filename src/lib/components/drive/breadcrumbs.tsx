@@ -11,7 +11,7 @@ type BreadcrumbsProps = {
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     return (
-        <ul className='flex items-center overflow-x-auto py-2 px-6 text-gray-600'>
+        <ul className='flex w-full items-center overflow-x-auto border-b border-b-gray-300 py-2 px-6 text-gray-600'>
             <li>
                 <Link
                     href={clientRoutes.drive}
@@ -32,7 +32,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                                 'text-brand-600': idx === items.length - 1,
                             }
                         )}>
-                        <Folder className='h-4 w-4' />
+                        <Folder
+                            className={cn('h-4 w-4', {
+                                'fill-brand-600': idx === items.length - 1,
+                            })}
+                        />
                         <span>{item.metadata.name}</span>
                     </Link>
                 </li>
