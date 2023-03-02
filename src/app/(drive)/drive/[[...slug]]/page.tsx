@@ -10,9 +10,14 @@ import {
 } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Icon } from '@fluentui/react/lib/Icon';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+    getFileTypeIconProps,
+    initializeFileTypeIcons,
+} from '@uifabric/file-type-icons';
 import { downloadZip } from 'client-zip';
 import { format, isToday } from 'date-fns';
 import { orderBy } from 'lodash';
@@ -20,7 +25,6 @@ import {
     ChevronUp,
     ChevronsUpDown,
     Download,
-    File,
     Folder,
     Loader,
     Pencil,
@@ -58,6 +62,8 @@ import { cn } from '@/lib/utils/cn';
 import humanFileSize from '@/lib/utils/humanizedFileSize';
 import { streamSaver } from '@/lib/utils/stream-saver';
 import StreamSlicer, { StreamDecrypter } from '@/lib/utils/stream-slicer';
+
+initializeFileTypeIcons();
 
 function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const router = useRouter();
@@ -332,30 +338,53 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             size: node.metadata.size,
         });
 
-        responseStream.body
-            .pipeThrough(new TransformStream(new StreamSlicer()))
-            .pipeThrough(new TransformStream(new StreamDecrypter(node.fileKey)))
-            .pipeTo(stream);
+        window.onunload = () => {
+            stream.abort();
+        };
+
+        let done = false;
+
+        window.onbeforeunload = evt => {
+            if (!done) {
+                evt.returnValue = `Are you sure you want to leave?`;
+            }
+        };
+
+        try {
+            await responseStream.body
+                .pipeThrough(new TransformStream(new StreamSlicer()))
+                .pipeThrough(
+                    new TransformStream(new StreamDecrypter(node.fileKey))
+                )
+                .pipeTo(stream);
+        } catch (error) {
+            throw error;
+        } finally {
+            done = true;
+        }
     };
 
     async function* downloadGenerator(nodes: FileNodeDecrypted[]) {
         for (const node of nodes)
             yield {
-                input: await fetch(node.fileUrl).then(response =>
-                    response.body
-                        ?.pipeThrough(new TransformStream(new StreamSlicer()))
+                input: await fetch(node.fileUrl).then(response => {
+                    if (!response.body) {
+                        return response;
+                    }
+                    return response.body
+                        .pipeThrough(new TransformStream(new StreamSlicer()))
                         .pipeThrough(
                             new TransformStream(
                                 new StreamDecrypter(node.fileKey)
                             )
-                        )
-                ),
+                        );
+                }),
                 name: node.metadata.name,
             };
     }
 
-    const downloadMultiple = useCallback(() => {
-        const { body } = downloadZip(
+    const downloadMultiple = useCallback(async () => {
+        const zip = downloadZip(
             downloadGenerator(
                 selectedNodes
                     .filter(f => f.type === 'file')
@@ -365,7 +394,30 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
         const stream = streamSaver.createWriteStream('download.zip');
 
-        body?.pipeTo(stream);
+        window.onunload = () => {
+            stream.abort();
+        };
+
+        let done = false;
+
+        window.onbeforeunload = evt => {
+            if (!done) {
+                evt.returnValue = `Are you sure you want to leave?`;
+            }
+        };
+
+        if (!zip.body) {
+            done = true;
+            throw new Error('Download failed!');
+        }
+
+        try {
+            await zip.body.pipeTo(stream);
+        } catch (error) {
+            throw error;
+        } finally {
+            done = true;
+        }
     }, [selectedNodes]);
 
     const menuItems: (MenuItem | MenuSeparator)[] = useMemo(() => {
@@ -417,17 +469,24 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             {
                 type: 'item',
                 name: 'Download',
-                action: () => {
+                action: async () => {
                     if (selectedNodes.length === 1) {
-                        const urls = selectedNodes
-                            .filter(n => n.type === 'file')
-                            .map(n => (n.node as FileNodeDecrypted).fileUrl);
-                        // downloadMultiple(urls);
-                        downloadFile(
-                            selectedNodes[0].node as FileNodeDecrypted
+                        await toast.promise(
+                            downloadFile(
+                                selectedNodes[0].node as FileNodeDecrypted
+                            ),
+                            {
+                                success: 'Downloaded!',
+                                error: 'Download failed!',
+                                loading: 'Downloading...',
+                            }
                         );
                     } else {
-                        downloadMultiple();
+                        await toast.promise(downloadMultiple(), {
+                            success: 'Downloaded!',
+                            error: 'Download failed!',
+                            loading: 'Downloading...',
+                        });
                     }
                 },
                 icon: Download,
@@ -834,13 +893,13 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                                 )
                                                             }>
                                                             <div className='flex items-center gap-2'>
-                                                                <Folder className='h-4 w-4 shrink-0' />
+                                                                <Folder className='h-5 w-5 shrink-0 fill-brand-600 text-brand-600' />
                                                                 <Link
                                                                     onClick={e =>
                                                                         e.stopPropagation()
                                                                     }
                                                                     href={`${clientRoutes.drive}/${folder.id}`}
-                                                                    className='truncate text-sm'>
+                                                                    className='max-w-[8rem] truncate text-sm md:max-w-full'>
                                                                     {
                                                                         folder
                                                                             .metadata
@@ -963,8 +1022,22 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                         </td>
                                                         <td className='max-w-[300px] whitespace-nowrap py-2 text-left'>
                                                             <div className='flex items-center gap-2'>
-                                                                <File className='h-4 w-4 shrink-0' />
-                                                                <span className='truncate text-sm'>
+                                                                <Icon
+                                                                    className='h-5 w-5 shrink-0'
+                                                                    {...getFileTypeIconProps(
+                                                                        {
+                                                                            extension:
+                                                                                file.metadata.name
+                                                                                    .split(
+                                                                                        '.'
+                                                                                    )
+                                                                                    .at(
+                                                                                        -1
+                                                                                    ),
+                                                                        }
+                                                                    )}
+                                                                />
+                                                                <span className='max-w-[8rem] truncate text-sm md:max-w-full'>
                                                                     {
                                                                         file
                                                                             .metadata
@@ -996,8 +1069,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                             {humanFileSize(
                                                                 file.metadata
                                                                     .size,
-                                                                true,
-                                                                0
+                                                                true
                                                             )}
                                                         </td>
                                                     </tr>
@@ -1011,12 +1083,12 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                         <DriveContextMenu items={menuItems} />
                     </ContextMenu.Root>
                     <ScrollArea.Scrollbar
-                        className='duration-[160ms] flex touch-none select-none bg-gray-200 p-0.5 transition-colors ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
                         orientation='vertical'>
                         <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
                     </ScrollArea.Scrollbar>
                     <ScrollArea.Scrollbar
-                        className='duration-[160ms] flex touch-none select-none bg-gray-200 p-0.5 transition-colors ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
                         orientation='horizontal'>
                         <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
                     </ScrollArea.Scrollbar>

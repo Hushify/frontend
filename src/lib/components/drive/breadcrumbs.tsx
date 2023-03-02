@@ -11,7 +11,7 @@ type BreadcrumbsProps = {
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     return (
-        <ul className='flex items-center py-2 px-6 text-gray-600'>
+        <ul className='flex items-center overflow-x-auto py-2 px-6 text-gray-600'>
             <li>
                 <Link
                     href={clientRoutes.drive}
@@ -27,7 +27,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                     <Link
                         href={`${clientRoutes.drive}/${item.id}`}
                         className={cn(
-                            'flex items-center gap-1 before:mx-2 before:text-gray-400 before:content-["/"]',
+                            'flex shrink-0 items-center gap-1 before:mx-2 before:text-gray-400 before:content-["/"]',
                             {
                                 'text-brand-600': idx === items.length - 1,
                             }

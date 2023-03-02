@@ -330,13 +330,14 @@ export const CryptoService = {
             state,
             data,
             null,
-            isFinal
-                ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
-                : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+            isFinal ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL : 0
         );
     },
 
-    streamingDecryptionInit: async (header: Uint8Array, key: string) => {
+    streamingDecryptionInit: async (
+        header: Uint8Array,
+        key: string
+    ): Promise<sodium.StateAddress> => {
         await sodium.ready;
         return sodium.crypto_secretstream_xchacha20poly1305_init_pull(
             header,
@@ -349,11 +350,7 @@ export const CryptoService = {
         cipher: Uint8Array
     ) => {
         await sodium.ready;
-        return sodium.crypto_secretstream_xchacha20poly1305_pull(
-            state,
-            cipher,
-            null
-        );
+        return sodium.crypto_secretstream_xchacha20poly1305_pull(state, cipher);
     },
 
     pad: async (data: Uint8Array, blockSize: number) => {

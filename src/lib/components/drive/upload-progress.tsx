@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils/cn';
 export function UploadProgressBox() {
     const files = useUploadStore(state => state.files);
     const removeFile = useUploadStore(state => state.removeFile);
+    const retry = useUploadStore(state => state.retry);
     const clear = useUploadStore(state => state.clear);
 
     if (files.length <= 0) return null;
@@ -80,9 +81,19 @@ export function UploadProgressBox() {
                                                 onClick={() => {
                                                     if (
                                                         fileWithState.state ===
-                                                        'Uploaded'
+                                                        ('Uploaded' ||
+                                                            'Cancelled')
                                                     ) {
                                                         removeFile(
+                                                            fileWithState.trackingId
+                                                        );
+                                                    }
+
+                                                    if (
+                                                        fileWithState.state ===
+                                                        'Failed'
+                                                    ) {
+                                                        retry(
                                                             fileWithState.trackingId
                                                         );
                                                     }
