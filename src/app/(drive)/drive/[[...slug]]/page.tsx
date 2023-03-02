@@ -494,10 +494,6 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 variant: 'primary',
                 disabled: false,
             },
-            {
-                type: 'separator',
-                id: '1',
-            },
         ];
 
         if (selectedNodes.length == 1) {
@@ -511,6 +507,11 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 disabled: false,
             });
         }
+
+        items.push({
+            type: 'separator',
+            id: '1',
+        });
 
         items.push({
             type: 'item',
@@ -639,16 +640,13 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                         )}
                     </div>
 
-                    <div className='w-screen'>
-                        <DriveToolbar items={menuItems} />
+                    <DriveToolbar items={menuItems} />
 
-                        <Breadcrumbs
-                            items={
-                                data?.breadcrumbs ??
-                                ([] as BreadcrumbDecrypted[])
-                            }
-                        />
-                    </div>
+                    <Breadcrumbs
+                        items={
+                            data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])
+                        }
+                    />
                 </div>
 
                 <ScrollArea.Root

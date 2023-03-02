@@ -29,11 +29,11 @@ export function DriveContextMenu({
                             className={cn(
                                 'relative flex select-none items-center gap-1 rounded-sm py-1.5 pr-1 pl-6 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
                                 {
-                                    'text-red-600 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-600':
+                                    'text-red-700 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-700':
                                         item.variant === 'danger',
-                                    'text-gray-600 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-600':
+                                    'text-gray-700 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-700':
                                         item.variant === 'secondary',
-                                    'text-brand-600 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-600':
+                                    'text-brand-700 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-700':
                                         !item.variant ||
                                         item.variant === 'primary',
                                 }
