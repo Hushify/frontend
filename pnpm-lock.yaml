@@ -2,7 +2,6 @@ lockfileVersion: 5.4
 
 specifiers:
   '@babel/core': ^7.21.0
-  '@builder.io/partytown': ^0.7.5
   '@fluentui/react': ^8.106.2
   '@headlessui/react': ^1.7.12
   '@hookform/resolvers': ^2.9.11
@@ -165,7 +164,6 @@ dependencies:
 
 devDependencies:
   '@babel/core': 7.21.0
-  '@builder.io/partytown': 0.7.5
   '@ianvs/prettier-plugin-sort-imports': 3.7.1_prettier@2.8.4
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.7
   '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
@@ -454,11 +452,6 @@ packages:
       '@babel/helper-string-parser': 7.19.4
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
-
-  /@builder.io/partytown/0.7.5:
-    resolution: {integrity: sha512-Zbr2Eo0AQ4yzmQr/36/h+6LKjmdVBB3Q5cGzO6rtlIKB/IOpbQVUZW+XAnhpJmJr9sIF97OZjgbhG9k7Sjn4yw==}
-    hasBin: true
-    dev: true
 
   /@codemirror/autocomplete/6.4.0:
     resolution: {integrity: sha512-HLF2PnZAm1s4kGs30EiqKMgD7XsYaQ0XJnMR0rofEWQ5t5D60SfqpDIkIh1ze5tiEbyUWm8+VJ6W1/erVvBMIA==}
