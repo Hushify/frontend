@@ -8,6 +8,7 @@ import {
     useRef,
     useState,
 } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@fluentui/react/lib/Icon';
@@ -36,6 +37,7 @@ import { FileWithPath, useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
 import useMeasure from 'react-use-measure';
 
+import undrawFileManager from '@/lib/assets/undraw_file_manager.svg';
 import Breadcrumbs from '@/lib/components/drive/breadcrumbs';
 import { DriveContextMenu } from '@/lib/components/drive/context-menu';
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
@@ -296,12 +298,8 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             }
         },
         onSuccess: () => {
-            toast.success('Deleted!');
             setSelectedNodes([]);
             refetch();
-        },
-        onError: () => {
-            toast.error('Deletion failed!');
         },
     });
 
@@ -517,14 +515,21 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             type: 'item',
             name: 'Delete',
             action: () =>
-                deleteNodesMutation.mutateAsync({
-                    folderIds: selectedNodes
-                        .filter(n => n.type === 'folder')
-                        .map(n => n.node.id),
-                    fileIds: selectedNodes
-                        .filter(n => n.type === 'file')
-                        .map(n => n.node.id),
-                }),
+                toast.promise(
+                    deleteNodesMutation.mutateAsync({
+                        folderIds: selectedNodes
+                            .filter(n => n.type === 'folder')
+                            .map(n => n.node.id),
+                        fileIds: selectedNodes
+                            .filter(n => n.type === 'file')
+                            .map(n => n.node.id),
+                    }),
+                    {
+                        error: 'Failed to delete!',
+                        loading: 'Deleting...',
+                        success: 'Deleted!',
+                    }
+                ),
             icon: Trash2,
             textOnly: false,
             variant: 'danger',
@@ -797,287 +802,301 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                             </th>
                                         </tr>
                                     </thead>
-                                    {status === 'success' && (
-                                        <tbody className='divide-y divide-gray-200'>
-                                            {folders.map(folder => {
-                                                const isSelected =
-                                                    selectedNodes.findIndex(
-                                                        n =>
-                                                            n.node.id ===
-                                                            folder.id
-                                                    ) >= 0;
+                                    {status === 'success' &&
+                                        data.folders.length === 0 &&
+                                        data.files.length === 0 && (
+                                            <div className='absolute inset-0 -left-48 flex items-center justify-center'>
+                                                <Image
+                                                    className='aspect-square w-1/4'
+                                                    src={undrawFileManager}
+                                                    alt='File Manager'
+                                                />
+                                            </div>
+                                        )}
+                                    {status === 'success' &&
+                                        (data.folders.length ||
+                                            data.files.length > 0) > 0 && (
+                                            <tbody className='divide-y divide-gray-200'>
+                                                {folders.map(folder => {
+                                                    const isSelected =
+                                                        selectedNodes.findIndex(
+                                                            n =>
+                                                                n.node.id ===
+                                                                folder.id
+                                                        ) >= 0;
 
-                                                return (
-                                                    <tr
-                                                        key={folder.id}
-                                                        className={cn(
-                                                            'text-gray-900',
-                                                            {
-                                                                'bg-gray-300':
-                                                                    isSelected,
-                                                                'hover:bg-gray-200':
-                                                                    !isSelected,
+                                                    return (
+                                                        <tr
+                                                            key={folder.id}
+                                                            className={cn(
+                                                                'text-gray-900',
+                                                                {
+                                                                    'bg-gray-300':
+                                                                        isSelected,
+                                                                    'hover:bg-gray-200':
+                                                                        !isSelected,
+                                                                }
+                                                            )}
+                                                            onClick={() =>
+                                                                setSelectedNodes(
+                                                                    prev => {
+                                                                        if (
+                                                                            isSelected
+                                                                        ) {
+                                                                            return prev.filter(
+                                                                                n =>
+                                                                                    n
+                                                                                        .node
+                                                                                        .id !==
+                                                                                    folder.id
+                                                                            );
+                                                                        }
+
+                                                                        return [
+                                                                            ...prev,
+                                                                            {
+                                                                                node: folder as FolderNodeDecrypted,
+                                                                                type: 'folder',
+                                                                            },
+                                                                        ];
+                                                                    }
+                                                                )
                                                             }
-                                                        )}
-                                                        onClick={() =>
-                                                            setSelectedNodes(
-                                                                prev => {
-                                                                    if (
-                                                                        isSelected
-                                                                    ) {
-                                                                        return prev.filter(
-                                                                            n =>
-                                                                                n
-                                                                                    .node
-                                                                                    .id !==
-                                                                                folder.id
-                                                                        );
-                                                                    }
+                                                            onContextMenu={() =>
+                                                                setSelectedNodes(
+                                                                    prev => {
+                                                                        if (
+                                                                            isSelected
+                                                                        ) {
+                                                                            return prev;
+                                                                        }
 
-                                                                    return [
-                                                                        ...prev,
-                                                                        {
-                                                                            node: folder as FolderNodeDecrypted,
-                                                                            type: 'folder',
-                                                                        },
-                                                                    ];
-                                                                }
-                                                            )
-                                                        }
-                                                        onContextMenu={() =>
-                                                            setSelectedNodes(
-                                                                prev => {
-                                                                    if (
-                                                                        isSelected
-                                                                    ) {
-                                                                        return prev;
+                                                                        return [
+                                                                            {
+                                                                                node: folder as FolderNodeDecrypted,
+                                                                                type: 'folder',
+                                                                            },
+                                                                        ];
                                                                     }
-
-                                                                    return [
-                                                                        {
-                                                                            node: folder as FolderNodeDecrypted,
-                                                                            type: 'folder',
-                                                                        },
-                                                                    ];
-                                                                }
-                                                            )
-                                                        }>
-                                                        <td className='py-2 text-center'>
-                                                            <label
-                                                                htmlFor={`checkbox-${folder.id}`}
-                                                                className='sr-only'>
-                                                                Select
-                                                            </label>
-                                                            <input
-                                                                onClick={e =>
-                                                                    e.stopPropagation()
-                                                                }
-                                                                onChange={() =>
-                                                                    selectNode(
-                                                                        folder,
-                                                                        'folder'
-                                                                    )
-                                                                }
-                                                                checked={
-                                                                    isSelected
-                                                                }
-                                                                className='-mt-1 cursor-pointer rounded'
-                                                                type='checkbox'
-                                                                id={`checkbox-${folder.id}`}
-                                                            />
-                                                        </td>
-                                                        <td
-                                                            className='max-w-[300px] whitespace-nowrap py-2 text-left'
-                                                            onDoubleClick={() =>
-                                                                router.push(
-                                                                    `${clientRoutes.drive}/${folder.id}`
                                                                 )
                                                             }>
-                                                            <div className='flex items-center gap-2'>
-                                                                <Folder className='h-5 w-5 shrink-0 fill-brand-600 text-brand-600' />
-                                                                <Link
+                                                            <td className='py-2 text-center'>
+                                                                <label
+                                                                    htmlFor={`checkbox-${folder.id}`}
+                                                                    className='sr-only'>
+                                                                    Select
+                                                                </label>
+                                                                <input
                                                                     onClick={e =>
                                                                         e.stopPropagation()
                                                                     }
-                                                                    href={`${clientRoutes.drive}/${folder.id}`}
-                                                                    className='max-w-[8rem] truncate text-sm md:max-w-full'>
-                                                                    {
-                                                                        folder
-                                                                            .metadata
-                                                                            .name
+                                                                    onChange={() =>
+                                                                        selectNode(
+                                                                            folder,
+                                                                            'folder'
+                                                                        )
                                                                     }
-                                                                </Link>
-                                                            </div>
-                                                        </td>
-                                                        <td className='py-2 text-left text-sm'>
-                                                            {isToday(
-                                                                new Date(
-                                                                    folder.metadata.modified
-                                                                )
-                                                            )
-                                                                ? format(
-                                                                      new Date(
-                                                                          folder.metadata.modified
-                                                                      ),
-                                                                      'h:mm:ss b'
-                                                                  )
-                                                                : format(
-                                                                      new Date(
-                                                                          folder.metadata.modified
-                                                                      ),
-                                                                      'MMM d, y, h:mm b'
-                                                                  )}
-                                                        </td>
-                                                        <td className='hidden py-2 text-sm md:table-cell'>
-                                                            -
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                            {files.map(file => {
-                                                const isSelected =
-                                                    selectedNodes.findIndex(
-                                                        n =>
-                                                            n.node.id ===
-                                                            file.id
-                                                    ) >= 0;
-
-                                                return (
-                                                    <tr
-                                                        key={file.id}
-                                                        className={cn(
-                                                            'text-gray-900',
-                                                            {
-                                                                'bg-gray-300':
-                                                                    isSelected,
-                                                                'hover:bg-gray-200':
-                                                                    !isSelected,
-                                                            }
-                                                        )}
-                                                        onClick={() =>
-                                                            setSelectedNodes(
-                                                                prev => {
-                                                                    if (
+                                                                    checked={
                                                                         isSelected
-                                                                    ) {
-                                                                        return prev.filter(
-                                                                            n =>
-                                                                                n
-                                                                                    .node
-                                                                                    .id !==
-                                                                                file.id
-                                                                        );
                                                                     }
-
-                                                                    return [
-                                                                        ...prev,
-                                                                        {
-                                                                            node: file as FileNodeDecrypted,
-                                                                            type: 'file',
-                                                                        },
-                                                                    ];
-                                                                }
-                                                            )
-                                                        }
-                                                        onContextMenu={() =>
-                                                            setSelectedNodes(
-                                                                prev => {
-                                                                    if (
-                                                                        isSelected
-                                                                    ) {
-                                                                        return prev;
-                                                                    }
-
-                                                                    return [
-                                                                        {
-                                                                            node: file as FileNodeDecrypted,
-                                                                            type: 'file',
-                                                                        },
-                                                                    ];
-                                                                }
-                                                            )
-                                                        }>
-                                                        <td className='py-2 text-center'>
-                                                            <label
-                                                                htmlFor={`checkbox-${file.id}`}
-                                                                className='sr-only'>
-                                                                Select
-                                                            </label>
-                                                            <input
-                                                                onClick={e =>
-                                                                    e.stopPropagation()
-                                                                }
-                                                                onChange={() =>
-                                                                    selectNode(
-                                                                        file,
-                                                                        'file'
-                                                                    )
-                                                                }
-                                                                checked={
-                                                                    isSelected
-                                                                }
-                                                                className='-mt-1 cursor-pointer rounded'
-                                                                type='checkbox'
-                                                                id={`checkbox-${file.id}`}
-                                                            />
-                                                        </td>
-                                                        <td className='max-w-[300px] whitespace-nowrap py-2 text-left'>
-                                                            <div className='flex items-center gap-2'>
-                                                                <Icon
-                                                                    className='h-5 w-5 shrink-0'
-                                                                    {...getFileTypeIconProps(
-                                                                        {
-                                                                            extension:
-                                                                                file.metadata.name
-                                                                                    .split(
-                                                                                        '.'
-                                                                                    )
-                                                                                    .at(
-                                                                                        -1
-                                                                                    ),
-                                                                        }
-                                                                    )}
+                                                                    className='-mt-1 cursor-pointer rounded'
+                                                                    type='checkbox'
+                                                                    id={`checkbox-${folder.id}`}
                                                                 />
-                                                                <span className='max-w-[8rem] truncate text-sm md:max-w-full'>
-                                                                    {
-                                                                        file
-                                                                            .metadata
-                                                                            .name
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className='py-2 text-left text-sm'>
-                                                            {isToday(
-                                                                new Date(
-                                                                    file.metadata.modified
+                                                            </td>
+                                                            <td
+                                                                className='max-w-[300px] whitespace-nowrap py-2 text-left'
+                                                                onDoubleClick={() =>
+                                                                    router.push(
+                                                                        `${clientRoutes.drive}/${folder.id}`
+                                                                    )
+                                                                }>
+                                                                <div className='flex items-center gap-2'>
+                                                                    <Folder className='h-5 w-5 shrink-0 fill-brand-600 text-brand-600' />
+                                                                    <Link
+                                                                        onClick={e =>
+                                                                            e.stopPropagation()
+                                                                        }
+                                                                        href={`${clientRoutes.drive}/${folder.id}`}
+                                                                        className='max-w-[8rem] truncate text-sm md:max-w-full'>
+                                                                        {
+                                                                            folder
+                                                                                .metadata
+                                                                                .name
+                                                                        }
+                                                                    </Link>
+                                                                </div>
+                                                            </td>
+                                                            <td className='py-2 text-left text-sm'>
+                                                                {isToday(
+                                                                    new Date(
+                                                                        folder.metadata.modified
+                                                                    )
                                                                 )
-                                                            )
-                                                                ? format(
-                                                                      new Date(
-                                                                          file.metadata.modified
-                                                                      ),
-                                                                      'h:mm:ss b'
-                                                                  )
-                                                                : format(
-                                                                      new Date(
-                                                                          file.metadata.modified
-                                                                      ),
-                                                                      'MMM d, y, h:mm b'
-                                                                  )}
-                                                        </td>
-                                                        <td className='hidden py-2 text-sm md:table-cell'>
-                                                            {humanFileSize(
-                                                                file.metadata
-                                                                    .size,
-                                                                true
+                                                                    ? format(
+                                                                          new Date(
+                                                                              folder.metadata.modified
+                                                                          ),
+                                                                          'h:mm:ss b'
+                                                                      )
+                                                                    : format(
+                                                                          new Date(
+                                                                              folder.metadata.modified
+                                                                          ),
+                                                                          'MMM d, y, h:mm b'
+                                                                      )}
+                                                            </td>
+                                                            <td className='hidden py-2 text-sm md:table-cell'>
+                                                                -
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                                {files.map(file => {
+                                                    const isSelected =
+                                                        selectedNodes.findIndex(
+                                                            n =>
+                                                                n.node.id ===
+                                                                file.id
+                                                        ) >= 0;
+
+                                                    return (
+                                                        <tr
+                                                            key={file.id}
+                                                            className={cn(
+                                                                'text-gray-900',
+                                                                {
+                                                                    'bg-gray-300':
+                                                                        isSelected,
+                                                                    'hover:bg-gray-200':
+                                                                        !isSelected,
+                                                                }
                                                             )}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    )}
+                                                            onClick={() =>
+                                                                setSelectedNodes(
+                                                                    prev => {
+                                                                        if (
+                                                                            isSelected
+                                                                        ) {
+                                                                            return prev.filter(
+                                                                                n =>
+                                                                                    n
+                                                                                        .node
+                                                                                        .id !==
+                                                                                    file.id
+                                                                            );
+                                                                        }
+
+                                                                        return [
+                                                                            ...prev,
+                                                                            {
+                                                                                node: file as FileNodeDecrypted,
+                                                                                type: 'file',
+                                                                            },
+                                                                        ];
+                                                                    }
+                                                                )
+                                                            }
+                                                            onContextMenu={() =>
+                                                                setSelectedNodes(
+                                                                    prev => {
+                                                                        if (
+                                                                            isSelected
+                                                                        ) {
+                                                                            return prev;
+                                                                        }
+
+                                                                        return [
+                                                                            {
+                                                                                node: file as FileNodeDecrypted,
+                                                                                type: 'file',
+                                                                            },
+                                                                        ];
+                                                                    }
+                                                                )
+                                                            }>
+                                                            <td className='py-2 text-center'>
+                                                                <label
+                                                                    htmlFor={`checkbox-${file.id}`}
+                                                                    className='sr-only'>
+                                                                    Select
+                                                                </label>
+                                                                <input
+                                                                    onClick={e =>
+                                                                        e.stopPropagation()
+                                                                    }
+                                                                    onChange={() =>
+                                                                        selectNode(
+                                                                            file,
+                                                                            'file'
+                                                                        )
+                                                                    }
+                                                                    checked={
+                                                                        isSelected
+                                                                    }
+                                                                    className='-mt-1 cursor-pointer rounded'
+                                                                    type='checkbox'
+                                                                    id={`checkbox-${file.id}`}
+                                                                />
+                                                            </td>
+                                                            <td className='max-w-[300px] whitespace-nowrap py-2 text-left'>
+                                                                <div className='flex items-center gap-2'>
+                                                                    <Icon
+                                                                        className='h-5 w-5 shrink-0'
+                                                                        {...getFileTypeIconProps(
+                                                                            {
+                                                                                extension:
+                                                                                    file.metadata.name
+                                                                                        .split(
+                                                                                            '.'
+                                                                                        )
+                                                                                        .at(
+                                                                                            -1
+                                                                                        ),
+                                                                            }
+                                                                        )}
+                                                                    />
+                                                                    <span className='max-w-[8rem] truncate text-sm md:max-w-full'>
+                                                                        {
+                                                                            file
+                                                                                .metadata
+                                                                                .name
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className='py-2 text-left text-sm'>
+                                                                {isToday(
+                                                                    new Date(
+                                                                        file.metadata.modified
+                                                                    )
+                                                                )
+                                                                    ? format(
+                                                                          new Date(
+                                                                              file.metadata.modified
+                                                                          ),
+                                                                          'h:mm:ss b'
+                                                                      )
+                                                                    : format(
+                                                                          new Date(
+                                                                              file.metadata.modified
+                                                                          ),
+                                                                          'MMM d, y, h:mm b'
+                                                                      )}
+                                                            </td>
+                                                            <td className='hidden py-2 text-sm md:table-cell'>
+                                                                {humanFileSize(
+                                                                    file
+                                                                        .metadata
+                                                                        .size,
+                                                                    true
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        )}
                                 </table>
                             </ScrollArea.Viewport>
                         </ContextMenu.Trigger>
