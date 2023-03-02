@@ -3,9 +3,8 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Cross2Icon } from '@radix-ui/react-icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader } from 'lucide-react';
+import { Loader, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import sanitize from 'sanitize-filename';
@@ -206,9 +205,9 @@ export function RenameDialog({
                         <Dialog.Close asChild>
                             <button
                                 type='button'
-                                className='inline-flex h-6 w-6 items-center justify-center rounded-full text-brand-600 hover:bg-brand-200 focus:shadow focus:shadow-brand-300 focus:outline-none'
+                                className='inline-flex h-6 w-6 items-center justify-center rounded-full text-brand-600 focus:outline-none'
                                 aria-label='Close'>
-                                <Cross2Icon />
+                                <X />
                             </button>
                         </Dialog.Close>
                     </div>
@@ -231,7 +230,8 @@ export function RenameDialog({
                             type='text'
                             id='name'
                             autoComplete='name'
-                            {...register('name')}>
+                            {...register('name')}
+                            autoFocus>
                             New Name
                         </InputWithLabel>
 
