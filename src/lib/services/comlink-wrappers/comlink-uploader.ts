@@ -1,7 +1,6 @@
 import 'client-only';
-import { Remote, wrap } from 'comlink';
-
 import { UploadService } from '@/lib/services/upload.worker';
+import { Remote, wrap } from '@/lib/utils/comlink';
 
 class UploadWorker {
     instance!: Remote<typeof UploadService>;

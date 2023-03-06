@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import { resetPassword } from '@/lib/services/auth';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
@@ -38,10 +38,7 @@ export default function ResetPassword() {
     const { push } = useRouter();
 
     const onSubmit = async (data: ResetPasswordFormInputs) => {
-        const result = await resetPassword<ResetPasswordFormInputs>(
-            apiRoutes.identity.resetPassword,
-            data.email
-        );
+        const result = await resetPassword<ResetPasswordFormInputs>(data.email);
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
@@ -59,7 +56,7 @@ export default function ResetPassword() {
 
     return (
         <motion.div
-            className='w-full'
+            className='w-full sm:max-w-[300px]'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>

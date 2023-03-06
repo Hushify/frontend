@@ -22,7 +22,7 @@ export function getEncryptedSize(fileSize: number) {
 
 export const UploadService = {
     prepareFileForMultipartUpload: async (
-        // signal: AbortSignal,
+        signal: AbortSignal,
         parentFolderId: string,
         name: string,
         previousVersionId: string | undefined,
@@ -38,7 +38,7 @@ export const UploadService = {
         );
 
         const cryptoWorker = CryptoWorker.cryptoWorker;
-        const { fileKey, fileKeyB64, encFileKey, nonce } =
+        const { fileKey, fileKeyB64, encryptedFileKey, nonce } =
             await cryptoWorker.generateFileKey(currentFolderKey);
 
         const created = new Date().toUTCString();
@@ -56,21 +56,18 @@ export const UploadService = {
                 previousVersionId,
                 numberOfChunks: numberOfEncryptedChunks,
                 encryptedSize,
-                fileKeyBundle: {
+                keyBundle: {
                     nonce,
-                    encKey: encFileKey,
+                    encryptedKey: encryptedFileKey,
                 },
-                metadataBundle: {
-                    nonce: encryptedMetadataBundle.nonce,
-                    metadata: encryptedMetadataBundle.encMetadata,
-                },
+                metadataBundle: encryptedMetadataBundle,
             },
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
-                // signal,
+                signal,
             }
         )) as {
             data: {
@@ -84,7 +81,7 @@ export const UploadService = {
     },
 
     uploadMultipart: async (
-        // signal: AbortSignal,
+        signal: AbortSignal,
         file: File,
         fileKey: string,
         accessToken: string,
@@ -109,6 +106,10 @@ export const UploadService = {
                     j < AMZ_MIN_CHUNK_SIZE * (i + 1);
                     j += DEFAULT_CHUNK_SIZE
                 ) {
+                    if (signal.aborted) {
+                        throw new Error('Upload aborted.');
+                    }
+
                     const chunk = file.slice(j, j + DEFAULT_CHUNK_SIZE);
 
                     if (chunk.size === 0) {
@@ -147,7 +148,7 @@ export const UploadService = {
                         headers: {
                             'Content-Type': 'application/octet-stream',
                         },
-                        // signal,
+                        signal,
                     }
                 );
 
@@ -183,143 +184,10 @@ export const UploadService = {
         );
     },
 
-    uploadMultipartDbg: async (
-        file: File,
-        fileKey: string,
-        accessToken: string,
-        fileId: string,
-        parts: { partNumber: number; preSignedUrl: string }[],
-        onProgress: (uploaded: number) => void
-    ) => {
-        const cryptoWorker = CryptoWorker.cryptoWorker;
-        const { state, header } = await cryptoWorker.streamingEncryptionInit(
-            fileKey
-        );
-
-        const dstate = await cryptoWorker.streamingDecryptionInit(
-            header,
-            fileKey
-        );
-
-        const eTags: { eTag: string; partNumber: number }[] = [];
-
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            let amzChunk: Uint8Array | null = i === 0 ? header : null;
-
-            for (
-                let j = AMZ_MIN_CHUNK_SIZE * i;
-                j < AMZ_MIN_CHUNK_SIZE * (i + 1);
-                j += DEFAULT_CHUNK_SIZE
-            ) {
-                const chunk = file.slice(j, j + DEFAULT_CHUNK_SIZE);
-
-                if (chunk.size === 0) {
-                    break;
-                }
-
-                const chunkArrayBuffer = await chunk.arrayBuffer();
-                const encryptedChunk =
-                    await cryptoWorker.streamingEncryptionPush(
-                        state,
-                        new Uint8Array(chunkArrayBuffer),
-                        i + 1 === parts.length &&
-                            chunk.size < DEFAULT_CHUNK_SIZE
-                    );
-
-                if (amzChunk === null) {
-                    amzChunk = encryptedChunk;
-                } else {
-                    amzChunk = new Uint8Array([...amzChunk, ...encryptedChunk]);
-                }
-
-                onProgress(chunk.size);
-            }
-
-            if (amzChunk === null) {
-                throw new Error('Encryption failed.');
-            }
-
-            if (i === 0) {
-                for (
-                    let index = 0;
-                    index < AMZ_MIN_CHUNK_SIZE / (64 * 1024);
-                    index++
-                ) {
-                    const { message, tag } =
-                        await cryptoWorker.streamingDecryptionPull(
-                            dstate,
-                            amzChunk.slice(
-                                24 + (64 * 1024 + 17) * index,
-                                24 + (64 * 1024 + 17) * (index + 1)
-                            )
-                        );
-
-                    console.log({ message, tag });
-                }
-            }
-
-            if (i === 1) {
-                const { message, tag } =
-                    await cryptoWorker.streamingDecryptionPull(
-                        dstate,
-                        amzChunk.slice(0, 64 * 1024 + 17)
-                    );
-
-                console.log({ message, tag });
-            }
-
-            // if (i === 1) {
-            //     for (let index = 0; index < 4; index++) {
-            //         console.log(
-            //             amzChunk.slice(
-            //                 (64 * 1024 + 17) * index,
-            //                 (64 * 1024 + 17) * (index + 1)
-            //             )
-            //         );
-
-            //         const { message, tag } =
-            //             await cryptoWorker.streamingDecryptionPull(
-            //                 dstate,
-            //                 amzChunk.slice(
-            //                     (64 * 1024 + 17) * index,
-            //                     (64 * 1024 + 17) * (index + 1)
-            //                 )
-            //             );
-
-            //         console.log({ message, tag });
-            //     }
-            // }
-
-            const { headers, status } = await axios.put(
-                part.preSignedUrl,
-                amzChunk,
-                {
-                    headers: {
-                        'Content-Type': 'application/octet-stream',
-                    },
-                }
-            );
-
-            if (status !== 200) {
-                throw new Error('Upload failed');
-            }
-
-            if (!headers.etag) {
-                throw new Error('Missing eTag');
-            }
-
-            eTags.push({
-                eTag: headers.etag.replace(/"/g, ''),
-                partNumber: part.partNumber,
-            });
-        }
-
+    cancelMultipart: async (fileId: string, accessToken: string) => {
         await axios.post(
-            `${apiRoutes.drive.multipart.commit}/${fileId}`,
-            {
-                parts: eTags,
-            },
+            `${apiRoutes.drive.multipart.cancel}/${fileId}`,
+            undefined,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

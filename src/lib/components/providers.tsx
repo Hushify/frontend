@@ -20,13 +20,11 @@ const queryClient = new QueryClient({
 
 export function Providers({ children }: { children: ReactNode }) {
     return (
-        <Tooltip.Provider>
-            <QueryClientProvider client={queryClient}>
-                <ReactQueryDevtools initialIsOpen={false} />
-                <Toaster />
-                {children}
-            </QueryClientProvider>
-        </Tooltip.Provider>
+        <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools initialIsOpen={false} />
+            <Tooltip.Provider>{children}</Tooltip.Provider>
+            <Toaster />
+        </QueryClientProvider>
     );
 }
 
@@ -37,11 +35,7 @@ export function AuthStateProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => setLoaded(true), []);
 
-    if (!loaded) {
-        return null;
-    }
-
-    if (status === 'unauthenticated') {
+    if (!loaded || status === 'unauthenticated') {
         return null;
     }
 

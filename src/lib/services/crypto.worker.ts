@@ -1,10 +1,44 @@
 import { entropyToMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
-import { expose } from 'comlink';
 import sodium from 'libsodium-wrappers-sumo';
 
+import { expose } from '@/lib/utils/comlink';
+
+export type UserCryptoProperties = {
+    salt: string;
+    masterKeyBundle: SecretKeyBundle;
+    recoveryMasterKeyBundle: SecretKeyBundle;
+    recoveryKeyBundle: SecretKeyBundle;
+    asymmetricKeyBundle: KeyPairBundle;
+    signingKeyBundle: KeyPairBundle;
+};
+
+export type MetadataBundle = {
+    nonce: string;
+    encryptedMetadata: string;
+};
+
+export type SecretKeyBundle = {
+    nonce: string;
+    encryptedKey: string;
+};
+
+export type KeyPairBundle = {
+    nonce: string;
+    publicKey: string;
+    encryptedPrivateKey: string;
+};
+
 export const CryptoService = {
-    generateRequiredKeys: async (password: string) => {
+    generateRequiredKeys: async (
+        password: string
+    ): Promise<{
+        cryptoProperties: UserCryptoProperties;
+        recoveryMnemonic: string;
+        masterKey: string;
+        asymmetricPrivateKey: string;
+        signingPrivateKey: string;
+    }> => {
         await sodium.ready;
 
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
@@ -30,13 +64,13 @@ export const CryptoService = {
         );
 
         // Asymmetric Keys
-        const asymmetricEncKp = sodium.crypto_box_keypair();
-        const asymmetricEncKeyNonce = sodium.randombytes_buf(
+        const asymmetricKp = sodium.crypto_box_keypair();
+        const asymmetricKeyNonce = sodium.randombytes_buf(
             sodium.crypto_secretbox_NONCEBYTES
         );
-        const encAsymmetricPrivateKey = sodium.crypto_secretbox_easy(
-            asymmetricEncKp.privateKey,
-            asymmetricEncKeyNonce,
+        const encryptedAsymmetricPrivateKey = sodium.crypto_secretbox_easy(
+            asymmetricKp.privateKey,
+            asymmetricKeyNonce,
             masterKey
         );
 
@@ -44,7 +78,7 @@ export const CryptoService = {
         const signingKeyNonce = sodium.randombytes_buf(
             sodium.crypto_secretbox_NONCEBYTES
         );
-        const encSigningPrivateKey = sodium.crypto_secretbox_easy(
+        const encryptedSigningPrivateKey = sodium.crypto_secretbox_easy(
             signingKp.privateKey,
             signingKeyNonce,
             masterKey
@@ -77,74 +111,79 @@ export const CryptoService = {
         const recoveryMnemonic = entropyToMnemonic(recoveryKey, wordlist);
 
         return {
-            salt: sodium.to_base64(salt),
-            masterKeyBundle: {
-                nonce: sodium.to_base64(nonce),
-                encKey: sodium.to_base64(encMasterKey),
-            },
-            recoveryMasterKeyBundle: {
-                nonce: sodium.to_base64(recoveryMasterKeyNonce),
-                encKey: recoveryEncMasterKey,
-            },
-            recoveryKeyBundle: {
-                nonce: sodium.to_base64(recoveryKeyNonce),
-                encKey: encRecoveryKey,
-            },
-            asymmetricEncKeyBundle: {
-                nonce: sodium.to_base64(asymmetricEncKeyNonce),
-                publicKey: sodium.to_base64(asymmetricEncKp.publicKey),
-                encPrivateKey: sodium.to_base64(encAsymmetricPrivateKey),
-            },
-            signingKeyBundle: {
-                nonce: sodium.to_base64(signingKeyNonce),
-                publicKey: sodium.to_base64(signingKp.publicKey),
-                encPrivateKey: sodium.to_base64(encSigningPrivateKey),
-            },
             recoveryMnemonic,
             masterKey: sodium.to_base64(masterKey),
-            asymmetricEncPrivateKey: sodium.to_base64(
-                asymmetricEncKp.privateKey
-            ),
+            asymmetricPrivateKey: sodium.to_base64(asymmetricKp.privateKey),
             signingPrivateKey: sodium.to_base64(signingKp.privateKey),
+            cryptoProperties: {
+                salt: sodium.to_base64(salt),
+                masterKeyBundle: {
+                    nonce: sodium.to_base64(nonce),
+                    encryptedKey: sodium.to_base64(encMasterKey),
+                },
+                recoveryMasterKeyBundle: {
+                    nonce: sodium.to_base64(recoveryMasterKeyNonce),
+                    encryptedKey: recoveryEncMasterKey,
+                },
+                recoveryKeyBundle: {
+                    nonce: sodium.to_base64(recoveryKeyNonce),
+                    encryptedKey: encRecoveryKey,
+                },
+                asymmetricKeyBundle: {
+                    nonce: sodium.to_base64(asymmetricKeyNonce),
+                    publicKey: sodium.to_base64(asymmetricKp.publicKey),
+                    encryptedPrivateKey: sodium.to_base64(
+                        encryptedAsymmetricPrivateKey
+                    ),
+                },
+                signingKeyBundle: {
+                    nonce: sodium.to_base64(signingKeyNonce),
+                    publicKey: sodium.to_base64(signingKp.publicKey),
+                    encryptedPrivateKey: sodium.to_base64(
+                        encryptedSigningPrivateKey
+                    ),
+                },
+            },
         };
     },
 
     decryptRequiredKeys: async (
         password: string,
-        salt: string,
-        masterKeyNonce: string,
-        encMasterKey: string,
-        asymmetricEncKeyNonce: string,
-        encAsymmetricPrivateKey: string,
-        signingKeyNonce: string,
-        encSigningPrivateKey: string
+        cryptoProperties: Omit<
+            UserCryptoProperties,
+            'recoveryKeyBundle' | 'recoveryMasterKeyBundle'
+        >
     ) => {
         await sodium.ready;
 
         const passwordHash = sodium.crypto_pwhash(
             sodium.crypto_box_SEEDBYTES,
             password,
-            sodium.from_base64(salt),
+            sodium.from_base64(cryptoProperties.salt),
             sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
             sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
             sodium.crypto_pwhash_ALG_DEFAULT
         );
 
         const masterKey = sodium.crypto_secretbox_open_easy(
-            sodium.from_base64(encMasterKey),
-            sodium.from_base64(masterKeyNonce),
+            sodium.from_base64(cryptoProperties.masterKeyBundle.encryptedKey),
+            sodium.from_base64(cryptoProperties.masterKeyBundle.nonce),
             passwordHash
         );
 
         const asymmetricPrivateKey = sodium.crypto_secretbox_open_easy(
-            sodium.from_base64(encAsymmetricPrivateKey),
-            sodium.from_base64(asymmetricEncKeyNonce),
+            sodium.from_base64(
+                cryptoProperties.asymmetricKeyBundle.encryptedPrivateKey
+            ),
+            sodium.from_base64(cryptoProperties.asymmetricKeyBundle.nonce),
             masterKey
         );
 
         const signingPrivateKey = sodium.crypto_secretbox_open_easy(
-            sodium.from_base64(encSigningPrivateKey),
-            sodium.from_base64(signingKeyNonce),
+            sodium.from_base64(
+                cryptoProperties.signingKeyBundle.encryptedPrivateKey
+            ),
+            sodium.from_base64(cryptoProperties.signingKeyBundle.nonce),
             masterKey
         );
 
@@ -155,19 +194,19 @@ export const CryptoService = {
         };
     },
 
-    decryptAccessToken: async (
-        encAccessToken: string,
-        encAccessTokenNonce: string,
-        serverPublicKey: string,
-        asymmetricPrivateKey: string
+    asymmetricDecrypt: async (
+        data: string,
+        nonce: string,
+        publicKey: string,
+        privateKey: string
     ) => {
         await sodium.ready;
 
         const token = sodium.crypto_box_open_easy(
-            sodium.from_base64(encAccessToken),
-            sodium.from_base64(encAccessTokenNonce),
-            sodium.from_base64(serverPublicKey),
-            sodium.from_base64(asymmetricPrivateKey)
+            sodium.from_base64(data),
+            sodium.from_base64(nonce),
+            sodium.from_base64(publicKey),
+            sodium.from_base64(privateKey)
         );
 
         return sodium.to_string(token);
@@ -182,7 +221,7 @@ export const CryptoService = {
             sodium.crypto_secretbox_NONCEBYTES
         );
 
-        const encFolderKey = sodium.crypto_secretbox_easy(
+        const encryptedFolderKey = sodium.crypto_secretbox_easy(
             folderKey,
             nonce,
             sodium.from_base64(key),
@@ -192,7 +231,7 @@ export const CryptoService = {
         return {
             folderKey,
             folderKeyB64: sodium.to_base64(folderKey),
-            encFolderKey,
+            encryptedFolderKey,
             nonce: sodium.to_base64(nonce),
         };
     },
@@ -223,7 +262,7 @@ export const CryptoService = {
             sodium.crypto_secretbox_NONCEBYTES
         );
 
-        const encFileKey = sodium.crypto_secretbox_easy(
+        const encryptedFileKey = sodium.crypto_secretbox_easy(
             fileKey,
             nonce,
             sodium.from_base64(folderKey),
@@ -233,7 +272,7 @@ export const CryptoService = {
         return {
             fileKey,
             fileKeyB64: sodium.to_base64(fileKey),
-            encFileKey,
+            encryptedFileKey,
             nonce: sodium.to_base64(nonce),
         };
     },
@@ -255,21 +294,45 @@ export const CryptoService = {
         return fileKey;
     },
 
-    encryptMetadata: async (key: Uint8Array | string, metadata: unknown) => {
+    reEncryptKey: async (key: string, currentKey: string) => {
         await sodium.ready;
 
         const nonce = sodium.randombytes_buf(
             sodium.crypto_secretbox_NONCEBYTES
         );
 
-        const encMetadata = sodium.crypto_secretbox_easy(
+        const encryptedKey = sodium.crypto_secretbox_easy(
+            sodium.from_base64(currentKey),
+            nonce,
+            sodium.from_base64(key),
+            'base64'
+        );
+
+        return {
+            key: sodium.from_base64(currentKey),
+            encryptedKey,
+            nonce: sodium.to_base64(nonce),
+        };
+    },
+
+    encryptMetadata: async (
+        key: Uint8Array | string,
+        metadata: unknown
+    ): Promise<MetadataBundle> => {
+        await sodium.ready;
+
+        const nonce = sodium.randombytes_buf(
+            sodium.crypto_secretbox_NONCEBYTES
+        );
+
+        const encryptedMetadata = sodium.crypto_secretbox_easy(
             JSON.stringify(metadata),
             nonce,
             typeof key === 'string' ? sodium.from_base64(key) : key,
             'base64'
         );
 
-        return { encMetadata, nonce: sodium.to_base64(nonce) };
+        return { encryptedMetadata, nonce: sodium.to_base64(nonce) };
     },
 
     decryptMetadata: async (
@@ -288,20 +351,15 @@ export const CryptoService = {
         return sodium.to_string(decryptedMetadata);
     },
 
-    getNonce: async () => {
+    encryptFile: async (key: Uint8Array, file: Uint8Array) => {
+        await sodium.ready;
         const nonce = sodium.randombytes_buf(
             sodium.crypto_secretbox_NONCEBYTES
         );
-        return { nonce, nonceB64: sodium.to_base64(nonce) };
-    },
-
-    encryptFile: async (
-        key: Uint8Array,
-        file: Uint8Array,
-        nonce: Uint8Array
-    ) => {
-        await sodium.ready;
-        return sodium.crypto_secretbox_easy(file, nonce, key);
+        return {
+            fileKey: sodium.crypto_secretbox_easy(file, nonce, key),
+            nonce: sodium.to_base64(nonce),
+        };
     },
 
     decryptFile: async (key: string, data: Uint8Array, nonce: string) => {
@@ -351,16 +409,6 @@ export const CryptoService = {
     ) => {
         await sodium.ready;
         return sodium.crypto_secretstream_xchacha20poly1305_pull(state, cipher);
-    },
-
-    pad: async (data: Uint8Array, blockSize: number) => {
-        await sodium.ready;
-        return sodium.pad(data, blockSize);
-    },
-
-    unpad: async (data: Uint8Array, blockSize: number) => {
-        await sodium.ready;
-        return sodium.unpad(data, blockSize);
     },
 };
 

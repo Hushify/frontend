@@ -3,10 +3,12 @@
 import * as Accordion from '@radix-ui/react-accordion';
 import { ChevronDown, File, RefreshCw, X } from 'lucide-react';
 
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { useUploadStore } from '@/lib/stores/upload-store';
 import { cn } from '@/lib/utils/cn';
 
 export function UploadProgressBox() {
+    const accessToken = useAuthStore(state => state.accessToken)!;
     const files = useUploadStore(state => state.files);
     const removeFile = useUploadStore(state => state.removeFile);
     const retry = useUploadStore(state => state.retry);
@@ -80,9 +82,8 @@ export function UploadProgressBox() {
                                             <button
                                                 onClick={() => {
                                                     if (
-                                                        fileWithState.state ===
-                                                        ('Uploaded' ||
-                                                            'Cancelled')
+                                                        fileWithState.state !==
+                                                        'Failed'
                                                     ) {
                                                         removeFile(
                                                             fileWithState.trackingId
@@ -94,7 +95,8 @@ export function UploadProgressBox() {
                                                         'Failed'
                                                     ) {
                                                         retry(
-                                                            fileWithState.trackingId
+                                                            fileWithState.trackingId,
+                                                            accessToken
                                                         );
                                                     }
                                                 }}

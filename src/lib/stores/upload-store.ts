@@ -1,11 +1,10 @@
-import { proxy } from 'comlink';
 import PQueue from 'p-queue';
 import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import UploadService from '@/lib/services/comlink-wrappers/comlink-uploader';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { proxy } from '@/lib/utils/comlink';
 
 const uploadQueue = new PQueue({
     concurrency: 5,
@@ -60,7 +59,7 @@ export type UploadActions = {
         value: valueof<Omit<FileWithState, 'file'>>
     ) => void;
 
-    retry: (trackingId: string) => void;
+    retry: (trackingId: string, accessToken: string) => void;
 
     removeFile: (trackingId: string) => void;
 
@@ -114,7 +113,7 @@ export const useUploadStore = create<UploadState & UploadActions>(
                     try {
                         const resp =
                             await UploadService.instance.prepareFileForMultipartUpload(
-                                // file.abortController.signal,
+                                file.abortController.signal,
                                 parentFolderId,
                                 file.fileWithVersion.file.name,
                                 file.fileWithVersion.previousVersionId,
@@ -123,6 +122,8 @@ export const useUploadStore = create<UploadState & UploadActions>(
                                 accessToken,
                                 currentFolderKey
                             );
+
+                        file.id = resp.data.fileId;
 
                         const onProgress = (uploaded: number) => {
                             const currentFile = get().files.find(
@@ -151,7 +152,7 @@ export const useUploadStore = create<UploadState & UploadActions>(
                         };
 
                         await UploadService.instance.uploadMultipart(
-                            // file.abortController.signal,
+                            file.abortController.signal,
                             file.fileWithVersion.file,
                             resp.fileKey,
                             accessToken,
@@ -175,6 +176,12 @@ export const useUploadStore = create<UploadState & UploadActions>(
                                 ? error
                                 : (error as Error).message
                         );
+                        if (file.id) {
+                            await UploadService.instance.cancelMultipart(
+                                file.id,
+                                accessToken
+                            );
+                        }
                     }
                 });
             }
@@ -197,14 +204,15 @@ export const useUploadStore = create<UploadState & UploadActions>(
                 }),
             })),
 
-        retry: (trackingId: string) => {
+        retry: (trackingId: string, accessToken: string) => {
             const currentFile = get().files.find(
                 f => f.trackingId === trackingId
             );
 
             if (
                 !currentFile ||
-                currentFile.state !== ('Cancelled' || 'Failed')
+                (currentFile.state !== 'Cancelled' &&
+                    currentFile.state !== 'Failed')
             ) {
                 return;
             }
@@ -213,8 +221,7 @@ export const useUploadStore = create<UploadState & UploadActions>(
                 [currentFile.fileWithVersion],
                 currentFile.parentFolderId,
                 currentFile.currentFolderKey,
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useAuthStore().accessToken ?? '',
+                accessToken,
                 currentFile.onUploadCb
             );
 
@@ -231,9 +238,10 @@ export const useUploadStore = create<UploadState & UploadActions>(
             if (currentFile && currentFile.state === 'Uploading') {
                 currentFile.abortController.abort('User cancelled upload.');
                 currentFile.state = 'Cancelled';
+                return;
             }
 
-            return set(current => ({
+            set(current => ({
                 files: current.files.filter(f => f.trackingId !== trackingId),
             }));
         },

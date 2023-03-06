@@ -6,13 +6,13 @@ import {
     SuccessResponse,
     getErrors,
 } from '@/lib/services/common';
+import { UserCryptoProperties } from '@/lib/services/crypto.worker';
 import { zxcvbn } from '@/lib/utils/zxcvbn';
 
 export async function register<T>(
-    url: string,
     email: string
 ): Promise<ResponseMessage<T, null>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.register, {
         method: 'POST',
         body: JSON.stringify({
             email,
@@ -31,46 +31,18 @@ export async function register<T>(
 }
 
 export async function registerConfirm<T>(
-    url: string,
     email: string,
     code: string,
-    salt: string,
-    masterKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    recoveryMasterKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    recoveryKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    asymmetricEncKeyBundle: {
-        nonce: string;
-        publicKey: string;
-        encPrivateKey: string;
-    },
-    signingKeyBundle: {
-        nonce: string;
-        publicKey: string;
-        encPrivateKey: string;
-    }
+    cryptoProperties: UserCryptoProperties
 ): Promise<ResponseMessage<T, undefined>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.registerConfirm, {
         method: 'POST',
         credentials: 'include',
         mode: 'cors',
         body: JSON.stringify({
             email,
             code,
-            salt,
-            masterKeyBundle,
-            recoveryMasterKeyBundle,
-            recoveryKeyBundle,
-            asymmetricEncKeyBundle,
-            signingKeyBundle,
+            cryptoProperties,
         }),
         headers: {
             'Content-Type': 'application/json',
@@ -86,10 +58,9 @@ export async function registerConfirm<T>(
 }
 
 export async function resetPassword<T>(
-    url: string,
     email: string
 ): Promise<ResponseMessage<T, null>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.resetPassword, {
         method: 'POST',
         body: JSON.stringify({
             email,
@@ -107,45 +78,20 @@ export async function resetPassword<T>(
     return { success: false, errors };
 }
 
-export async function passwordResetConfirm<T>(
+export async function resetPasswordConfirm<T>(
     url: string,
     userId: string,
     code: string,
-    salt: string,
-    masterKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    recoveryMasterKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    recoveryKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    asymmetricEncKeyBundle: {
-        nonce: string;
-        encKey: string;
-    },
-    signingKeyBundle: {
-        nonce: string;
-        encKey: string;
-    }
+    cryptoProperties: UserCryptoProperties
 ): Promise<ResponseMessage<T, undefined>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.resetPasswordConfirm, {
         method: 'POST',
         credentials: 'include',
         mode: 'cors',
         body: JSON.stringify({
             userId,
             code,
-            salt,
-            masterKeyBundle,
-            recoveryMasterKeyBundle,
-            recoveryKeyBundle,
-            asymmetricEncKeyBundle,
-            signingKeyBundle,
+            cryptoProperties,
         }),
         headers: {
             'Content-Type': 'application/json',
@@ -161,10 +107,9 @@ export async function passwordResetConfirm<T>(
 }
 
 export async function initiateLogin<T>(
-    url: string,
     email: string
 ): Promise<ResponseMessage<T, undefined>> {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.initiateLogin, {
         method: 'POST',
         body: JSON.stringify({
             email,
@@ -182,34 +127,21 @@ export async function initiateLogin<T>(
     return { success: false, errors };
 }
 
-export async function authenticate<T>(
-    url: string,
+export async function login<T>(
     email: string,
     code: string
 ): Promise<
     ResponseMessage<
         T,
         {
-            salt: string;
-
-            encAccessToken: string;
-            encAccessTokenNonce: string;
+            encryptedAccessToken: string;
+            accessTokenNonce: string;
             serverPublicKey: string;
-
-            masterKeyNonce: string;
-            encMasterKey: string;
-
-            asymmetricEncKeyNonce: string;
-            asymmetricEncPublicKey: string;
-            encAsymmetricPrivateKey: string;
-
-            signingKeyNonce: string;
-            signingPublicKey: string;
-            encSigningPrivateKey: string;
+            cryptoProperties: UserCryptoProperties;
         }
     >
 > {
-    const response = await fetch(url, {
+    const response = await fetch(apiRoutes.identity.login, {
         method: 'POST',
         credentials: 'include',
         mode: 'cors',
@@ -235,7 +167,7 @@ export async function refreshToken<T>(): Promise<
     ResponseMessage<
         T,
         {
-            encAccessToken: string;
+            encryptedAccessToken: string;
             accessTokenNonce: string;
             serverPublicKey: string;
         }
@@ -255,8 +187,8 @@ export async function refreshToken<T>(): Promise<
     return { success: false, errors };
 }
 
-export function logout(url: string): Promise<Response> {
-    return fetch(url, {
+export function logout(): Promise<Response> {
+    return fetch(apiRoutes.identity.logout, {
         method: 'POST',
         credentials: 'include',
         mode: 'cors',

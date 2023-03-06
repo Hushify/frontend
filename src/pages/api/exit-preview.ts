@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function ExitPreview(
-    req: NextApiRequest,
+    _req: NextApiRequest,
     res: NextApiResponse
 ) {
     res.clearPreviewData();

@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import {
     checkPasswordStrength,
@@ -79,10 +79,7 @@ function Confirm() {
     }, [resendTimer]);
 
     const resendCode = async () => {
-        const result = await registerApi(
-            apiRoutes.identity.register,
-            searchParams?.get('email') as string
-        );
+        const result = await registerApi(searchParams?.get('email') as string);
 
         if (!result.success) {
             addServerErrors(result.errors, setError, ['errors', 'email']);
@@ -121,24 +118,19 @@ function Confirm() {
         const keys = await crypto.generateRequiredKeys(data.password);
 
         const result = await registerConfirm<ConfirmFormInputs>(
-            apiRoutes.identity.registerConfirm,
             data.email,
             data.code,
-            keys.salt,
-            keys.masterKeyBundle,
-            keys.recoveryMasterKeyBundle,
-            keys.recoveryKeyBundle,
-            keys.asymmetricEncKeyBundle,
-            keys.signingKeyBundle
+            keys.cryptoProperties
         );
 
         if (result.success) {
             setData({
                 status: 'authenticated',
                 masterKey: keys.masterKey,
-                publicKey: keys.asymmetricEncKeyBundle.publicKey,
-                privateKey: keys.asymmetricEncPrivateKey,
-                signingPublicKey: keys.signingKeyBundle.publicKey,
+                publicKey: keys.cryptoProperties.asymmetricKeyBundle.publicKey,
+                privateKey: keys.asymmetricPrivateKey,
+                signingPublicKey:
+                    keys.cryptoProperties.signingKeyBundle.publicKey,
                 signingPrivateKey: keys.signingPrivateKey,
                 recoveryKeyMnemonic: keys.recoveryMnemonic,
             });
@@ -153,7 +145,7 @@ function Confirm() {
 
     return (
         <motion.div
-            className='w-full'
+            className='w-full sm:max-w-[300px]'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>

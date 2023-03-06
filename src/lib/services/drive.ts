@@ -1,39 +1,32 @@
-import { Remote } from 'comlink';
-
 import { apiRoutes } from '@/lib/data/routes';
 import { ResponseMessage, getErrors } from '@/lib/services/common';
-import { CryptoService } from '@/lib/services/crypto.worker';
+import {
+    CryptoService,
+    MetadataBundle,
+    SecretKeyBundle,
+} from '@/lib/services/crypto.worker';
 import { authenticatedAxiosInstance } from '@/lib/services/http';
-
-export type MetadataBundle = {
-    nonce: string;
-    metadata: string;
-};
-
-export type SecretKeyBundle = {
-    nonce: string;
-    encKey: string;
-};
+import { Remote } from '@/lib/utils/comlink';
 
 export type Breadcrumb = {
     id: string;
     metadataBundle: MetadataBundle;
-    folderKey: SecretKeyBundle;
+    keyBundle: SecretKeyBundle;
 };
 
 export type FileNode = {
     id: string;
     metadataBundle: MetadataBundle;
     encryptedSize: number;
-    fileKey: SecretKeyBundle;
-    fileUrl: string;
+    keyBundle: SecretKeyBundle;
+    url: string;
     nonce?: string;
 };
 
 export type FolderNode = {
     id: string;
     metadataBundle: MetadataBundle;
-    folderKey: SecretKeyBundle;
+    keyBundle: SecretKeyBundle;
 };
 
 export type DriveListResponse = {
@@ -63,14 +56,14 @@ export type FileMetadata = {
 export type FolderNodeDecrypted = {
     id: string;
     metadata: FolderMetadata;
-    folderKey: string;
+    key: string;
 };
 
 export type FileNodeDecrypted = {
     id: string;
     metadata: FileMetadata;
-    fileKey: string;
-    fileUrl: string;
+    key: string;
+    url: string;
 };
 
 export type BreadcrumbDecrypted = {
@@ -110,13 +103,13 @@ export async function list(
 
         const key = await crypto.decryptFolderKey(
             index === 0 ? masterKey : breadcrumbs.at(index - 1)!.key,
-            crumb.folderKey.encKey,
-            crumb.folderKey.nonce
+            crumb.keyBundle.encryptedKey,
+            crumb.keyBundle.nonce
         );
 
         const metadata = await crypto.decryptMetadata(
             key,
-            crumb.metadataBundle.metadata,
+            crumb.metadataBundle.encryptedMetadata,
             crumb.metadataBundle.nonce
         );
 
@@ -132,45 +125,45 @@ export async function list(
 
     const folders: FolderNodeDecrypted[] = await Promise.all(
         data.folders.map(async f => {
-            const folderKey = await crypto.decryptFolderKey(
+            const key = await crypto.decryptFolderKey(
                 currentFolderKey,
-                f.folderKey.encKey,
-                f.folderKey.nonce
+                f.keyBundle.encryptedKey,
+                f.keyBundle.nonce
             );
 
             const metadata = await crypto.decryptMetadata(
-                folderKey,
-                f.metadataBundle.metadata,
+                key,
+                f.metadataBundle.encryptedMetadata,
                 f.metadataBundle.nonce
             );
 
             return {
                 id: f.id,
                 metadata: JSON.parse(metadata) as FolderMetadata,
-                folderKey,
+                key,
             };
         })
     );
 
     const files: FileNodeDecrypted[] = await Promise.all(
         data.files.map(async f => {
-            const fileKey = await crypto.decryptFileKey(
+            const key = await crypto.decryptFileKey(
                 currentFolderKey,
-                f.fileKey.encKey,
-                f.fileKey.nonce
+                f.keyBundle.encryptedKey,
+                f.keyBundle.nonce
             );
 
             const metadata = await crypto.decryptMetadata(
-                fileKey,
-                f.metadataBundle.metadata,
+                key,
+                f.metadataBundle.encryptedMetadata,
                 f.metadataBundle.nonce
             );
 
             return {
                 id: f.id,
                 metadata: JSON.parse(metadata) as FileMetadata,
-                fileKey,
-                fileUrl: f.fileUrl,
+                key,
+                url: f.url,
                 nonce: f.nonce,
             };
         })
@@ -183,14 +176,14 @@ export async function createFolder<T>(
     accessToken: string,
     parentFolderId: string | null,
     metadataBundle: MetadataBundle,
-    folderKeyBundle: SecretKeyBundle
+    keyBundle: SecretKeyBundle
 ): Promise<ResponseMessage<T, { id: string }>> {
     const response = await fetch(apiRoutes.drive.createFolder, {
         method: 'POST',
         body: JSON.stringify({
             parentFolderId,
             metadataBundle,
-            folderKeyBundle,
+            keyBundle,
         }),
         headers: {
             'Content-Type': 'application/json',
@@ -224,6 +217,37 @@ export async function deleteNodes<T>(
     if (response.ok) {
         const data = await response.json();
         return { success: true, data };
+    }
+
+    const errors = await getErrors<T>(response);
+    return { success: false, errors };
+}
+
+export async function moveNodes<T>(
+    accessToken: string,
+    targetFolderId: string,
+    folders: {
+        id: string;
+        metadataBundle: MetadataBundle;
+        keyBundle: SecretKeyBundle;
+    }[],
+    files: {
+        id: string;
+        metadataBundle: MetadataBundle;
+        keyBundle: SecretKeyBundle;
+    }[]
+): Promise<ResponseMessage<T, undefined>> {
+    const response = await fetch(apiRoutes.drive.moveNodes, {
+        method: 'POST',
+        body: JSON.stringify({ targetFolderId, folders, files }),
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (response.ok) {
+        return { success: true, data: undefined };
     }
 
     const errors = await getErrors<T>(response);

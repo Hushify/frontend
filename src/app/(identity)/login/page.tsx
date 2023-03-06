@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import { initiateLogin } from '@/lib/services/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -54,10 +54,7 @@ function Login({
     }, [isLoggedIn, push]);
 
     const onSubmit = async (data: LoginFormInputs) => {
-        const result = await initiateLogin(
-            apiRoutes.identity.initiateLogin,
-            data.email
-        );
+        const result = await initiateLogin(data.email);
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
@@ -75,7 +72,7 @@ function Login({
 
     return (
         <motion.div
-            className='w-full'
+            className='w-full sm:max-w-[300px]'
             initial={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>
             <div className='space-y-1 text-center'>
@@ -91,7 +88,7 @@ function Login({
             </div>
 
             <form
-                className='mt-8 space-y-3'
+                className='mt-4 space-y-3'
                 onSubmit={handleSubmit(data => mutation.mutateAsync(data))}>
                 <small className='text-red-600'>{errors.errors?.message}</small>
                 <InputWithLabel

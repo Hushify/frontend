@@ -1,5 +1,3 @@
-'use client';
-
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -43,7 +41,6 @@ export function RenameDialog({
     node,
     nodes,
     currentFolderId,
-    currentFolderKey,
     isRenameOpen,
     setIsRenameOpen,
     type,
@@ -51,7 +48,6 @@ export function RenameDialog({
     node: FolderNodeDecrypted | FileNodeDecrypted;
     nodes: undefined | FolderNodeDecrypted[] | FileNodeDecrypted[];
     currentFolderId: string | null;
-    currentFolderKey: string;
     isRenameOpen: boolean;
     setIsRenameOpen: Dispatch<SetStateAction<boolean>>;
     type: 'folder' | 'file';
@@ -89,7 +85,7 @@ export function RenameDialog({
             if (node.metadata.name === data.name) {
                 addServerErrors(
                     {
-                        name: ['The name can not be same.'],
+                        name: [`The ${type} name can not be same.`],
                     },
                     setError,
                     Object.keys(data)
@@ -118,9 +114,9 @@ export function RenameDialog({
 
             let key = null;
             if (type === 'file') {
-                key = (node as FileNodeDecrypted).fileKey;
+                key = (node as FileNodeDecrypted).key;
             } else {
-                key = (node as FolderNodeDecrypted).folderKey;
+                key = (node as FolderNodeDecrypted).key;
             }
 
             const metadataBundle = await crypto.encryptMetadata(
@@ -128,15 +124,16 @@ export function RenameDialog({
                 node.metadata
             );
 
-            const result = await updateMetadata(accessToken, node.id, type, {
-                nonce: metadataBundle.nonce,
-                metadata: metadataBundle.encMetadata,
-            });
+            const result = await updateMetadata(
+                accessToken,
+                node.id,
+                type,
+                metadataBundle
+            );
 
             if (result.success) {
                 setIsRenameOpen(false);
                 resetForm();
-                toast.success('Node renamed!');
                 queryClient.setQueryData<DriveList>([queryKey], queryData => {
                     if (!queryData) {
                         return undefined;
@@ -167,9 +164,9 @@ export function RenameDialog({
                 return null;
             }
 
-            toast.error('Folder creation failed!');
-
             addServerErrors(result.errors, setError, Object.keys(data));
+
+            throw new Error('Rename failed!');
         },
         [
             node,
@@ -184,8 +181,16 @@ export function RenameDialog({
         ]
     );
 
-    const mutation = useFormMutation(onSubmit, setError, () =>
-        toast.error('Rename failed!')
+    const mutation = useFormMutation(
+        async (data: RenameInputs) => {
+            await toast.promise(onSubmit(data), {
+                loading: 'Renaming...',
+                success: `${type === 'file' ? 'File' : 'Folder'} renamed!`,
+                error: 'Rename failed!',
+            });
+        },
+        setError,
+        () => toast.error('Rename failed!')
     );
 
     return (

@@ -42,6 +42,7 @@ const nakedApiRoutes = {
         forgotPassword: '/identity/forgot-password',
 
         resetPassword: '/identity/reset-password',
+        resetPasswordConfirm: '/identity/reset-password-confirm',
         getUserClaims: '/identity/getuserclaims',
     },
     drive: {
@@ -50,6 +51,7 @@ const nakedApiRoutes = {
         createFolder: '/drive/create-folder',
         deleteNodes: '/drive/delete-nodes',
         updateMetadata: '/drive/update-metadata',
+        moveNodes: '/drive/move-nodes',
         multipart: {
             create: '/drive/create-multipart-upload',
             commit: '/drive/commit-multipart-upload',
@@ -70,6 +72,8 @@ export const apiRoutes = {
         forgotPassword: apiUrl + nakedApiRoutes.identity.forgotPassword,
 
         resetPassword: apiUrl + nakedApiRoutes.identity.resetPassword,
+        resetPasswordConfirm:
+            apiUrl + nakedApiRoutes.identity.resetPasswordConfirm,
         getUserClaims: apiUrl + nakedApiRoutes.identity.getUserClaims,
     },
     drive: {
@@ -78,6 +82,7 @@ export const apiRoutes = {
         createFolder: apiUrl + nakedApiRoutes.drive.createFolder,
         deleteNodes: apiUrl + nakedApiRoutes.drive.deleteNodes,
         updateMetadata: apiUrl + nakedApiRoutes.drive.updateMetadata,
+        moveNodes: apiUrl + nakedApiRoutes.drive.moveNodes,
         multipart: {
             create: apiUrl + nakedApiRoutes.drive.multipart.create,
             commit: apiUrl + nakedApiRoutes.drive.multipart.commit,

@@ -1,7 +1,6 @@
 import 'client-only';
-import { Remote, wrap } from 'comlink';
-
 import { CryptoService } from '@/lib/services/crypto.worker';
+import { Remote, wrap } from '@/lib/utils/comlink';
 
 class CryptoWorker {
     public cryptoWorker!: Remote<typeof CryptoService>;

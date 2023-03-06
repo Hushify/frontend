@@ -48,8 +48,8 @@ authenticatedAxiosInstance.interceptors.response.use(
 
             const crypto = CryptoWorker.cryptoWorker;
 
-            const decryptedAccessToken = await crypto.decryptAccessToken(
-                result.data.encAccessToken,
+            const decryptedAccessToken = await crypto.asymmetricDecrypt(
+                result.data.encryptedAccessToken,
                 result.data.accessTokenNonce,
                 result.data.serverPublicKey,
                 privKey

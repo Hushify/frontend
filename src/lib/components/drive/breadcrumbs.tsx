@@ -1,46 +1,192 @@
 import Link from 'next/link';
+import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { Folder, FolderOpen, HardDrive } from 'lucide-react';
+import { useMultiDrop } from 'react-dnd-multi-backend';
 
 import { clientRoutes } from '@/lib/data/routes';
-import { BreadcrumbDecrypted } from '@/lib/services/drive';
+import {
+    BreadcrumbDecrypted,
+    FileNodeDecrypted,
+    FolderNodeDecrypted,
+} from '@/lib/services/drive';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn } from '@/lib/utils/cn';
 
 type BreadcrumbsProps = {
     items: BreadcrumbDecrypted[];
+    onMove: UseMutateAsyncFunction<
+        void,
+        unknown,
+        {
+            items: (
+                | { node: FolderNodeDecrypted; type: 'folder' }
+                | { node: FileNodeDecrypted; type: 'file' }
+            )[];
+            destinationFolderId: string;
+            destinationFolderKey: string;
+        },
+        unknown
+    >;
+    workspaceId: string | undefined;
 };
 
-export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+export default function Breadcrumbs({
+    items,
+    onMove,
+    workspaceId,
+}: BreadcrumbsProps) {
     return (
-        <ul className='flex flex-wrap items-center border-b border-b-gray-300 py-2 px-6 text-gray-600'>
-            <li>
-                <Link
-                    href={clientRoutes.drive}
-                    className={cn('flex items-center gap-1', {
-                        'text-brand-600': items.length === 0,
-                    })}>
-                    <HardDrive className='h-4 w-4' />
-                    <span>Home</span>
-                </Link>
-            </li>
+        <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 py-2 px-6 text-gray-600'>
+            <MainCrumb
+                workspaceId={workspaceId}
+                totalItems={items.length}
+                onMove={onMove}
+            />
             {items.map((item, idx) => (
-                <li key={item.id}>
-                    <Link
-                        href={`${clientRoutes.drive}/${item.id}`}
-                        className={cn(
-                            'flex items-center gap-1 before:mx-2 before:text-gray-400 before:content-["|"]',
-                            {
-                                'text-brand-600': idx === items.length - 1,
-                            }
-                        )}>
-                        {idx === items.length - 1 ? (
-                            <FolderOpen className='h-4 w-4' />
-                        ) : (
-                            <Folder className='h-4 w-4' />
-                        )}
-                        <span>{item.metadata.name}</span>
-                    </Link>
-                </li>
+                <Crumb
+                    key={item.id}
+                    item={item}
+                    idx={idx}
+                    totalItems={items.length}
+                    onMove={onMove}
+                />
             ))}
         </ul>
+    );
+}
+
+function MainCrumb({
+    workspaceId,
+    totalItems,
+    onMove,
+}: {
+    workspaceId: string | undefined;
+    totalItems: number;
+    onMove: UseMutateAsyncFunction<
+        void,
+        unknown,
+        {
+            items: (
+                | { node: FolderNodeDecrypted; type: 'folder' }
+                | { node: FileNodeDecrypted; type: 'file' }
+            )[];
+            destinationFolderId: string;
+            destinationFolderKey: string;
+        },
+        unknown
+    >;
+}) {
+    const masterKey = useAuthStore(state => state.masterKey);
+
+    const [[dropProps, drop]] = useMultiDrop({
+        accept: 'NODE',
+        drop: async (
+            items: (
+                | { node: FolderNodeDecrypted; type: 'folder' }
+                | { node: FileNodeDecrypted; type: 'file' }
+            )[]
+        ) => {
+            onMove({
+                items,
+                destinationFolderId: workspaceId ?? '',
+                destinationFolderKey: masterKey ?? '',
+            });
+        },
+        canDrop: _item => totalItems > 0,
+        collect: monitor => ({
+            canDrop: monitor.canDrop(),
+            isOver: monitor.isOver(),
+        }),
+    });
+
+    if (!masterKey || !workspaceId) {
+        return null;
+    }
+
+    return (
+        <li
+            className={cn('px-2', {
+                'bg-brand-200': dropProps.isOver && dropProps.canDrop,
+            })}
+            ref={drop}>
+            <Link
+                href={clientRoutes.drive}
+                className={cn('flex items-center gap-1', {
+                    'text-brand-600': totalItems === 0,
+                })}>
+                <HardDrive className='h-4 w-4' />
+                <span>Home</span>
+            </Link>
+        </li>
+    );
+}
+
+function Crumb({
+    item,
+    idx,
+    totalItems,
+    onMove,
+}: {
+    item: BreadcrumbDecrypted;
+    idx: number;
+    totalItems: number;
+    onMove: UseMutateAsyncFunction<
+        void,
+        unknown,
+        {
+            items: (
+                | { node: FolderNodeDecrypted; type: 'folder' }
+                | { node: FileNodeDecrypted; type: 'file' }
+            )[];
+            destinationFolderId: string;
+            destinationFolderKey: string;
+        },
+        unknown
+    >;
+}) {
+    const [[dropProps, drop]] = useMultiDrop({
+        accept: 'NODE',
+        drop: async (
+            items: (
+                | { node: FolderNodeDecrypted; type: 'folder' }
+                | { node: FileNodeDecrypted; type: 'file' }
+            )[]
+        ) => {
+            onMove({
+                items,
+                destinationFolderId: item.id,
+                destinationFolderKey: item.key,
+            });
+        },
+        canDrop: _item => idx !== totalItems - 1,
+        collect: monitor => ({
+            canDrop: monitor.canDrop(),
+            isOver: monitor.isOver(),
+        }),
+    });
+
+    return (
+        <>
+            <li>|</li>
+            <li
+                ref={drop}
+                className={cn('px-2', {
+                    'bg-brand-200 before:bg-transparent':
+                        dropProps.isOver && dropProps.canDrop,
+                })}>
+                <Link
+                    href={`${clientRoutes.drive}/${item.id}`}
+                    className={cn('flex items-center gap-1', {
+                        'text-brand-600': idx === totalItems - 1,
+                    })}>
+                    {idx === totalItems - 1 ? (
+                        <FolderOpen className='h-4 w-4' />
+                    ) : (
+                        <Folder className='h-4 w-4' />
+                    )}
+                    <span>{item.metadata.name}</span>
+                </Link>
+            </li>
+        </>
     );
 }

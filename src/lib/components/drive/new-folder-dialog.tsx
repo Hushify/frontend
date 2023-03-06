@@ -1,5 +1,3 @@
-'use client';
-
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -114,12 +112,9 @@ export function NewFolderDialog({
             const result = await createFolder(
                 accessToken,
                 currentFolderId ?? null,
+                metadataBundle,
                 {
-                    nonce: metadataBundle.nonce,
-                    metadata: metadataBundle.encMetadata,
-                },
-                {
-                    encKey: keyBundle.encFolderKey,
+                    encryptedKey: keyBundle.encryptedFolderKey,
                     nonce: keyBundle.nonce,
                 }
             );
@@ -137,7 +132,7 @@ export function NewFolderDialog({
                         ...queryData.folders,
                         {
                             id: result.data.id,
-                            folderKey: keyBundle.folderKeyB64,
+                            key: keyBundle.folderKeyB64,
                             metadata,
                         },
                     ];

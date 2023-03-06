@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { apiRoutes } from '@/lib/data/routes';
 import { logout } from '@/lib/services/auth';
 import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
 
@@ -62,7 +61,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             logout: async () => {
                 set({ ...initialAuthState, status: 'loggingout' });
                 try {
-                    await logout(apiRoutes.identity.logout);
+                    await logout();
                 } catch {}
                 set(initialAuthState);
             },

@@ -9,9 +9,9 @@ import { useForm } from 'react-hook-form';
 import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
-import { authenticate, initiateLogin } from '@/lib/services/auth';
+import { initiateLogin, login } from '@/lib/services/auth';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
@@ -72,7 +72,6 @@ function Confirm() {
 
     const resendCode = async () => {
         const result = await initiateLogin(
-            apiRoutes.identity.initiateLogin,
             searchParams?.get('email') as string
         );
 
@@ -96,11 +95,7 @@ function Confirm() {
     });
 
     const onSubmit = async (data: ConfirmFormInputs) => {
-        const result = await authenticate<ConfirmFormInputs>(
-            apiRoutes.identity.login,
-            data.email,
-            data.code
-        );
+        const result = await login<ConfirmFormInputs>(data.email, data.code);
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
@@ -111,18 +106,12 @@ function Confirm() {
 
         const keys = await crypto.decryptRequiredKeys(
             data.password,
-            result.data.salt,
-            result.data.masterKeyNonce,
-            result.data.encMasterKey,
-            result.data.asymmetricEncKeyNonce,
-            result.data.encAsymmetricPrivateKey,
-            result.data.signingKeyNonce,
-            result.data.encSigningPrivateKey
+            result.data.cryptoProperties
         );
 
-        const accessToken = await crypto.decryptAccessToken(
-            result.data.encAccessToken,
-            result.data.encAccessTokenNonce,
+        const accessToken = await crypto.asymmetricDecrypt(
+            result.data.encryptedAccessToken,
+            result.data.accessTokenNonce,
             result.data.serverPublicKey,
             keys.asymmetricPrivateKey
         );
@@ -130,9 +119,11 @@ function Confirm() {
         setData({
             status: 'authenticated',
             masterKey: keys.masterKey,
-            publicKey: result.data.asymmetricEncPublicKey,
+            publicKey:
+                result.data.cryptoProperties.asymmetricKeyBundle.publicKey,
             privateKey: keys.asymmetricPrivateKey,
-            signingPublicKey: result.data.signingPublicKey,
+            signingPublicKey:
+                result.data.cryptoProperties.signingKeyBundle.publicKey,
             signingPrivateKey: keys.signingPrivateKey,
             accessToken,
         });
@@ -144,7 +135,7 @@ function Confirm() {
 
     return (
         <motion.div
-            className='w-full'
+            className='w-full sm:max-w-[300px]'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>

@@ -9,18 +9,11 @@ import {
     useState,
 } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Icon } from '@fluentui/react/lib/Icon';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-    getFileTypeIconProps,
-    initializeFileTypeIcons,
-} from '@uifabric/file-type-icons';
+import { useMutation } from '@tanstack/react-query';
+import { initializeFileTypeIcons } from '@uifabric/file-type-icons';
 import { downloadZip } from 'client-zip';
-import { format, isToday } from 'date-fns';
 import { orderBy } from 'lodash';
 import {
     ChevronUp,
@@ -33,6 +26,8 @@ import {
     Trash2,
     Upload,
 } from 'lucide-react';
+import { HTML5toTouch } from 'rdndmb-html5-to-touch';
+import { DndProvider } from 'react-dnd-multi-backend';
 import { FileWithPath, useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
 import useMeasure from 'react-use-measure';
@@ -40,15 +35,18 @@ import useMeasure from 'react-use-measure';
 import undrawFileManager from '@/lib/assets/undraw_file_manager.svg';
 import Breadcrumbs from '@/lib/components/drive/breadcrumbs';
 import { DriveContextMenu } from '@/lib/components/drive/context-menu';
+import { DragPreview } from '@/lib/components/drive/drag-preview';
+import { FileRow } from '@/lib/components/drive/file-row';
+import { FolderRow } from '@/lib/components/drive/folder-row';
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
 import { RenameDialog } from '@/lib/components/drive/rename-dialog';
 import { DriveToolbar } from '@/lib/components/drive/toolbar';
 import { MenuItem, MenuSeparator } from '@/lib/components/drive/types/menu';
 import { UploadProgressBox } from '@/lib/components/drive/upload-progress';
 import { FullscreenUpload } from '@/lib/components/fullscreen-upload';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
 import { useClickDirect } from '@/lib/hooks/use-click-direct';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { useDriveList } from '@/lib/hooks/use-drive-list';
+import { useMoveNodes } from '@/lib/hooks/use-move-nodes';
 import {
     BreadcrumbDecrypted,
     FileMetadata,
@@ -56,34 +54,27 @@ import {
     FolderMetadata,
     FolderNodeDecrypted,
     deleteNodes,
-    list,
 } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { FileWithVersion, useUploadStore } from '@/lib/stores/upload-store';
 import { cn } from '@/lib/utils/cn';
-import humanFileSize from '@/lib/utils/humanizedFileSize';
 import { streamSaver } from '@/lib/utils/stream-saver';
 import StreamSlicer, { StreamDecrypter } from '@/lib/utils/stream-slicer';
 
 initializeFileTypeIcons();
 
 function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
-    const router = useRouter();
-
-    const currentFolder = slug?.at(0);
-
-    const url = currentFolder
-        ? `${apiRoutes.drive.list}?folderId=${currentFolder}`
-        : apiRoutes.drive.list;
-
     const accessToken = useAuthStore(state => state.accessToken)!;
     const masterKey = useAuthStore(state => state.masterKey)!;
 
-    const { data, status, refetch } = useQuery([url], () =>
-        list(url, accessToken, masterKey, CryptoWorker.cryptoWorker)
+    const currentFolderId = slug?.at(0) ?? null;
+
+    const { data, status, refetch } = useDriveList(
+        currentFolderId,
+        accessToken,
+        masterKey
     );
 
-    const currentFolderId = currentFolder ?? null;
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
     const [isRenameOpen, setIsRenameOpen] = useState(false);
 
@@ -327,7 +318,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     }, [data?.files.length, data?.folders.length, selectedNodes.length]);
 
     const downloadFile = async (node: FileNodeDecrypted) => {
-        const responseStream = await fetch(node.fileUrl);
+        const responseStream = await fetch(node.url);
         if (!responseStream.body) {
             return;
         }
@@ -344,16 +335,14 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
         window.onbeforeunload = evt => {
             if (!done) {
-                evt.returnValue = `Are you sure you want to leave?`;
+                evt.returnValue = `Download in progress. Are you sure you want to leave?`;
             }
         };
 
         try {
             await responseStream.body
                 .pipeThrough(new TransformStream(new StreamSlicer()))
-                .pipeThrough(
-                    new TransformStream(new StreamDecrypter(node.fileKey))
-                )
+                .pipeThrough(new TransformStream(new StreamDecrypter(node.key)))
                 .pipeTo(stream);
         } catch (error) {
             throw error;
@@ -365,16 +354,14 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     async function* downloadGenerator(nodes: FileNodeDecrypted[]) {
         for (const node of nodes)
             yield {
-                input: await fetch(node.fileUrl).then(response => {
+                input: await fetch(node.url).then(response => {
                     if (!response.body) {
                         return response;
                     }
                     return response.body
                         .pipeThrough(new TransformStream(new StreamSlicer()))
                         .pipeThrough(
-                            new TransformStream(
-                                new StreamDecrypter(node.fileKey)
-                            )
+                            new TransformStream(new StreamDecrypter(node.key))
                         );
                 }),
                 name: node.metadata.name,
@@ -400,7 +387,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
         window.onbeforeunload = evt => {
             if (!done) {
-                evt.returnValue = `Are you sure you want to leave?`;
+                evt.returnValue = `Download in progress. Are you sure you want to leave?`;
             }
         };
 
@@ -601,538 +588,336 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const clearSelection = useCallback(() => setSelectedNodes([]), []);
     useClickDirect(divRef, clearSelection);
 
+    const moveMutation = useMoveNodes(currentFolderId, accessToken);
+
     return (
-        <div className='h-full w-full' {...getRootProps()}>
-            <FullscreenUpload
-                isDragActive={isDragActive}
-                inputProps={inputProps}
-            />
+        <DndProvider
+            options={{
+                backends: HTML5toTouch.backends.map(backend => {
+                    backend.preview = true;
+                    return backend;
+                }),
+            }}>
+            <div className='h-full w-full' {...getRootProps()}>
+                <FullscreenUpload
+                    isDragActive={isDragActive}
+                    inputProps={inputProps}
+                />
 
-            <input
-                {...getFolderInputProps()}
-                // @ts-expect-error
-                webkitdirectory=''
-                mozdirectory=''
-                nwdirectory=''
-                directory=''
-            />
+                <input
+                    {...getFolderInputProps()}
+                    // @ts-expect-error
+                    webkitdirectory=''
+                    mozdirectory=''
+                    nwdirectory=''
+                    directory=''
+                />
 
-            <UploadProgressBox />
+                <UploadProgressBox />
 
-            <div className='relative h-full bg-white' ref={ref}>
-                {status === 'error' && (
-                    <div className='absolute inset-0 grid place-items-center text-red-600'>
-                        Error
-                    </div>
-                )}
+                <div className='relative h-full bg-white' ref={ref}>
+                    {status === 'error' && (
+                        <div className='absolute inset-0 grid place-items-center text-red-600'>
+                            Error
+                        </div>
+                    )}
 
-                {status === 'loading' && (
-                    <div className='absolute inset-0 grid place-items-center'>
-                        <Loader
-                            size={32}
-                            className='animate-spin stroke-brand-600'
-                        />
-                    </div>
-                )}
+                    {status === 'loading' && (
+                        <div className='absolute inset-0 grid place-items-center'>
+                            <Loader
+                                size={32}
+                                className='animate-spin stroke-brand-600'
+                            />
+                        </div>
+                    )}
 
-                <div ref={refRest}>
-                    <div className='relative z-10'>
-                        <NewFolderDialog
-                            folders={data?.folders}
-                            currentFolderId={currentFolderId}
-                            currentFolderKey={currentFolderKey}
-                            isNewFolderOpen={isNewFolderOpen}
-                            setIsNewFolderOpen={setIsNewFolderOpen}
-                        />
-
-                        {selectedNodes.length === 1 && (
-                            <RenameDialog
-                                nodes={
-                                    selectedNodes.at(0)!.type === 'folder'
-                                        ? folders
-                                        : files
-                                }
-                                type={selectedNodes.at(0)!.type}
-                                node={selectedNodes.at(0)!.node}
-                                isRenameOpen={isRenameOpen}
-                                setIsRenameOpen={setIsRenameOpen}
+                    <div ref={refRest}>
+                        <div className='relative z-10'>
+                            <NewFolderDialog
+                                folders={data?.folders}
                                 currentFolderId={currentFolderId}
                                 currentFolderKey={currentFolderKey}
+                                isNewFolderOpen={isNewFolderOpen}
+                                setIsNewFolderOpen={setIsNewFolderOpen}
                             />
-                        )}
+
+                            {selectedNodes.length === 1 && (
+                                <RenameDialog
+                                    nodes={
+                                        selectedNodes.at(0)!.type === 'folder'
+                                            ? folders
+                                            : files
+                                    }
+                                    type={selectedNodes.at(0)!.type}
+                                    node={selectedNodes.at(0)!.node}
+                                    isRenameOpen={isRenameOpen}
+                                    setIsRenameOpen={setIsRenameOpen}
+                                    currentFolderId={currentFolderId}
+                                />
+                            )}
+                        </div>
+
+                        <DriveToolbar items={menuItems} />
+
+                        <Breadcrumbs
+                            items={
+                                data?.breadcrumbs ??
+                                ([] as BreadcrumbDecrypted[])
+                            }
+                            workspaceId={data?.workspaceFolderId}
+                            onMove={moveMutation.mutateAsync}
+                        />
                     </div>
 
-                    <DriveToolbar items={menuItems} />
-
-                    <Breadcrumbs
-                        items={
-                            data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])
-                        }
-                    />
-                </div>
-
-                <ScrollArea.Root
-                    style={{
-                        height:
-                            document.body.clientHeight -
-                            bounds.top -
-                            boundsRest.height,
-                    }}
-                    className='w-full overflow-hidden'>
-                    <ContextMenu.Root>
-                        <ContextMenu.Trigger asChild>
-                            <ScrollArea.Viewport
-                                className='h-full w-full rounded'
-                                ref={divRef}>
-                                <table className='w-full'>
-                                    <thead className='sticky top-0 select-none border-b border-b-gray-400 bg-white text-sm text-gray-600'>
-                                        <tr>
-                                            <th
-                                                scope='col'
-                                                className='w-16 py-3 text-center font-light'>
-                                                <label
-                                                    className='sr-only'
-                                                    htmlFor='SelectAllOrNone'>
-                                                    Select All
-                                                </label>
-                                                <input
-                                                    type='checkbox'
-                                                    className='-mt-1 cursor-pointer rounded'
-                                                    id='SelectAllOrNone'
-                                                    onChange={selectAll}
-                                                    ref={selectAllRef}
-                                                />
-                                            </th>
-                                            <th
-                                                scope='col'
-                                                className='py-3 text-left'>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => {
-                                                        if (
-                                                            sortKey === 'name'
-                                                        ) {
-                                                            setSortOrder(prev =>
-                                                                prev === 'asc'
-                                                                    ? 'desc'
-                                                                    : 'asc'
-                                                            );
-                                                        } else {
-                                                            setSortKey('name');
-                                                            setSortOrder('asc');
-                                                        }
-                                                    }}
-                                                    className='flex items-center gap-1'>
-                                                    <span>Name</span>
-                                                    {sortKey === 'name' ? (
-                                                        <ChevronUp
-                                                            className={cn(
-                                                                'h-4',
-                                                                {
-                                                                    'rotate-180':
-                                                                        sortOrder ===
-                                                                        'desc',
-                                                                }
-                                                            )}
-                                                        />
-                                                    ) : (
-                                                        <ChevronsUpDown className='h-4' />
-                                                    )}
-                                                </button>
-                                            </th>
-                                            <th
-                                                scope='col'
-                                                className='w-24 py-3 text-left md:w-48'>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => {
-                                                        if (
-                                                            sortKey ===
-                                                            'modified'
-                                                        ) {
-                                                            setSortOrder(prev =>
-                                                                prev === 'asc'
-                                                                    ? 'desc'
-                                                                    : 'asc'
-                                                            );
-                                                        } else {
-                                                            setSortKey(
-                                                                'modified'
-                                                            );
-                                                            setSortOrder('asc');
-                                                        }
-                                                    }}
-                                                    className='flex items-center gap-1'>
-                                                    <span>Modified</span>
-                                                    {sortKey === 'modified' ? (
-                                                        <ChevronUp
-                                                            className={cn(
-                                                                'h-4',
-                                                                {
-                                                                    'rotate-180':
-                                                                        sortOrder ===
-                                                                        'desc',
-                                                                }
-                                                            )}
-                                                        />
-                                                    ) : (
-                                                        <ChevronsUpDown className='h-4' />
-                                                    )}
-                                                </button>
-                                            </th>
-                                            <th
-                                                scope='col'
-                                                className='hidden w-40 py-3 text-left md:table-cell'>
-                                                <button
-                                                    type='button'
-                                                    onClick={() => {
-                                                        if (
-                                                            sortKey === 'size'
-                                                        ) {
-                                                            setSortOrder(prev =>
-                                                                prev === 'asc'
-                                                                    ? 'desc'
-                                                                    : 'asc'
-                                                            );
-                                                        } else {
-                                                            setSortKey('size');
-                                                            setSortOrder('asc');
-                                                        }
-                                                    }}
-                                                    className='flex items-center gap-1'>
-                                                    <span>Size</span>
-                                                    {sortKey === 'size' ? (
-                                                        <ChevronUp
-                                                            className={cn(
-                                                                'h-4',
-                                                                {
-                                                                    'rotate-180':
-                                                                        sortOrder ===
-                                                                        'desc',
-                                                                }
-                                                            )}
-                                                        />
-                                                    ) : (
-                                                        <ChevronsUpDown className='h-4' />
-                                                    )}
-                                                </button>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    {status === 'success' &&
-                                        data.folders.length === 0 &&
-                                        data.files.length === 0 && (
-                                            <div className='absolute inset-0 flex items-center justify-center md:-left-48'>
-                                                <Image
-                                                    className='aspect-square w-1/2 md:w-1/4'
-                                                    src={undrawFileManager}
-                                                    alt='File Manager'
-                                                />
-                                            </div>
-                                        )}
-                                    {status === 'success' &&
-                                        (data.folders.length ||
-                                            data.files.length > 0) > 0 && (
-                                            <tbody className='divide-y divide-gray-200'>
-                                                {folders.map(folder => {
-                                                    const isSelected =
-                                                        selectedNodes.findIndex(
-                                                            n =>
-                                                                n.node.id ===
-                                                                folder.id
-                                                        ) >= 0;
-
-                                                    return (
-                                                        <tr
-                                                            key={folder.id}
-                                                            className={cn(
-                                                                'text-gray-900',
-                                                                {
-                                                                    'bg-gray-300':
-                                                                        isSelected,
-                                                                    'hover:bg-gray-200':
-                                                                        !isSelected,
-                                                                }
-                                                            )}
-                                                            onClick={() =>
-                                                                setSelectedNodes(
-                                                                    prev => {
-                                                                        if (
-                                                                            isSelected
-                                                                        ) {
-                                                                            return prev.filter(
-                                                                                n =>
-                                                                                    n
-                                                                                        .node
-                                                                                        .id !==
-                                                                                    folder.id
-                                                                            );
-                                                                        }
-
-                                                                        return [
-                                                                            ...prev,
-                                                                            {
-                                                                                node: folder as FolderNodeDecrypted,
-                                                                                type: 'folder',
-                                                                            },
-                                                                        ];
-                                                                    }
-                                                                )
+                    <ScrollArea.Root
+                        style={{
+                            height:
+                                document.body.clientHeight -
+                                bounds.top -
+                                boundsRest.height,
+                        }}
+                        className='w-full overflow-hidden'>
+                        <ContextMenu.Root>
+                            <ContextMenu.Trigger asChild>
+                                <ScrollArea.Viewport
+                                    className='h-full w-full rounded'
+                                    ref={divRef}>
+                                    <table className='w-full'>
+                                        <thead className='sticky top-0 select-none border-b border-b-gray-400 bg-white text-sm text-gray-600'>
+                                            <tr>
+                                                <th
+                                                    scope='col'
+                                                    className='w-16 py-3 text-center font-light'>
+                                                    <label
+                                                        className='sr-only'
+                                                        htmlFor='SelectAllOrNone'>
+                                                        Select All
+                                                    </label>
+                                                    <input
+                                                        type='checkbox'
+                                                        className='-mt-1 cursor-pointer rounded'
+                                                        id='SelectAllOrNone'
+                                                        onChange={selectAll}
+                                                        ref={selectAllRef}
+                                                    />
+                                                </th>
+                                                <th
+                                                    scope='col'
+                                                    className='py-3 text-left'>
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => {
+                                                            if (
+                                                                sortKey ===
+                                                                'name'
+                                                            ) {
+                                                                setSortOrder(
+                                                                    prev =>
+                                                                        prev ===
+                                                                        'asc'
+                                                                            ? 'desc'
+                                                                            : 'asc'
+                                                                );
+                                                            } else {
+                                                                setSortKey(
+                                                                    'name'
+                                                                );
+                                                                setSortOrder(
+                                                                    'asc'
+                                                                );
                                                             }
-                                                            onContextMenu={() =>
-                                                                setSelectedNodes(
-                                                                    prev => {
-                                                                        if (
-                                                                            isSelected
-                                                                        ) {
-                                                                            return prev;
-                                                                        }
-
-                                                                        return [
-                                                                            {
-                                                                                node: folder as FolderNodeDecrypted,
-                                                                                type: 'folder',
-                                                                            },
-                                                                        ];
+                                                        }}
+                                                        className='flex items-center gap-1'>
+                                                        <span>Name</span>
+                                                        {sortKey === 'name' ? (
+                                                            <ChevronUp
+                                                                className={cn(
+                                                                    'h-4',
+                                                                    {
+                                                                        'rotate-180':
+                                                                            sortOrder ===
+                                                                            'desc',
                                                                     }
-                                                                )
-                                                            }>
-                                                            <td className='py-2 text-center'>
-                                                                <label
-                                                                    htmlFor={`checkbox-${folder.id}`}
-                                                                    className='sr-only'>
-                                                                    Select
-                                                                </label>
-                                                                <input
-                                                                    onClick={e =>
-                                                                        e.stopPropagation()
-                                                                    }
-                                                                    onChange={() =>
-                                                                        selectNode(
-                                                                            folder,
-                                                                            'folder'
-                                                                        )
-                                                                    }
-                                                                    checked={
-                                                                        isSelected
-                                                                    }
-                                                                    className='-mt-1 cursor-pointer rounded'
-                                                                    type='checkbox'
-                                                                    id={`checkbox-${folder.id}`}
-                                                                />
-                                                            </td>
-                                                            <td
-                                                                className='max-w-[300px] whitespace-nowrap py-2 text-left'
-                                                                onDoubleClick={() =>
-                                                                    router.push(
-                                                                        `${clientRoutes.drive}/${folder.id}`
-                                                                    )
-                                                                }>
-                                                                <div className='flex items-center gap-2'>
-                                                                    <Folder className='h-5 w-5 shrink-0 fill-brand-600 text-brand-600' />
-                                                                    <Link
-                                                                        onClick={e =>
-                                                                            e.stopPropagation()
-                                                                        }
-                                                                        href={`${clientRoutes.drive}/${folder.id}`}
-                                                                        className='max-w-[8rem] truncate text-sm md:max-w-full'>
-                                                                        {
-                                                                            folder
-                                                                                .metadata
-                                                                                .name
-                                                                        }
-                                                                    </Link>
-                                                                </div>
-                                                            </td>
-                                                            <td className='py-2 text-left text-sm'>
-                                                                {isToday(
-                                                                    new Date(
-                                                                        folder.metadata.modified
-                                                                    )
-                                                                )
-                                                                    ? format(
-                                                                          new Date(
-                                                                              folder.metadata.modified
-                                                                          ),
-                                                                          'h:mm:ss b'
-                                                                      )
-                                                                    : format(
-                                                                          new Date(
-                                                                              folder.metadata.modified
-                                                                          ),
-                                                                          'MMM d, y, h:mm b'
-                                                                      )}
-                                                            </td>
-                                                            <td className='hidden py-2 text-sm md:table-cell'>
-                                                                -
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                                {files.map(file => {
-                                                    const isSelected =
-                                                        selectedNodes.findIndex(
-                                                            n =>
-                                                                n.node.id ===
-                                                                file.id
-                                                        ) >= 0;
-
-                                                    return (
-                                                        <tr
-                                                            key={file.id}
-                                                            className={cn(
-                                                                'text-gray-900',
-                                                                {
-                                                                    'bg-gray-300':
-                                                                        isSelected,
-                                                                    'hover:bg-gray-200':
-                                                                        !isSelected,
-                                                                }
-                                                            )}
-                                                            onClick={() =>
-                                                                setSelectedNodes(
-                                                                    prev => {
-                                                                        if (
-                                                                            isSelected
-                                                                        ) {
-                                                                            return prev.filter(
-                                                                                n =>
-                                                                                    n
-                                                                                        .node
-                                                                                        .id !==
-                                                                                    file.id
-                                                                            );
-                                                                        }
-
-                                                                        return [
-                                                                            ...prev,
-                                                                            {
-                                                                                node: file as FileNodeDecrypted,
-                                                                                type: 'file',
-                                                                            },
-                                                                        ];
-                                                                    }
-                                                                )
-                                                            }
-                                                            onContextMenu={() =>
-                                                                setSelectedNodes(
-                                                                    prev => {
-                                                                        if (
-                                                                            isSelected
-                                                                        ) {
-                                                                            return prev;
-                                                                        }
-
-                                                                        return [
-                                                                            {
-                                                                                node: file as FileNodeDecrypted,
-                                                                                type: 'file',
-                                                                            },
-                                                                        ];
-                                                                    }
-                                                                )
-                                                            }>
-                                                            <td className='py-2 text-center'>
-                                                                <label
-                                                                    htmlFor={`checkbox-${file.id}`}
-                                                                    className='sr-only'>
-                                                                    Select
-                                                                </label>
-                                                                <input
-                                                                    onClick={e =>
-                                                                        e.stopPropagation()
-                                                                    }
-                                                                    onChange={() =>
-                                                                        selectNode(
-                                                                            file,
-                                                                            'file'
-                                                                        )
-                                                                    }
-                                                                    checked={
-                                                                        isSelected
-                                                                    }
-                                                                    className='-mt-1 cursor-pointer rounded'
-                                                                    type='checkbox'
-                                                                    id={`checkbox-${file.id}`}
-                                                                />
-                                                            </td>
-                                                            <td className='max-w-[300px] whitespace-nowrap py-2 text-left'>
-                                                                <div className='flex items-center gap-2'>
-                                                                    <Icon
-                                                                        className='h-5 w-5 shrink-0'
-                                                                        {...getFileTypeIconProps(
-                                                                            {
-                                                                                extension:
-                                                                                    file.metadata.name
-                                                                                        .split(
-                                                                                            '.'
-                                                                                        )
-                                                                                        .at(
-                                                                                            -1
-                                                                                        ),
-                                                                            }
-                                                                        )}
-                                                                    />
-                                                                    <span className='max-w-[8rem] truncate text-sm md:max-w-full'>
-                                                                        {
-                                                                            file
-                                                                                .metadata
-                                                                                .name
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                            <td className='py-2 text-left text-sm'>
-                                                                {isToday(
-                                                                    new Date(
-                                                                        file.metadata.modified
-                                                                    )
-                                                                )
-                                                                    ? format(
-                                                                          new Date(
-                                                                              file.metadata.modified
-                                                                          ),
-                                                                          'h:mm:ss b'
-                                                                      )
-                                                                    : format(
-                                                                          new Date(
-                                                                              file.metadata.modified
-                                                                          ),
-                                                                          'MMM d, y, h:mm b'
-                                                                      )}
-                                                            </td>
-                                                            <td className='hidden py-2 text-sm md:table-cell'>
-                                                                {humanFileSize(
-                                                                    file
-                                                                        .metadata
-                                                                        .size,
-                                                                    true
                                                                 )}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        )}
-                                </table>
-                            </ScrollArea.Viewport>
-                        </ContextMenu.Trigger>
-                        <DriveContextMenu items={menuItems} />
-                    </ContextMenu.Root>
-                    <ScrollArea.Scrollbar
-                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                        orientation='vertical'>
-                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-                    </ScrollArea.Scrollbar>
-                    <ScrollArea.Scrollbar
-                        className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                        orientation='horizontal'>
-                        <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-                    </ScrollArea.Scrollbar>
-                    <ScrollArea.Corner className='bg-gray-500' />
-                </ScrollArea.Root>
+                                                            />
+                                                        ) : (
+                                                            <ChevronsUpDown className='h-4' />
+                                                        )}
+                                                    </button>
+                                                </th>
+                                                <th
+                                                    scope='col'
+                                                    className='w-24 py-3 text-left md:w-48'>
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => {
+                                                            if (
+                                                                sortKey ===
+                                                                'modified'
+                                                            ) {
+                                                                setSortOrder(
+                                                                    prev =>
+                                                                        prev ===
+                                                                        'asc'
+                                                                            ? 'desc'
+                                                                            : 'asc'
+                                                                );
+                                                            } else {
+                                                                setSortKey(
+                                                                    'modified'
+                                                                );
+                                                                setSortOrder(
+                                                                    'asc'
+                                                                );
+                                                            }
+                                                        }}
+                                                        className='flex items-center gap-1'>
+                                                        <span>Modified</span>
+                                                        {sortKey ===
+                                                        'modified' ? (
+                                                            <ChevronUp
+                                                                className={cn(
+                                                                    'h-4',
+                                                                    {
+                                                                        'rotate-180':
+                                                                            sortOrder ===
+                                                                            'desc',
+                                                                    }
+                                                                )}
+                                                            />
+                                                        ) : (
+                                                            <ChevronsUpDown className='h-4' />
+                                                        )}
+                                                    </button>
+                                                </th>
+                                                <th
+                                                    scope='col'
+                                                    className='hidden w-40 py-3 text-left md:table-cell'>
+                                                    <button
+                                                        type='button'
+                                                        onClick={() => {
+                                                            if (
+                                                                sortKey ===
+                                                                'size'
+                                                            ) {
+                                                                setSortOrder(
+                                                                    prev =>
+                                                                        prev ===
+                                                                        'asc'
+                                                                            ? 'desc'
+                                                                            : 'asc'
+                                                                );
+                                                            } else {
+                                                                setSortKey(
+                                                                    'size'
+                                                                );
+                                                                setSortOrder(
+                                                                    'asc'
+                                                                );
+                                                            }
+                                                        }}
+                                                        className='flex items-center gap-1'>
+                                                        <span>Size</span>
+                                                        {sortKey === 'size' ? (
+                                                            <ChevronUp
+                                                                className={cn(
+                                                                    'h-4',
+                                                                    {
+                                                                        'rotate-180':
+                                                                            sortOrder ===
+                                                                            'desc',
+                                                                    }
+                                                                )}
+                                                            />
+                                                        ) : (
+                                                            <ChevronsUpDown className='h-4' />
+                                                        )}
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        {status === 'success' &&
+                                            data.folders.length === 0 &&
+                                            data.files.length === 0 && (
+                                                <tbody>
+                                                    <tr>
+                                                        <td colSpan={10}>
+                                                            <div className='absolute inset-0 flex select-none items-center justify-center'>
+                                                                <Image
+                                                                    draggable={
+                                                                        false
+                                                                    }
+                                                                    className='w-1/2 xl:w-1/3'
+                                                                    src={
+                                                                        undrawFileManager
+                                                                    }
+                                                                    alt='File Manager'
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            )}
+                                        {status === 'success' &&
+                                            (data.folders.length ||
+                                                data.files.length > 0) > 0 && (
+                                                <tbody className='divide-y divide-gray-200'>
+                                                    {folders.map(folder => (
+                                                        <FolderRow
+                                                            key={folder.id}
+                                                            selectNode={
+                                                                selectNode
+                                                            }
+                                                            folder={folder}
+                                                            selectedNodes={
+                                                                selectedNodes
+                                                            }
+                                                            setSelectedNodes={
+                                                                setSelectedNodes
+                                                            }
+                                                            onMove={
+                                                                moveMutation.mutateAsync
+                                                            }
+                                                        />
+                                                    ))}
+                                                    {files.map(file => (
+                                                        <FileRow
+                                                            key={file.id}
+                                                            selectNode={
+                                                                selectNode
+                                                            }
+                                                            file={file}
+                                                            selectedNodes={
+                                                                selectedNodes
+                                                            }
+                                                            setSelectedNodes={
+                                                                setSelectedNodes
+                                                            }
+                                                        />
+                                                    ))}
+                                                </tbody>
+                                            )}
+                                    </table>
+                                </ScrollArea.Viewport>
+                            </ContextMenu.Trigger>
+                            <DriveContextMenu items={menuItems} />
+                        </ContextMenu.Root>
+                        <ScrollArea.Scrollbar
+                            className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                            orientation='vertical'>
+                            <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
+                        </ScrollArea.Scrollbar>
+                        <ScrollArea.Scrollbar
+                            className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
+                            orientation='horizontal'>
+                            <ScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
+                        </ScrollArea.Scrollbar>
+                        <ScrollArea.Corner className='bg-gray-500' />
+                    </ScrollArea.Root>
+                </div>
             </div>
-        </div>
+            <DragPreview />
+        </DndProvider>
     );
 }
 

@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
-import { apiRoutes, clientRoutes } from '@/lib/data/routes';
+import { clientRoutes } from '@/lib/data/routes';
 import { useFormMutation } from '@/lib/hooks/use-form-mutation';
 import { register as registerApi } from '@/lib/services/auth';
 import { addServerErrors } from '@/lib/utils/addServerErrors';
@@ -37,10 +37,7 @@ function Register() {
     const { push } = useRouter();
 
     const onSubmit = async (data: RegisterFormInputs) => {
-        const result = await registerApi<RegisterFormInputs>(
-            apiRoutes.identity.register,
-            data.email
-        );
+        const result = await registerApi<RegisterFormInputs>(data.email);
 
         if (!result.success) {
             addServerErrors(result.errors, setError, Object.keys(data));
@@ -58,7 +55,7 @@ function Register() {
 
     return (
         <motion.div
-            className='w-full'
+            className='w-full sm:max-w-[300px]'
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}>
