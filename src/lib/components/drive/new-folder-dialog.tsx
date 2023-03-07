@@ -203,8 +203,7 @@ export function NewFolderDialog({
                             type='text'
                             id='folderName'
                             autoComplete='folderName'
-                            {...register('folderName')}
-                            autoFocus>
+                            {...register('folderName')}>
                             Folder Name
                         </InputWithLabel>
 

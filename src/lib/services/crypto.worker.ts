@@ -412,6 +412,7 @@ export const CryptoService = {
     },
 
     generateRandomKeyForCompat: async () => {
+        await sodium.ready;
         return sodium.crypto_secretstream_xchacha20poly1305_keygen();
     },
 };

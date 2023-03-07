@@ -13,4 +13,5 @@ export type MenuItem = {
     textOnly: boolean;
     variant: 'primary' | 'secondary' | 'danger';
     disabled: boolean;
+    className?: string;
 };

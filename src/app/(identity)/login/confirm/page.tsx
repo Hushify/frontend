@@ -107,31 +107,35 @@ function Confirm() {
 
         const crypto = CryptoWorker.instance;
 
-        const keys = await crypto.decryptRequiredKeys(
-            data.password,
-            result.data.cryptoProperties
-        );
+        try {
+            const keys = await crypto.decryptRequiredKeys(
+                data.password,
+                result.data.cryptoProperties
+            );
 
-        const accessToken = await crypto.asymmetricDecrypt(
-            result.data.encryptedAccessToken,
-            result.data.accessTokenNonce,
-            result.data.serverPublicKey,
-            keys.asymmetricPrivateKey
-        );
+            const accessToken = await crypto.asymmetricDecrypt(
+                result.data.encryptedAccessToken,
+                result.data.accessTokenNonce,
+                result.data.serverPublicKey,
+                keys.asymmetricPrivateKey
+            );
 
-        setData({
-            status: 'authenticated',
-            masterKey: keys.masterKey,
-            publicKey:
-                result.data.cryptoProperties.asymmetricKeyBundle.publicKey,
-            privateKey: keys.asymmetricPrivateKey,
-            signingPublicKey:
-                result.data.cryptoProperties.signingKeyBundle.publicKey,
-            signingPrivateKey: keys.signingPrivateKey,
-            accessToken,
-        });
+            setData({
+                status: 'authenticated',
+                masterKey: keys.masterKey,
+                publicKey:
+                    result.data.cryptoProperties.asymmetricKeyBundle.publicKey,
+                privateKey: keys.asymmetricPrivateKey,
+                signingPublicKey:
+                    result.data.cryptoProperties.signingKeyBundle.publicKey,
+                signingPrivateKey: keys.signingPrivateKey,
+                accessToken,
+            });
 
-        push(clientRoutes.drive);
+            push(clientRoutes.drive);
+        } catch (error) {
+            setError('errors', { message: 'Wrong password.' });
+        }
     };
 
     const mutation = useFormMutation(onSubmit, setError);

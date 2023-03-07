@@ -36,7 +36,8 @@ export function DriveContextMenu({
                                     'text-brand-700 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-700':
                                         !item.variant ||
                                         item.variant === 'primary',
-                                }
+                                },
+                                item.className
                             )}>
                             <item.icon
                                 className={cn('h-4 w-4', {

@@ -19,6 +19,7 @@ import {
     ChevronUp,
     ChevronsUpDown,
     Download,
+    Eye,
     Folder,
     Loader,
     Pencil,
@@ -39,6 +40,7 @@ import { DragPreview } from '@/lib/components/drive/drag-preview';
 import { FileRow } from '@/lib/components/drive/file-row';
 import { FolderRow } from '@/lib/components/drive/folder-row';
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
+import { Preivew } from '@/lib/components/drive/preview';
 import { RenameDialog } from '@/lib/components/drive/rename-dialog';
 import { DriveToolbar } from '@/lib/components/drive/toolbar';
 import { MenuItem, MenuSeparator } from '@/lib/components/drive/types/menu';
@@ -405,6 +407,10 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
         }
     }, [selectedNodes]);
 
+    const [fileForPreview, setFileForPreview] = useState<FileNodeDecrypted>();
+
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
     const menuItems: (MenuItem | MenuSeparator)[] = useMemo(() => {
         if (selectedNodes.length <= 0) {
             return [
@@ -431,6 +437,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                     textOnly: false,
                     variant: 'secondary',
                     disabled: false,
+                    className: 'hidden md:flex',
                 },
                 {
                     type: 'item',
@@ -487,6 +494,34 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                 name: 'Rename',
                 action: () => setIsRenameOpen(true),
                 icon: Pencil,
+                textOnly: false,
+                variant: 'secondary',
+                disabled: false,
+            });
+        }
+
+        if (
+            selectedNodes.length == 1 &&
+            selectedNodes[0].type === 'file' &&
+            (selectedNodes[0].node.metadata.mimeType.startsWith('image/') ||
+                selectedNodes[0].node.metadata.mimeType.startsWith('video/') ||
+                selectedNodes[0].node.metadata.mimeType.startsWith(
+                    'application/pdf'
+                )) &&
+            // selectedNodes[0].node.metadata.mimeType.startsWith('image/') ||
+            // selectedNodes[0].node.metadata.mimeType.startsWith('image/')
+            selectedNodes[0].node.metadata.size <= 5 * 1024 * 1024
+        ) {
+            items.push({
+                type: 'item' as const,
+                name: 'Preview',
+                action: () => {
+                    setFileForPreview(
+                        selectedNodes[0].node as FileNodeDecrypted
+                    );
+                    setIsPreviewOpen(true);
+                },
+                icon: Eye,
                 textOnly: false,
                 variant: 'secondary',
                 disabled: false,
@@ -636,6 +671,14 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
                     <div ref={refRest}>
                         <div className='relative z-10'>
+                            {fileForPreview && (
+                                <Preivew
+                                    file={fileForPreview}
+                                    isPreviewOpen={isPreviewOpen}
+                                    setIsPreviewOpen={setIsPreviewOpen}
+                                />
+                            )}
+
                             <NewFolderDialog
                                 folders={data?.folders}
                                 currentFolderId={currentFolderId}

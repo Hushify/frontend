@@ -14,14 +14,14 @@ export const clientRoutes = {
         registerConfirm: '/register/confirm',
         recoveryQr: '/recovery-qr',
 
+        resetPassword: '/reset-password',
+        resetPasswordConfirm: '/reset-password/confirm',
+
         resendConfirmation: '/resend',
         resendConfirmationSuccess: '/resend/success',
 
         forgotPassword: '/forgot-password',
         forgotPasswordSuccess: '/forgot-password/success',
-
-        resetPassword: '/reset-password',
-        resetPasswordSuccess: '/reset-password/success',
     },
     drive: '/drive',
     trash: '/trash',

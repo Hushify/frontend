@@ -49,7 +49,9 @@ export default function ResetPassword() {
             email: data.email,
         });
 
-        push(`${clientRoutes.identity.registerConfirm}?${params.toString()}`);
+        push(
+            `${clientRoutes.identity.resetPasswordConfirm}?${params.toString()}`
+        );
     };
 
     const mutation = useFormMutation(onSubmit, setError);

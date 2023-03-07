@@ -37,7 +37,8 @@ export function DriveToolbar({
                                     'bg-brand-600 hover:bg-brand-800 focus:shadow-brand-400':
                                         !item.variant ||
                                         item.variant === 'primary',
-                                }
+                                },
+                                item.className
                             )}>
                             <item.icon
                                 className={cn('h-4 w-4', {
@@ -69,7 +70,7 @@ export function DriveToolbar({
                                     return (
                                         <DropdownMenu.Separator
                                             key={item.id}
-                                            className='w-px bg-gray-300'
+                                            className='m-[5px] h-[1px] bg-gray-300'
                                         />
                                     );
                                 }
@@ -90,7 +91,8 @@ export function DriveToolbar({
                                                 'text-brand-700 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-700':
                                                     !item.variant ||
                                                     item.variant === 'primary',
-                                            }
+                                            },
+                                            item.className
                                         )}>
                                         <item.icon
                                             className={cn('h-4 w-4', {
