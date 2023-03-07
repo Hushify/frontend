@@ -289,7 +289,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             }
         },
         onSuccess: () => {
-            setSelectedNodes([]);
+            clearSelection();
             refetch();
         },
     });
@@ -587,8 +587,11 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
     const divRef = useRef<HTMLDivElement>(null);
     const clearSelection = useCallback(() => setSelectedNodes([]), []);
     useClickDirect(divRef, clearSelection);
-
-    const moveMutation = useMoveNodes(currentFolderId, accessToken);
+    const moveMutation = useMoveNodes(
+        currentFolderId,
+        accessToken,
+        clearSelection
+    );
 
     return (
         <DndProvider
@@ -653,6 +656,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                     isRenameOpen={isRenameOpen}
                                     setIsRenameOpen={setIsRenameOpen}
                                     currentFolderId={currentFolderId}
+                                    onSuccess={clearSelection}
                                 />
                             )}
                         </div>

@@ -44,6 +44,7 @@ export function RenameDialog({
     isRenameOpen,
     setIsRenameOpen,
     type,
+    onSuccess,
 }: {
     node: FolderNodeDecrypted | FileNodeDecrypted;
     nodes: undefined | FolderNodeDecrypted[] | FileNodeDecrypted[];
@@ -51,6 +52,7 @@ export function RenameDialog({
     isRenameOpen: boolean;
     setIsRenameOpen: Dispatch<SetStateAction<boolean>>;
     type: 'folder' | 'file';
+    onSuccess: () => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -132,8 +134,6 @@ export function RenameDialog({
             );
 
             if (result.success) {
-                setIsRenameOpen(false);
-                resetForm();
                 queryClient.setQueryData<DriveList>([queryKey], queryData => {
                     if (!queryData) {
                         return undefined;
@@ -161,6 +161,9 @@ export function RenameDialog({
                         folders,
                     };
                 });
+                setIsRenameOpen(false);
+                resetForm();
+                onSuccess();
                 return null;
             }
 
@@ -171,13 +174,14 @@ export function RenameDialog({
         [
             node,
             nodes,
-            accessToken,
             type,
+            accessToken,
             setError,
-            setIsRenameOpen,
-            resetForm,
             queryClient,
             queryKey,
+            setIsRenameOpen,
+            resetForm,
+            onSuccess,
         ]
     );
 

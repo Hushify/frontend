@@ -1,14 +1,15 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Loader } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
-import { useCheckAuth } from '@/lib/hooks/use-check-auth';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { clientRoutes } from '@/lib/data/routes';
+import { useAuth } from '@/lib/hooks/use-auth';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -30,16 +31,19 @@ export function Providers({ children }: { children: ReactNode }) {
 
 export function AuthStateProvider({ children }: { children: ReactNode }) {
     const [loaded, setLoaded] = useState(false);
-    const status = useCheckAuth();
-    const hasRequiredKeys = useAuthStore(state => state.hasRequiredKeys);
+    const status = useAuth();
 
     useEffect(() => setLoaded(true), []);
 
-    if (!loaded || status === 'unauthenticated') {
+    if (!loaded) {
         return null;
     }
 
-    if (hasRequiredKeys() && status === 'authenticated') {
+    if (status === 'unauthenticated') {
+        return redirect(clientRoutes.identity.login);
+    }
+
+    if (status === 'authenticated') {
         return <>{children}</>;
     }
 

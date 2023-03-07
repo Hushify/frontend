@@ -13,7 +13,8 @@ import {
 
 export function useMoveNodes(
     currentFolderId: string | null,
-    accessToken: string
+    accessToken: string,
+    onSuccess: () => void
 ) {
     const queryClient = useQueryClient();
 
@@ -81,12 +82,13 @@ export function useMoveNodes(
                         ),
                     };
                 });
+                onSuccess();
                 return null;
             }
 
             throw new Error('Error!');
         },
-        [accessToken, queryClient, queryKey]
+        [accessToken, onSuccess, queryClient, queryKey]
     );
 
     return useMutation({

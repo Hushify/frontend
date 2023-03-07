@@ -1,44 +1,35 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { shallow } from 'zustand/shallow';
 
-import { clientRoutes } from '@/lib/data/routes';
 import { refreshToken } from '@/lib/services/auth';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
-export function useCheckAuth() {
+export function useAuth() {
     const forceRef = useRef(false);
     const authState = useAuthStore(state => state, shallow);
-    const { push } = useRouter();
 
     const getSession = useCallback(async () => {
         if (typeof location === 'undefined') {
-            return null;
+            return 'loading' as const;
+        }
+
+        if (authState.status === 'unauthenticated') {
+            return authState.status;
         }
 
         if (!authState.hasRequiredKeys()) {
             await authState.logout();
-            push(clientRoutes.identity.login);
-            return null;
-        }
-
-        if (authState.status === 'loggingout') {
-            return null;
-        }
-
-        if (authState.status === 'unauthenticated') {
-            push(clientRoutes.identity.login);
-            return null;
+            return authState.status;
         }
 
         if (authState.accessToken && !forceRef.current) {
             forceRef.current = true;
             authState.setData({ status: 'authenticated' });
-            return authState.accessToken;
+            return authState.status;
         }
 
         try {
@@ -46,7 +37,7 @@ export function useCheckAuth() {
 
             if (!result.success) {
                 await authState.logout();
-                return null;
+                return authState.status;
             }
 
             const crypto = CryptoWorker.cryptoWorker;
@@ -61,19 +52,31 @@ export function useCheckAuth() {
             authState.setData({ accessToken: decryptedAccessToken });
             authState.setData({ status: 'authenticated' });
             forceRef.current = true;
-
-            return decryptedAccessToken;
         } catch (e) {
             await authState.logout();
         }
-    }, [authState, push]);
 
-    useQuery(['refreshToken'], getSession, {
-        retry: false,
-        refetchOnWindowFocus: false,
-        refetchInterval: 1000 * 60 * 10,
-        refetchIntervalInBackground: true,
-    });
+        return authState.status;
+    }, [authState]);
 
-    return authState.status;
+    const { data, isLoading, isError } = useQuery(
+        ['refreshToken'],
+        getSession,
+        {
+            retry: false,
+            refetchOnWindowFocus: false,
+            refetchInterval: 1000 * 60 * 10,
+            refetchIntervalInBackground: true,
+        }
+    );
+
+    if (isError) {
+        return 'unauthenticated' as const;
+    }
+
+    if (isLoading) {
+        return 'loading' as const;
+    }
+
+    return data;
 }

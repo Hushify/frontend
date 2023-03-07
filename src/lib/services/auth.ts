@@ -33,7 +33,8 @@ export async function register<T>(
 export async function registerConfirm<T>(
     email: string,
     code: string,
-    cryptoProperties: UserCryptoProperties
+    cryptoProperties: UserCryptoProperties,
+    captcha: string
 ): Promise<ResponseMessage<T, undefined>> {
     const response = await fetch(apiRoutes.identity.registerConfirm, {
         method: 'POST',
@@ -43,6 +44,7 @@ export async function registerConfirm<T>(
             email,
             code,
             cryptoProperties,
+            captcha,
         }),
         headers: {
             'Content-Type': 'application/json',

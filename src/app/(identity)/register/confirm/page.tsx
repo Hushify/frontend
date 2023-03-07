@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -100,7 +101,19 @@ function Confirm() {
         );
     });
 
+    const captchaRef = useRef<TurnstileInstance | undefined>();
+
     const onSubmit = async (data: ConfirmFormInputs) => {
+        const captchaResponse = captchaRef.current?.getResponse();
+        if (!captchaResponse) {
+            setError('errors', {
+                type: 'captcha',
+                message: 'Please complete the captcha.',
+            });
+            captchaRef.current?.reset();
+            return null;
+        }
+
         const pwStrengthResult = checkPasswordStrength(
             data.password,
             data.email
@@ -120,7 +133,8 @@ function Confirm() {
         const result = await registerConfirm<ConfirmFormInputs>(
             data.email,
             data.code,
-            keys.cryptoProperties
+            keys.cryptoProperties,
+            captchaResponse
         );
 
         if (result.success) {
@@ -235,6 +249,17 @@ function Confirm() {
                         )}
                     </div>
                 </InputWithLabel>
+                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                    <div className='flex flex-col gap-1'>
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                            options={{
+                                theme: 'light',
+                            }}
+                            ref={captchaRef}
+                        />
+                    </div>
+                )}
                 <button
                     type='submit'
                     disabled={

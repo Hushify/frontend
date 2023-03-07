@@ -36,7 +36,7 @@ export default function Breadcrumbs({
     workspaceId,
 }: BreadcrumbsProps) {
     return (
-        <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 py-2 px-6 text-gray-600'>
+        <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 py-2 px-4 text-gray-700'>
             <MainCrumb
                 workspaceId={workspaceId}
                 totalItems={items.length}
@@ -112,9 +112,9 @@ function MainCrumb({
             <Link
                 href={clientRoutes.drive}
                 className={cn('flex items-center gap-1', {
-                    'text-brand-600': totalItems === 0,
+                    'text-brand-700': totalItems === 0,
                 })}>
-                <HardDrive className='h-4 w-4' />
+                <HardDrive className='hidden h-4 w-4' />
                 <span>Home</span>
             </Link>
         </li>
@@ -177,12 +177,12 @@ function Crumb({
                 <Link
                     href={`${clientRoutes.drive}/${item.id}`}
                     className={cn('flex items-center gap-1', {
-                        'text-brand-600': idx === totalItems - 1,
+                        'text-brand-700': idx === totalItems - 1,
                     })}>
                     {idx === totalItems - 1 ? (
-                        <FolderOpen className='h-4 w-4' />
+                        <FolderOpen className='hidden h-4 w-4' />
                     ) : (
-                        <Folder className='h-4 w-4' />
+                        <Folder className='hidden h-4 w-4' />
                     )}
                     <span>{item.metadata.name}</span>
                 </Link>

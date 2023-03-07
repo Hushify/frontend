@@ -4,11 +4,7 @@ import { persist } from 'zustand/middleware';
 import { logout } from '@/lib/services/auth';
 import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
 
-export type AuthStatus =
-    | 'unauthenticated'
-    | 'authenticated'
-    | 'loading'
-    | 'loggingout';
+export type AuthStatus = 'unauthenticated' | 'authenticated' | 'loading';
 
 export type AuthState = {
     accessToken: string | null;
@@ -59,7 +55,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 get().hasRequiredKeys() && get().status === 'authenticated',
 
             logout: async () => {
-                set({ ...initialAuthState, status: 'loggingout' });
                 try {
                     await logout();
                 } catch {}

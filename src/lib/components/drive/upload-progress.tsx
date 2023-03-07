@@ -1,7 +1,9 @@
 'use client';
 
+import { Icon } from '@fluentui/react/lib/Icon';
 import * as Accordion from '@radix-ui/react-accordion';
-import { ChevronDown, File, RefreshCw, X } from 'lucide-react';
+import { getFileTypeIconProps } from '@uifabric/file-type-icons';
+import { ChevronDown, RefreshCw, X } from 'lucide-react';
 
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useUploadStore } from '@/lib/stores/upload-store';
@@ -57,9 +59,14 @@ export function UploadProgressBox() {
                                     key={fileWithState.trackingId}>
                                     <div className='flex items-center justify-between gap-4'>
                                         <div className='flex w-[180px] items-center gap-1 sm:w-[292px]'>
-                                            <File
-                                                className='shrink-0'
-                                                size={16}
+                                            <Icon
+                                                className='h-4 w-4 shrink-0'
+                                                {...getFileTypeIconProps({
+                                                    extension:
+                                                        fileWithState.fileWithVersion.file.name
+                                                            .split('.')
+                                                            .at(-1),
+                                                })}
                                             />
                                             <div
                                                 className='w-[160px] truncate text-sm'
