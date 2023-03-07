@@ -168,7 +168,7 @@ export function FolderRow({
                     <Link
                         onClick={e => e.stopPropagation()}
                         href={`${clientRoutes.drive}/${folder.id}`}
-                        className='max-w-[8rem] truncate text-sm md:max-w-full'>
+                        className='max-w-[8rem] truncate text-sm sm:max-w-[32rem] md:max-w-full'>
                         {folder.metadata.name}
                     </Link>
                 </div>

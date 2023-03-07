@@ -92,6 +92,7 @@ export function RenameDialog({
                     setError,
                     Object.keys(data)
                 );
+                throw new Error('Rename failed!');
                 return null;
             }
 
@@ -106,6 +107,7 @@ export function RenameDialog({
                     setError,
                     Object.keys(data)
                 );
+                throw new Error('Rename failed!');
                 return null;
             }
 
@@ -168,7 +170,6 @@ export function RenameDialog({
             }
 
             addServerErrors(result.errors, setError, Object.keys(data));
-
             throw new Error('Rename failed!');
         },
         [
@@ -185,17 +186,13 @@ export function RenameDialog({
         ]
     );
 
-    const mutation = useFormMutation(
-        async (data: RenameInputs) => {
-            await toast.promise(onSubmit(data), {
-                loading: 'Renaming...',
-                success: `${type === 'file' ? 'File' : 'Folder'} renamed!`,
-                error: 'Rename failed!',
-            });
-        },
-        setError,
-        () => toast.error('Rename failed!')
-    );
+    const mutation = useFormMutation(async (data: RenameInputs) => {
+        await toast.promise(onSubmit(data), {
+            loading: 'Renaming...',
+            success: `${type === 'file' ? 'File' : 'Folder'} renamed!`,
+            error: 'Rename failed!',
+        });
+    }, setError);
 
     return (
         <Dialog.Root
@@ -225,11 +222,6 @@ export function RenameDialog({
                         onSubmit={handleSubmit(data =>
                             mutation.mutateAsync(data)
                         )}>
-                        <div className='flex items-center gap-2'>
-                            <span>Current Name:</span>
-                            <span>{node.metadata.name}</span>
-                        </div>
-
                         <small className='text-red-600'>
                             {errors.errors?.message}
                         </small>

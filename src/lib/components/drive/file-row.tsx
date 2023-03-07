@@ -124,7 +124,7 @@ export function FileRow({
                             extension: file.metadata.name.split('.').at(-1),
                         })}
                     />
-                    <span className='max-w-[8rem] truncate text-sm md:max-w-full'>
+                    <span className='max-w-[8rem] truncate text-sm sm:max-w-[16rem] md:max-w-full'>
                         {file.metadata.name}
                     </span>
                 </div>
