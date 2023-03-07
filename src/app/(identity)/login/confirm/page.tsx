@@ -27,8 +27,11 @@ type ConfirmFormInputs = {
 const confirmSchema = zod
     .object({
         email: zod.string().email(),
-        code: zod.string(),
-        password: zod.string().min(10).max(64),
+        code: zod.string().length(6, 'Code must be exactly 6 characters.'),
+        password: zod
+            .string()
+            .min(10, 'Password must be at least 10 characters long.')
+            .max(64, 'Password can not exceed 64 characters.'),
     })
     .required();
 
