@@ -260,6 +260,7 @@ function Confirm() {
                                 theme: 'light',
                             }}
                             ref={captchaRef}
+                            onError={captchaRef?.current?.reset}
                             autoResetOnExpire
                         />
                     </div>
