@@ -3,8 +3,16 @@ import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
 import CryptoWorker from '@/lib/services/comlink-crypto';
-import UploadService from '@/lib/services/comlink-wrappers/comlink-uploader';
-import { proxy } from '@/lib/utils/comlink';
+import UploadWorker from '@/lib/services/comlink-wrappers/comlink-uploader';
+import { UploadService } from '@/lib/services/upload';
+
+const UploaderInstance = UploadWorker.instance.checkCompat().then(isCompat => {
+    if (isCompat) {
+        return UploadWorker.instance;
+    } else {
+        return UploadService;
+    }
+});
 
 const uploadQueue = new PQueue({
     concurrency: 5,
@@ -84,7 +92,8 @@ export const useUploadStore = create<UploadState & UploadActions>(
             accessToken: string,
             onUploadCb: () => void
         ) => {
-            const worker = CryptoWorker.cryptoWorker;
+            const Uploader = await UploaderInstance;
+            const worker = CryptoWorker.instance;
 
             const filesToAdd: FileWithState[] = files.map(
                 file =>
@@ -112,7 +121,7 @@ export const useUploadStore = create<UploadState & UploadActions>(
                     setFileProperty(file.trackingId, 'state', 'Uploading');
                     try {
                         const resp =
-                            await UploadService.instance.prepareFileForMultipartUpload(
+                            await Uploader.prepareFileForMultipartUpload(
                                 file.abortController.signal,
                                 parentFolderId,
                                 file.fileWithVersion.file.name,
@@ -151,14 +160,15 @@ export const useUploadStore = create<UploadState & UploadActions>(
                             );
                         };
 
-                        await UploadService.instance.uploadMultipart(
+                        await UploadService.uploadMultipart(
                             file.abortController.signal,
                             file.fileWithVersion.file,
                             resp.fileKey,
                             accessToken,
                             resp.data.fileId,
                             resp.data.parts,
-                            proxy(onProgress)
+                            // proxy(onProgress)
+                            onProgress
                         );
 
                         setFileProperty(file.trackingId, 'state', 'Uploaded');
@@ -177,7 +187,7 @@ export const useUploadStore = create<UploadState & UploadActions>(
                                 : (error as Error).message
                         );
                         if (file.id) {
-                            await UploadService.instance.cancelMultipart(
+                            await UploadService.cancelMultipart(
                                 file.id,
                                 accessToken
                             );

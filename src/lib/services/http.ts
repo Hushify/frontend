@@ -46,7 +46,7 @@ authenticatedAxiosInstance.interceptors.response.use(
                 return Promise.reject(error);
             }
 
-            const crypto = CryptoWorker.cryptoWorker;
+            const crypto = CryptoWorker.instance;
 
             const decryptedAccessToken = await crypto.asymmetricDecrypt(
                 result.data.encryptedAccessToken,

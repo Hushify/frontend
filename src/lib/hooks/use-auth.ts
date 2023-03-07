@@ -40,7 +40,7 @@ export function useAuth() {
                 return authState.status;
             }
 
-            const crypto = CryptoWorker.cryptoWorker;
+            const crypto = CryptoWorker.instance;
 
             const decryptedAccessToken = await crypto.asymmetricDecrypt(
                 result.data.encryptedAccessToken,

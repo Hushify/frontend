@@ -37,7 +37,7 @@ export const UploadService = {
             encryptedSize / AMZ_MIN_CHUNK_SIZE
         );
 
-        const cryptoWorker = CryptoWorker.cryptoWorker;
+        const cryptoWorker = CryptoWorker.instance;
         const { fileKey, fileKeyB64, encryptedFileKey, nonce } =
             await cryptoWorker.generateFileKey(currentFolderKey);
 
@@ -89,7 +89,7 @@ export const UploadService = {
         parts: { partNumber: number; preSignedUrl: string }[],
         onProgress: (uploaded: number) => void
     ) => {
-        const cryptoWorker = CryptoWorker.cryptoWorker;
+        const cryptoWorker = CryptoWorker.instance;
         const { state, header } = await cryptoWorker.streamingEncryptionInit(
             fileKey
         );
@@ -195,5 +195,20 @@ export const UploadService = {
                 },
             }
         );
+    },
+
+    checkCompat: async () => {
+        try {
+            const key = CryptoWorker.instance.generateRandomKeyForCompat();
+            if (!key) {
+                return false;
+            }
+
+            return true;
+        } catch {
+            return false;
+        }
+
+        return false;
     },
 };

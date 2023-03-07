@@ -3,10 +3,14 @@ import { CryptoService } from '@/lib/services/crypto.worker';
 import { Remote, wrap } from '@/lib/utils/comlink';
 
 class CryptoWorker {
-    public cryptoWorker!: Remote<typeof CryptoService>;
+    public instance!: Remote<typeof CryptoService>;
 
     constructor() {
         if (typeof Worker === 'undefined') {
+            return;
+        }
+
+        if (this.instance) {
             return;
         }
 
@@ -18,7 +22,7 @@ class CryptoWorker {
             }
         );
 
-        this.cryptoWorker = wrap<typeof CryptoService>(worker);
+        this.instance = wrap<typeof CryptoService>(worker);
     }
 }
 

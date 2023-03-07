@@ -89,7 +89,7 @@ export class StreamDecrypter {
         chunk: Uint8Array,
         controller: TransformStreamDefaultController<Uint8Array>
     ) {
-        const worker = CryptoWorker.cryptoWorker;
+        const worker = CryptoWorker.instance;
 
         if (this.chunkIndex === 0) {
             this.state = await worker.streamingDecryptionInit(

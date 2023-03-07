@@ -14,6 +14,6 @@ export function useDriveList(
         : apiRoutes.drive.list;
 
     return useQuery([queryKey], () =>
-        list(queryKey, accessToken, masterKey, CryptoWorker.cryptoWorker)
+        list(queryKey, accessToken, masterKey, CryptoWorker.instance)
     );
 }

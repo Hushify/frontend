@@ -62,7 +62,7 @@ export function DriveToolbar({
                     <DropdownMenu.Portal>
                         <DropdownMenu.Content
                             align='start'
-                            className='min-w-[220px] rounded-md bg-white p-1 shadow data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade'
+                            className='min-w-[220px] rounded-md border border-gray-300 bg-white p-1 shadow-xl data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade'
                             sideOffset={5}>
                             {items.map(item => {
                                 if (item.type === 'separator') {

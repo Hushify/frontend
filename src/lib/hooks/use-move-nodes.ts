@@ -31,7 +31,7 @@ export function useMoveNodes(
             destinationFolderId: string;
             destinationFolderKey: string;
         }) => {
-            const crypto = CryptoWorker.cryptoWorker;
+            const crypto = CryptoWorker.instance;
 
             const currentDate = new Date().toUTCString();
 

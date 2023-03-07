@@ -109,7 +109,7 @@ export function RenameDialog({
                 return null;
             }
 
-            const crypto = CryptoWorker.cryptoWorker;
+            const crypto = CryptoWorker.instance;
 
             node.metadata.name = data.name;
             node.metadata.modified = new Date().toUTCString();

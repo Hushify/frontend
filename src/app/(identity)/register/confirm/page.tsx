@@ -127,7 +127,7 @@ function Confirm() {
             return null;
         }
 
-        const crypto = CryptoWorker.cryptoWorker;
+        const crypto = CryptoWorker.instance;
         const keys = await crypto.generateRequiredKeys(data.password);
 
         const result = await registerConfirm<ConfirmFormInputs>(

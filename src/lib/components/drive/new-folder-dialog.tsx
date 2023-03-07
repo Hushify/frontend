@@ -94,7 +94,7 @@ export function NewFolderDialog({
                 return null;
             }
 
-            const crypto = CryptoWorker.cryptoWorker;
+            const crypto = CryptoWorker.instance;
 
             const keyBundle = await crypto.generateFolderKey(currentFolderKey);
 

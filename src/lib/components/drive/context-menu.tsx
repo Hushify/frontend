@@ -10,7 +10,7 @@ export function DriveContextMenu({
 }) {
     return (
         <ContextMenu.Portal>
-            <ContextMenu.Content className='min-w-[192px] overflow-hidden rounded-md bg-white p-[5px] shadow-md'>
+            <ContextMenu.Content className='min-w-[192px] overflow-hidden rounded-md border border-gray-300 bg-white p-[5px] shadow-xl'>
                 {items.map(item => {
                     if (item.type === 'separator') {
                         return (
@@ -27,7 +27,7 @@ export function DriveContextMenu({
                             onSelect={item.action}
                             disabled={item.disabled}
                             className={cn(
-                                'relative flex select-none items-center gap-1 rounded-sm py-2 pr-1 pl-6 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
+                                'relative flex select-none items-center gap-1 rounded-sm py-2 pr-1 pl-3 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
                                 {
                                     'text-red-700 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-700':
                                         item.variant === 'danger',
