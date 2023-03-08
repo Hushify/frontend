@@ -106,10 +106,9 @@ export function Preivew({
     return (
         <Dialog.Root open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
             <Dialog.Portal>
-                <Dialog.Overlay className='fixed inset-0 bg-gray-700/50 data-[state=open]:animate-overlayShow' />
-                <Dialog.Content className='fixed top-1/2 left-1/2 flex h-full max-h-[85vh] w-full max-w-[90vw] -translate-x-1/2 -translate-y-1/2 flex-col gap-1 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-contentShow'>
+                <Dialog.Content className='fixed inset-0 flex h-full w-full flex-col gap-1 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-previewShow'>
                     <div className='flex shrink-0 items-start justify-between gap-2'>
-                        <Dialog.Title className='m-0 text-[17px] font-medium text-gray-900'>
+                        <Dialog.Title className='m-0 font-medium text-gray-900'>
                             <span>Preview: </span>
                             <span className='break-all font-normal'>
                                 {file.metadata.name}
@@ -133,7 +132,7 @@ export function Preivew({
                             </Dialog.Close>
                         </div>
                     </div>
-                    <div className='relative m-6 flex-auto'>
+                    <div className='relative my-4 flex-auto'>
                         {fileToPreview &&
                             file.metadata.mimeType.startsWith('image/') && (
                                 <Image

@@ -42,6 +42,14 @@ module.exports = {
                         transform: 'translate(-50%, -50%) scale(1)',
                     },
                 },
+                previewShow: {
+                    from: {
+                        opacity: 0,
+                    },
+                    to: {
+                        opacity: 1,
+                    },
+                },
                 sidebarContentShow: {
                     from: {
                         transform: 'translate(-50%, 0)',
@@ -70,6 +78,7 @@ module.exports = {
                     'slideRightAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)',
                 overlayShow: 'overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
                 contentShow: 'contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+                previewShow: 'previewShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
                 sidebarContentShow:
                     'sidebarContentShow 250ms cubic-bezier(0.16, 1, 0.3, 1)',
                 slideDown: 'slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1)',
