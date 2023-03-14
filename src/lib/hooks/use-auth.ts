@@ -59,24 +59,16 @@ export function useAuth() {
         return authState.status;
     }, [authState]);
 
-    const { data, isLoading, isError } = useQuery(
-        ['refreshToken'],
-        getSession,
-        {
-            retry: false,
-            refetchOnWindowFocus: false,
-            refetchInterval: 1000 * 60 * 10,
-            refetchIntervalInBackground: true,
-        }
-    );
-
-    if (isError) {
-        return 'unauthenticated' as const;
-    }
+    const { isLoading } = useQuery(['refreshToken'], getSession, {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchInterval: 1000 * 60 * 10,
+        refetchIntervalInBackground: true,
+    });
 
     if (isLoading) {
         return 'loading' as const;
     }
 
-    return data;
+    return authState.status;
 }

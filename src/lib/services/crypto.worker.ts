@@ -253,7 +253,7 @@ export const CryptoService = {
         return folderKey;
     },
 
-    generateFileKey: async (folderKey: string) => {
+    generateFileKey: async (key: string) => {
         await sodium.ready;
 
         const fileKey = sodium.crypto_secretstream_xchacha20poly1305_keygen();
@@ -265,7 +265,7 @@ export const CryptoService = {
         const encryptedFileKey = sodium.crypto_secretbox_easy(
             fileKey,
             nonce,
-            sodium.from_base64(folderKey),
+            sodium.from_base64(key),
             'base64'
         );
 
@@ -278,7 +278,7 @@ export const CryptoService = {
     },
 
     decryptFileKey: async (
-        folderKey: string,
+        key: string,
         encryptedFileKey: string,
         fileKeyNonce: string
     ) => {
@@ -287,7 +287,7 @@ export const CryptoService = {
         const fileKey = sodium.crypto_secretbox_open_easy(
             sodium.from_base64(encryptedFileKey),
             sodium.from_base64(fileKeyNonce),
-            sodium.from_base64(folderKey),
+            sodium.from_base64(key),
             'base64'
         );
 

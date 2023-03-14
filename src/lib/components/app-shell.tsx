@@ -2,8 +2,8 @@
 
 import {
     Fragment,
+    HTMLAttributeAnchorTarget,
     ReactNode,
-    SVGProps,
     useCallback,
     useMemo,
     useState,
@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     HardDrive,
     LogOut,
+    LucideIcon,
     Mail,
     Menu,
     PieChart,
@@ -32,19 +33,15 @@ import { usePrefStore } from '@/lib/stores/pref-store';
 import { cn } from '@/lib/utils/cn';
 import humanFileSize from '@/lib/utils/humanizedFileSize';
 
-export interface Navigation {
-    name: string;
+export type Navigation = {
     href: string;
-    icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
-}
-
-export interface UserNavigation {
     name: string;
-    href?: string;
-    action?: () => void;
-}
+    icon: LucideIcon;
+    target?: HTMLAttributeAnchorTarget;
+    rel?: string;
+};
 
-const navigation = [
+const navigation: Navigation[] = [
     {
         href: clientRoutes.drive,
         name: 'Drive',
@@ -64,6 +61,8 @@ const navigation = [
         href: 'mailto:feedback@hushify.io',
         name: 'Feedback',
         icon: Mail,
+        target: '_blank',
+        rel: 'noreferrer',
     },
 ];
 
@@ -142,6 +141,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                                             <Link
                                                 key={item.name}
                                                 href={item.href}
+                                                target={item.target}
+                                                rel={item.rel}
                                                 className={cn(
                                                     path?.startsWith(item.href)
                                                         ? 'border-l-4 border-brand-600 bg-brand-50 text-brand-600'
@@ -243,6 +244,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                             const LinkComp = (
                                 <Link
                                     href={item.href}
+                                    target={item.target}
+                                    rel={item.rel}
                                     className={cn(
                                         path?.startsWith(item.href)
                                             ? 'bg-brand-50 text-brand-600'
@@ -333,7 +336,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </nav>
                 </div>
 
-                <main className='flex-auto'>{children}</main>
+                <main className='flex-auto bg-white'>{children}</main>
             </div>
         </div>
     );

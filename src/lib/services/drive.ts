@@ -8,26 +8,20 @@ import {
 import { authenticatedAxiosInstance } from '@/lib/services/http';
 import { Remote } from '@/lib/utils/comlink';
 
-export type Breadcrumb = {
+export type Node = {
     id: string;
     metadataBundle: MetadataBundle;
     keyBundle: SecretKeyBundle;
+    isShared: boolean;
 };
 
-export type FileNode = {
-    id: string;
-    metadataBundle: MetadataBundle;
-    encryptedSize: number;
-    keyBundle: SecretKeyBundle;
+export type Breadcrumb = Node;
+
+export type FileNode = Node & {
     url: string;
-    nonce?: string;
 };
 
-export type FolderNode = {
-    id: string;
-    metadataBundle: MetadataBundle;
-    keyBundle: SecretKeyBundle;
-};
+export type FolderNode = Node;
 
 export type DriveListResponse = {
     workspaceFolderId: string;
@@ -39,37 +33,36 @@ export type DriveListResponse = {
     folders: FolderNode[];
 };
 
-export type FolderMetadata = {
+export type NodeMetadata = {
     name: string;
-    modified: string;
     created: string;
+    modified: string;
 };
 
-export type FileMetadata = {
-    name: string;
+export type FolderMetadata = NodeMetadata;
+
+export type FileMetadata = NodeMetadata & {
     size: number;
-    created: string;
-    modified: string;
     mimeType: string;
 };
 
-export type FolderNodeDecrypted = {
+export type DecryptedNode = {
     id: string;
-    metadata: FolderMetadata;
     key: string;
+    isShared: boolean;
 };
 
-export type FileNodeDecrypted = {
-    id: string;
+export type FolderNodeDecrypted = DecryptedNode & {
+    metadata: FolderMetadata;
+};
+
+export type FileNodeDecrypted = DecryptedNode & {
     metadata: FileMetadata;
-    key: string;
     url: string;
 };
 
-export type BreadcrumbDecrypted = {
-    id: string;
+export type BreadcrumbDecrypted = DecryptedNode & {
     metadata: FolderMetadata;
-    key: string;
 };
 
 export type DriveList = {
@@ -117,6 +110,7 @@ export async function list(
             id: crumb.id,
             key,
             metadata: JSON.parse(metadata) as FolderMetadata,
+            isShared: crumb.isShared,
         });
     }, Promise.resolve());
 
@@ -141,6 +135,7 @@ export async function list(
                 id: f.id,
                 metadata: JSON.parse(metadata) as FolderMetadata,
                 key,
+                isShared: f.isShared,
             };
         })
     );
@@ -164,7 +159,7 @@ export async function list(
                 metadata: JSON.parse(metadata) as FileMetadata,
                 key,
                 url: f.url,
-                nonce: f.nonce,
+                isShared: f.isShared,
             };
         })
     );

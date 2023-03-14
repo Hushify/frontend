@@ -108,7 +108,6 @@ export function RenameDialog({
                     Object.keys(data)
                 );
                 throw new Error('Rename failed!');
-                return null;
             }
 
             const crypto = CryptoWorker.instance;

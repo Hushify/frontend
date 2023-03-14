@@ -39,13 +39,13 @@ import { DriveContextMenu } from '@/lib/components/drive/context-menu';
 import { DragPreview } from '@/lib/components/drive/drag-preview';
 import { FileRow } from '@/lib/components/drive/file-row';
 import { FolderRow } from '@/lib/components/drive/folder-row';
+import { FullscreenUpload } from '@/lib/components/drive/fullscreen-upload';
 import { NewFolderDialog } from '@/lib/components/drive/new-folder-dialog';
 import { Preivew } from '@/lib/components/drive/preview';
 import { RenameDialog } from '@/lib/components/drive/rename-dialog';
 import { DriveToolbar } from '@/lib/components/drive/toolbar';
 import { MenuItem, MenuSeparator } from '@/lib/components/drive/types/menu';
 import { UploadProgressBox } from '@/lib/components/drive/upload-progress';
-import { FullscreenUpload } from '@/lib/components/fullscreen-upload';
 import { useClickDirect } from '@/lib/hooks/use-click-direct';
 import { useDriveList } from '@/lib/hooks/use-drive-list';
 import { useMoveNodes } from '@/lib/hooks/use-move-nodes';
@@ -505,11 +505,10 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
             selectedNodes[0].type === 'file' &&
             (selectedNodes[0].node.metadata.mimeType.startsWith('image/') ||
                 selectedNodes[0].node.metadata.mimeType.startsWith('video/') ||
+                selectedNodes[0].node.metadata.mimeType.startsWith('audio/') ||
                 selectedNodes[0].node.metadata.mimeType.startsWith(
                     'application/pdf'
                 )) &&
-            // selectedNodes[0].node.metadata.mimeType.startsWith('image/') ||
-            // selectedNodes[0].node.metadata.mimeType.startsWith('image/')
             selectedNodes[0].node.metadata.size <= 5 * 1024 * 1024
         ) {
             items.push({
@@ -653,7 +652,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
 
                 <UploadProgressBox />
 
-                <div className='relative h-full bg-white' ref={ref}>
+                <div className='relative h-full' ref={ref}>
                     {status === 'error' && (
                         <div className='absolute inset-0 grid place-items-center text-red-600'>
                             Error
@@ -678,6 +677,8 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                     setIsPreviewOpen={setIsPreviewOpen}
                                 />
                             )}
+
+                            {/* <Share /> */}
 
                             <NewFolderDialog
                                 folders={data?.folders}
@@ -794,7 +795,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                 </th>
                                                 <th
                                                     scope='col'
-                                                    className='w-24 py-3 text-left md:w-48'>
+                                                    className='w-48 py-3 text-left lg:w-56'>
                                                     <button
                                                         type='button'
                                                         onClick={() => {
@@ -839,7 +840,7 @@ function Drive({ params: { slug } }: { params: { slug?: string[] } }) {
                                                 </th>
                                                 <th
                                                     scope='col'
-                                                    className='hidden w-40 py-3 text-left md:table-cell'>
+                                                    className='hidden w-28 py-3 text-left md:table-cell lg:w-48'>
                                                     <button
                                                         type='button'
                                                         onClick={() => {

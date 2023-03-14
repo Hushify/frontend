@@ -157,6 +157,17 @@ export function Preivew({
                                 </div>
                             )}
                         {fileToPreview &&
+                            file.metadata.mimeType.startsWith('audio/') && (
+                                <div className='absolute inset-0 flex h-full w-full items-center justify-center'>
+                                    <audio controls autoPlay>
+                                        <source
+                                            src={fileToPreview}
+                                            type={file.metadata.mimeType}
+                                        />
+                                    </audio>
+                                </div>
+                            )}
+                        {fileToPreview &&
                             file.metadata.mimeType.startsWith(
                                 'application/pdf'
                             ) && (

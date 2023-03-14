@@ -134,6 +134,7 @@ export function NewFolderDialog({
                             id: result.data.id,
                             key: keyBundle.folderKeyB64,
                             metadata,
+                            isShared: false,
                         },
                     ];
 

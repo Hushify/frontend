@@ -1,7 +1,7 @@
 import '@/styles/tw.css';
 import { ReactNode } from 'react';
 
-import { Providers } from '@/lib/components/providers';
+import { Providers } from '@/lib/components/provider';
 import { cn } from '@/lib/utils/cn';
 
 export const metadata = {
