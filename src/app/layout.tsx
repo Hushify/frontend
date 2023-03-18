@@ -10,14 +10,14 @@ export const metadata = {
         template: '%s',
     },
     keywords: 'Hushify',
-    description: 'Hushify, an opensource end to end encrypted ecosystem.',
+    description: 'Privacy built on open source.',
     robots: {
         index: true,
         follow: true,
     },
     themeColor: '#4f46e5',
     openGraph: {
-        description: 'Hushify, an opensource end to end encrypted ecosystem.',
+        description: 'Privacy built on open source.',
         type: 'website',
         title: {
             default: 'Hushify',
@@ -28,7 +28,7 @@ export const metadata = {
         }/icon.png`,
     },
     twitter: {
-        description: 'Hushify, an opensource end to end encrypted ecosystem.',
+        description: 'Privacy built on open source.',
         title: {
             default: 'Hushify',
             template: '%s',
@@ -50,7 +50,7 @@ export const metadata = {
     },
 };
 
-function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <html lang='en' dir='ltr'>
             <head />
@@ -63,5 +63,3 @@ function RootLayout({ children }: { children: ReactNode }) {
         </html>
     );
 }
-
-export default RootLayout;

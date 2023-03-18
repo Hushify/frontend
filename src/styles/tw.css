@@ -55,7 +55,8 @@
         @apply focus:ring-brand-600;
     }
 
-    button, a[type='button'] {
+    button,
+    a[type='button'] {
         @apply focus:outline-none;
         @apply focus-visible:ring focus-visible:ring-offset-2;
     }

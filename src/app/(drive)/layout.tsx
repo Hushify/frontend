@@ -7,12 +7,10 @@ export const metadata = {
     title: 'Hushify Drive',
 };
 
-function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
     return (
         <AuthStateProvider>
             <AppShell>{children}</AppShell>
         </AuthStateProvider>
     );
 }
-
-export default RootLayout;

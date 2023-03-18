@@ -1,8 +1,8 @@
-import { CryptoService } from '@/lib/services/crypto';
+import { UploadService } from '@/lib/services/upload.worker';
 import { Remote, wrap } from '@/lib/utils/comlink';
 
-class CryptoWorker {
-    public instance!: Remote<typeof CryptoService>;
+class UploadWorker {
+    instance!: Remote<typeof UploadService>;
 
     constructor() {
         if (typeof Worker === 'undefined') {
@@ -14,16 +14,16 @@ class CryptoWorker {
         }
 
         const worker = new Worker(
-            new URL('@/lib/services/crypto.worker', import.meta.url),
+            new URL('@/lib/services/upload.worker', import.meta.url),
             {
                 type: 'module',
-                name: 'hushify-crypto-worker',
+                name: 'hushify-upload-worker',
             }
         );
 
-        this.instance = wrap<typeof CryptoService>(worker);
+        this.instance = wrap<typeof UploadService>(worker);
     }
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default new CryptoWorker();
+export default new UploadWorker();

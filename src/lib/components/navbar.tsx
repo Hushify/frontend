@@ -11,12 +11,19 @@ export function Navbar() {
                     <Logo className='w-6' />
                     <span className='text-2xl font-medium'>Hushify</span>
                 </Link>
-                <ul className='flex items-center justify-center gap-4 md:gap-8'>
+                <ul className='flex items-center justify-center gap-4 md:gap-6'>
                     <li>
                         <Link
                             href={clientRoutes.blog.index}
                             className='text-lg hover:underline'>
                             Blog
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={clientRoutes.identity.register}
+                            className='rounded bg-brand-600 py-1.5 px-2 font-medium text-white'>
+                            Get Started
                         </Link>
                     </li>
                 </ul>

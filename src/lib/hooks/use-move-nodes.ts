@@ -4,12 +4,12 @@ import { toast } from 'react-hot-toast';
 
 import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
+import { moveNodes } from '@/lib/services/drive';
 import {
     DriveList,
     FileNodeDecrypted,
     FolderNodeDecrypted,
-    moveNodes,
-} from '@/lib/services/drive';
+} from '@/lib/types/drive';
 
 export function useMoveNodes(
     currentFolderId: string | null,

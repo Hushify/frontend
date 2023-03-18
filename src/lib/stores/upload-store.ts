@@ -3,7 +3,7 @@ import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
 import CryptoWorker from '@/lib/services/comlink-crypto';
-import UploadWorker from '@/lib/services/comlink-wrappers/comlink-uploader';
+import UploadWorker from '@/lib/services/comlink-uploader';
 import { UploadService } from '@/lib/services/upload';
 
 const UploaderInstance = UploadWorker.instance.checkCompat().then(isCompat => {

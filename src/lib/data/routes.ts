@@ -12,7 +12,7 @@ export const clientRoutes = {
 
         register: '/register',
         registerConfirm: '/register/confirm',
-        recoveryQr: '/recovery-qr',
+        recoveryKey: '/recovery-key',
 
         resetPassword: '/reset-password',
         resetPasswordConfirm: '/reset-password/confirm',

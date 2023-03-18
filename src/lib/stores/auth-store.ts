@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { logout } from '@/lib/services/auth';
-import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
+import { withStorageEvents } from '@/lib/stores/with-storage-events';
 
 export type AuthStatus = 'unauthenticated' | 'authenticated' | 'loading';
 
@@ -73,4 +73,4 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     )
 );
 
-withStorageDOMEvents(useAuthStore);
+withStorageEvents(useAuthStore);

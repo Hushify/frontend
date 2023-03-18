@@ -66,9 +66,5 @@ export function useAuth() {
         refetchIntervalInBackground: true,
     });
 
-    if (isLoading) {
-        return 'loading' as const;
-    }
-
-    return authState.status;
+    return isLoading ? ('loading' as const) : authState.status;
 }

@@ -1,12 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
 import { apiRoutes } from '@/lib/data/routes';
-import {
-    ResponseMessage,
-    SuccessResponse,
-    getErrors,
-} from '@/lib/services/common';
-import { UserCryptoProperties } from '@/lib/services/crypto.worker';
+import { getErrors } from '@/lib/services/common';
+import { UserCryptoProperties } from '@/lib/types/crypto';
+import { ResponseMessage, SuccessResponse } from '@/lib/types/http';
 import { zxcvbn } from '@/lib/utils/zxcvbn';
 
 export async function register<T>(
@@ -35,7 +32,7 @@ export async function registerConfirm<T>(
     code: string,
     cryptoProperties: UserCryptoProperties,
     captcha: string
-): Promise<ResponseMessage<T, undefined>> {
+): Promise<ResponseMessage<T, null>> {
     const response = await fetch(apiRoutes.identity.registerConfirm, {
         method: 'POST',
         credentials: 'include',
@@ -52,7 +49,7 @@ export async function registerConfirm<T>(
     });
 
     if (response.ok) {
-        return { success: true, data: undefined };
+        return { success: true, data: null };
     }
 
     const errors = await getErrors<T>(response);

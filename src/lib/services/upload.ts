@@ -1,14 +1,11 @@
-import axios from 'axios';
-
+import {
+    AMZ_MIN_CHUNK_SIZE,
+    AUTH_SIZE,
+    DEFAULT_CHUNK_SIZE,
+    HEADER_SIZE,
+} from '@/lib/constants/encryption';
 import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
-
-export const HEADER_SIZE = 24;
-export const AUTH_SIZE = 17;
-
-export const AMZ_MIN_CHUNK_SIZE = 5 * 1024 * 1024;
-export const DEFAULT_CHUNK_SIZE = 64 * 1024;
-export const ENCRYPTED_CHUNK_SIZE = DEFAULT_CHUNK_SIZE + AUTH_SIZE;
 
 export function getEncryptedSize(fileSize: number) {
     const numberOfChunks = fileSize / DEFAULT_CHUNK_SIZE;
@@ -49,9 +46,9 @@ export const UploadService = {
             { name, size: fileSize, created, modified, mimeType }
         );
 
-        const { data } = (await axios.post(
-            apiRoutes.drive.multipart.create,
-            {
+        const response = await fetch(apiRoutes.drive.multipart.create, {
+            method: 'POST',
+            body: JSON.stringify({
                 parentFolderId,
                 previousVersionId,
                 numberOfChunks: numberOfEncryptedChunks,
@@ -61,20 +58,22 @@ export const UploadService = {
                     encryptedKey: encryptedFileKey,
                 },
                 metadataBundle: encryptedMetadataBundle,
+            }),
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
             },
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-                signal,
-            }
-        )) as {
-            data: {
-                fileId: string;
-                uploadId: string;
-                parts: { partNumber: number; preSignedUrl: string }[];
-            };
+            signal,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create multipart upload.');
+        }
+
+        const data = (await response.json()) as {
+            fileId: string;
+            uploadId: string;
+            parts: { partNumber: number; preSignedUrl: string }[];
         };
 
         return { data, fileKey: fileKeyB64 };
@@ -141,27 +140,25 @@ export const UploadService = {
                     throw new Error('Encryption failed.');
                 }
 
-                const { headers, status } = await axios.put(
-                    part.preSignedUrl,
-                    amzChunk,
-                    {
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                        },
-                        signal,
-                    }
-                );
+                const response = await fetch(part.preSignedUrl, {
+                    method: 'PUT',
+                    body: amzChunk,
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                    },
+                    signal,
+                });
 
-                if (status !== 200) {
+                if (!response.ok) {
                     throw new Error('Upload failed');
                 }
 
-                if (!headers.etag) {
+                if (!response.headers.has('etag')) {
                     throw new Error('Missing eTag');
                 }
 
                 eTags.push({
-                    eTag: headers.etag.replace(/"/g, ''),
+                    eTag: response.headers.get('etag')!.replace(/"/g, ''),
                     partNumber: part.partNumber,
                 });
             } catch (error) {
@@ -170,31 +167,34 @@ export const UploadService = {
             }
         }
 
-        await axios.post(
+        const response = await fetch(
             `${apiRoutes.drive.multipart.commit}/${fileId}`,
             {
-                parts: eTags,
-            },
-            {
+                method: 'POST',
+                body: JSON.stringify({
+                    parts: eTags,
+                }),
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
+                signal,
             }
         );
+
+        if (!response.ok) {
+            throw new Error('Failed to commit multipart upload.');
+        }
     },
 
     cancelMultipart: async (fileId: string, accessToken: string) => {
-        await axios.post(
-            `${apiRoutes.drive.multipart.cancel}/${fileId}`,
-            undefined,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+        await fetch(`${apiRoutes.drive.multipart.cancel}/${fileId}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
     },
 
     checkCompat: async () => {
@@ -208,7 +208,5 @@ export const UploadService = {
         } catch {
             return false;
         }
-
-        return false;
     },
 };

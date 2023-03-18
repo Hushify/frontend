@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { withStorageDOMEvents } from '@/lib/stores/withStorageDOMEvents';
+import { withStorageEvents } from '@/lib/stores/with-storage-events';
 
 export type PrefState = {
     sidebarOpen?: boolean;
@@ -28,4 +28,4 @@ export const usePrefStore = create<PrefState & PrefActions>()(
     )
 );
 
-withStorageDOMEvents(usePrefStore);
+withStorageEvents(usePrefStore);
