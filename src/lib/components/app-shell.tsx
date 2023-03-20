@@ -27,6 +27,7 @@ import {
 
 import { clientRoutes } from '@/lib/data/routes';
 import { getClaim } from '@/lib/services/auth';
+import { stats } from '@/lib/services/drive';
 // import { stats } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePrefStore } from '@/lib/stores/pref-store';
@@ -76,14 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     const accessToken = useAuthStore(state => state.accessToken);
     const queryClient = useQueryClient();
 
-    // const { data } = useQuery(['stats'], async () => await stats(accessToken!));
-    const { data } = useQuery(['stats'], () => ({
-        success: true,
-        data: {
-            used: 0,
-            total: 0,
-        },
-    }));
+    const { data } = useQuery(['stats'], async () => await stats(accessToken!));
 
     const logout = useCallback(async () => {
         queryClient.clear();
