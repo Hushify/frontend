@@ -4,6 +4,6 @@ export const metadata = {
     title: 'Hushify Drive',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { children: ReactNode }) {
     return <>{children}</>;
 }
