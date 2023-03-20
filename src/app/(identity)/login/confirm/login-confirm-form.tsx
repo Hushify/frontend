@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
@@ -36,7 +36,8 @@ const confirmSchema = zod
 
 export function LoginConfirmForm() {
     const { push } = useRouter();
-    const searchParams = useSearchParams();
+    const setData = useAuthStore(state => state.setData);
+    const email = useAuthStore(state => state.email);
 
     const {
         register,
@@ -46,11 +47,10 @@ export function LoginConfirmForm() {
     } = useForm<ConfirmFormInputs>({
         resolver: zodResolver(confirmSchema),
         defaultValues: {
-            email: searchParams?.get('email') ?? undefined,
+            email: email ?? undefined,
         },
     });
     const [showPassword, setShowPassword] = useState(false);
-    const setData = useAuthStore(state => state.setData);
 
     const [resendTimer, setResendTimer] = useState(30);
 
@@ -74,9 +74,7 @@ export function LoginConfirmForm() {
 
     const resendMutation = useMutation(
         async () => {
-            const result = await initiateLogin(
-                searchParams?.get('email') as string
-            );
+            const result = await initiateLogin(email!);
 
             if (!result.success) {
                 addServerErrors(result.errors, setError, ['errors', 'email']);

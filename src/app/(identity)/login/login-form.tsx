@@ -38,6 +38,7 @@ export function LoginForm() {
 
     const isLoggedIn = useAuthStore(state => state.isLoggedIn);
     const logout = useAuthStore(state => state.logout);
+    const setData = useAuthStore(state => state.setData);
 
     const { push } = useRouter();
 
@@ -56,11 +57,8 @@ export function LoginForm() {
                 return null;
             }
 
-            const params = new URLSearchParams({
-                email: data.email,
-            });
-
-            push(`${clientRoutes.identity.loginConfirm}?${params.toString()}`);
+            setData({ email: data.email });
+            push(clientRoutes.identity.loginConfirm);
             return null;
         },
         {

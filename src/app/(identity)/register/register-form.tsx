@@ -10,6 +10,7 @@ import zod from 'zod';
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { clientRoutes } from '@/lib/data/routes';
 import { register as registerApi } from '@/lib/services/auth';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { addServerErrors } from '@/lib/utils/add-server-errors';
 import { cn } from '@/lib/utils/cn';
 
@@ -33,6 +34,7 @@ export function RegisterForm() {
     } = useForm<RegisterFormInputs>({ resolver: zodResolver(registerSchema) });
 
     const router = useRouter();
+    const setData = useAuthStore(state => state.setData);
 
     const mutation = useMutation(
         async (data: RegisterFormInputs) => {
@@ -43,13 +45,8 @@ export function RegisterForm() {
                 return null;
             }
 
-            const params = new URLSearchParams({
-                email: data.email,
-            });
-
-            router.push(
-                `${clientRoutes.identity.registerConfirm}?${params.toString()}`
-            );
+            setData({ email: data.email });
+            router.push(clientRoutes.identity.registerConfirm);
         },
         {
             onError: () => {

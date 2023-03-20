@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 import { useMutation } from '@tanstack/react-query';
@@ -43,7 +43,9 @@ const RESEND_TIME = 30;
 
 export function RegisterConfirmForm() {
     const { push } = useRouter();
-    const searchParams = useSearchParams();
+
+    const setData = useAuthStore(state => state.setData);
+    const email = useAuthStore(state => state.email);
 
     const {
         register,
@@ -53,13 +55,11 @@ export function RegisterConfirmForm() {
     } = useForm<ConfirmFormInputs>({
         resolver: zodResolver(confirmSchema),
         defaultValues: {
-            email: searchParams?.get('email') ?? undefined,
+            email: email ?? undefined,
         },
     });
 
     const [showPassword, setShowPassword] = useState(false);
-
-    const setData = useAuthStore(state => state.setData);
 
     const [resendTimer, setResendTimer] = useState(RESEND_TIME);
 
@@ -83,9 +83,7 @@ export function RegisterConfirmForm() {
 
     const resendMutation = useMutation(
         async () => {
-            const result = await registerApi(
-                searchParams?.get('email') as string
-            );
+            const result = await registerApi(email!);
 
             if (!result.success) {
                 addServerErrors(result.errors, setError, ['errors', 'email']);
@@ -158,6 +156,7 @@ export function RegisterConfirmForm() {
                     signingPrivateKey: keys.signingPrivateKey,
                     recoveryKeyMnemonic: keys.recoveryMnemonic,
                 });
+                plausible('Signup');
                 push(clientRoutes.identity.recoveryKey);
                 return null;
             }

@@ -15,6 +15,7 @@ export type AuthState = {
     signingPrivateKey: string | null;
     recoveryKeyMnemonic: string | null;
     status: AuthStatus;
+    email: string | null;
 };
 
 export type AuthActions = {
@@ -37,6 +38,8 @@ const initialAuthState: AuthState = {
     recoveryKeyMnemonic: null,
 
     status: 'unauthenticated',
+
+    email: null,
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
