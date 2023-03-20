@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 import { useMutation } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -107,20 +106,8 @@ export function RegisterConfirmForm() {
         }
     );
 
-    const captchaRef = useRef<TurnstileInstance | undefined>();
-
     const confirmMutation = useMutation(
         async (data: ConfirmFormInputs) => {
-            const captchaResponse = captchaRef.current?.getResponse();
-            if (!captchaResponse) {
-                setError('errors', {
-                    type: 'captcha',
-                    message: 'Please complete the captcha.',
-                });
-                captchaRef.current?.reset();
-                return null;
-            }
-
             const pwStrengthResult = checkPasswordStrength(
                 data.password,
                 data.email
@@ -140,8 +127,7 @@ export function RegisterConfirmForm() {
             const result = await registerConfirm<ConfirmFormInputs>(
                 data.email,
                 data.code,
-                keys.cryptoProperties,
-                captchaResponse
+                keys.cryptoProperties
             );
 
             if (result.success) {
@@ -259,19 +245,6 @@ export function RegisterConfirmForm() {
                     )}
                 </div>
             </InputWithLabel>
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                <div className='flex flex-col gap-1'>
-                    <Turnstile
-                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                        options={{
-                            theme: 'light',
-                        }}
-                        ref={captchaRef}
-                        onError={captchaRef?.current?.reset}
-                        autoResetOnExpire
-                    />
-                </div>
-            )}
             <button
                 type='submit'
                 disabled={confirmMutation.isLoading || resendMutation.isLoading}
