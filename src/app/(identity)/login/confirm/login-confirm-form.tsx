@@ -158,6 +158,7 @@ export function LoginConfirmForm() {
                 error={errors.email}
                 type='email'
                 id='email'
+                placeholder='Enter your email'
                 autoComplete='email'
                 {...register('email')}>
                 Email

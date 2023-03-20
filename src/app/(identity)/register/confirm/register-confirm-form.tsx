@@ -186,6 +186,7 @@ export function RegisterConfirmForm() {
                 error={errors.email}
                 type='email'
                 id='email'
+                placeholder='Enter your email'
                 autoComplete='email'
                 {...register('email')}>
                 Email
