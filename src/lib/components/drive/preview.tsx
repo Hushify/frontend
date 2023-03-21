@@ -119,7 +119,7 @@ export function Preivew({
                             </Dialog.Close>
                         </div>
                     </div>
-                    <div className='my-4 flex h-full w-full flex-auto items-center justify-center'>
+                    <div className='flex h-full w-full flex-auto items-center justify-center py-4'>
                         {fileToPreview && file.metadata.mimeType.startsWith('image/') && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
