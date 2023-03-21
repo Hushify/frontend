@@ -119,47 +119,32 @@ export function Preivew({
                             </Dialog.Close>
                         </div>
                     </div>
-                    <div className='relative my-4 flex-auto'>
+                    <div className='my-4 flex h-full w-full flex-auto items-center justify-center'>
                         {fileToPreview && file.metadata.mimeType.startsWith('image/') && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={fileToPreview}
                                 alt={file.metadata.name}
-                                className='flex aspect-auto h-full items-center justify-center object-contain'
+                                className='h-full w-full object-contain'
                             />
                         )}
                         {fileToPreview && file.metadata.mimeType.startsWith('video/') && (
-                            <div className='absolute inset-0'>
-                                <video controls autoPlay className='h-full w-full object-contain'>
-                                    <source src={fileToPreview} type={file.metadata.mimeType} />
-                                </video>
-                            </div>
+                            <video controls autoPlay className='h-full w-full object-contain'>
+                                <source src={fileToPreview} type={file.metadata.mimeType} />
+                            </video>
                         )}
                         {fileToPreview && file.metadata.mimeType.startsWith('audio/') && (
-                            <div className='absolute inset-0 flex h-full w-full items-center justify-center'>
-                                <audio controls autoPlay>
-                                    <source src={fileToPreview} type={file.metadata.mimeType} />
-                                </audio>
-                            </div>
+                            <audio controls autoPlay>
+                                <source src={fileToPreview} type={file.metadata.mimeType} />
+                            </audio>
                         )}
                         {fileToPreview && file.metadata.mimeType.startsWith('application/pdf') && (
-                            <div className='absolute inset-0'>
-                                <iframe
-                                    src={fileToPreview}
-                                    className='h-full w-full object-contain'
-                                />
-                            </div>
+                            <iframe src={fileToPreview} className='h-full w-full object-contain' />
                         )}
                         {!fileToPreview && !error && (
-                            <div className='absolute inset-0 flex items-center justify-center'>
-                                <Loader className='h-5 w-5 animate-spin text-brand-600' />
-                            </div>
+                            <Loader className='h-5 w-5 animate-spin text-brand-600' />
                         )}
-                        {error && (
-                            <div className='absolute inset-0 flex items-center justify-center text-red-600'>
-                                {error}
-                            </div>
-                        )}
+                        {error}
                     </div>
                 </Dialog.Content>
             </Dialog.Portal>
