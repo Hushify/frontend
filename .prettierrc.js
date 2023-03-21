@@ -1,5 +1,3 @@
-// @ts-check
-
 /** @type {import("@ianvs/prettier-plugin-sort-imports").PrettierConfig} */
 module.exports = {
     bracketSpacing: true,
@@ -11,6 +9,8 @@ module.exports = {
     arrowParens: 'avoid',
     tabWidth: 4,
     printWidth: 80,
+    semi: true,
+
     importOrder: [
         '^(react/(.*)$)|^(react$)',
         '^(next/(.*)$)|^(next$)',
@@ -29,6 +29,7 @@ module.exports = {
     importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
     importOrderMergeDuplicateImports: true,
     importOrderCombineTypeAndValueImports: true,
+
     plugins: [
         '@ianvs/prettier-plugin-sort-imports',
         'prettier-plugin-tailwindcss',
