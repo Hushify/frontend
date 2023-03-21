@@ -33,7 +33,7 @@ export function useMoveNodes(
         }) => {
             const crypto = CryptoWorker.instance;
 
-            const currentDate = new Date().toUTCString();
+            const currentDate = new Date().toISOString();
 
             const items = await Promise.all(
                 data.items.map(async item => {

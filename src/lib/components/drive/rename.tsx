@@ -112,7 +112,7 @@ export function Rename({
             const crypto = CryptoWorker.instance;
 
             node.metadata.name = data.name;
-            node.metadata.modified = new Date().toUTCString();
+            node.metadata.modified = new Date().toISOString();
 
             let key = null;
             if (type === 'file') {

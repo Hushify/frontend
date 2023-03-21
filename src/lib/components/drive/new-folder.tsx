@@ -96,8 +96,8 @@ export function NewFolder({
 
             const metadata = {
                 name: data.folderName,
-                modified: new Date().toUTCString(),
-                created: new Date().toUTCString(),
+                modified: new Date().toISOString(),
+                created: new Date().toISOString(),
             };
 
             const metadataBundle = await crypto.encryptMetadata(

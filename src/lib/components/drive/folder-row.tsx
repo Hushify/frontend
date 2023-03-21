@@ -181,23 +181,17 @@ export function FolderRow({
             </td>
             <td className='py-2 text-left text-sm'>
                 {isToday(
-                    new Date(
-                        new Date(folder.metadata.modified).toLocaleString()
-                    )
+                    new Date(new Date(folder.metadata.modified).toISOString())
                 )
                     ? format(
                           new Date(
-                              new Date(
-                                  folder.metadata.modified
-                              ).toLocaleString()
+                              new Date(folder.metadata.modified).toISOString()
                           ),
                           'h:mm:ss b'
                       )
                     : format(
                           new Date(
-                              new Date(
-                                  folder.metadata.modified
-                              ).toLocaleString()
+                              new Date(folder.metadata.modified).toISOString()
                           ),
                           'MMM d, y, h:mm b'
                       )}

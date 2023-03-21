@@ -38,8 +38,8 @@ export const UploadService = {
         const { fileKey, fileKeyB64, encryptedFileKey, nonce } =
             await cryptoWorker.generateFileKey(currentFolderKey);
 
-        const created = new Date().toUTCString();
-        const modified = new Date().toUTCString();
+        const created = new Date().toISOString();
+        const modified = new Date().toISOString();
 
         const encryptedMetadataBundle = await cryptoWorker.encryptMetadata(
             fileKey,

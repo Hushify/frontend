@@ -129,17 +129,17 @@ export function FileRow({
             </td>
             <td className='py-2 text-left text-sm'>
                 {isToday(
-                    new Date(new Date(file.metadata.modified).toLocaleString())
+                    new Date(new Date(file.metadata.modified).toISOString())
                 )
                     ? format(
                           new Date(
-                              new Date(file.metadata.modified).toLocaleString()
+                              new Date(file.metadata.modified).toISOString()
                           ),
                           'h:mm:ss b'
                       )
                     : format(
                           new Date(
-                              new Date(file.metadata.modified).toLocaleString()
+                              new Date(file.metadata.modified).toISOString()
                           ),
                           'MMM d, y, h:mm b'
                       )}
