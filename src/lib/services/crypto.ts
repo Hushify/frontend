@@ -30,7 +30,7 @@ export const CryptoService = {
         const masterKey = sodium.crypto_kdf_keygen();
         const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
 
-        const encMasterKey = sodium.crypto_secretbox_easy(masterKey, nonce, passwordHash);
+        const encryptedMasterKey = sodium.crypto_secretbox_easy(masterKey, nonce, passwordHash);
 
         // Asymmetric Keys
         const asymmetricKp = sodium.crypto_box_keypair();
@@ -53,7 +53,7 @@ export const CryptoService = {
         const recoveryKey = sodium.crypto_kdf_keygen();
         const recoveryMasterKeyNonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
 
-        const recoveryEncMasterKey = sodium.crypto_secretbox_easy(
+        const recoveryEncryptedMasterKey = sodium.crypto_secretbox_easy(
             masterKey,
             recoveryMasterKeyNonce,
             recoveryKey,
@@ -62,7 +62,7 @@ export const CryptoService = {
 
         const recoveryKeyNonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
 
-        const encRecoveryKey = sodium.crypto_secretbox_easy(
+        const encryptedRecoveryKey = sodium.crypto_secretbox_easy(
             recoveryKey,
             recoveryKeyNonce,
             passwordHash,
@@ -80,15 +80,15 @@ export const CryptoService = {
                 salt: sodium.to_base64(salt),
                 masterKeyBundle: {
                     nonce: sodium.to_base64(nonce),
-                    encryptedKey: sodium.to_base64(encMasterKey),
+                    encryptedKey: sodium.to_base64(encryptedMasterKey),
                 },
                 recoveryMasterKeyBundle: {
                     nonce: sodium.to_base64(recoveryMasterKeyNonce),
-                    encryptedKey: recoveryEncMasterKey,
+                    encryptedKey: recoveryEncryptedMasterKey,
                 },
                 recoveryKeyBundle: {
                     nonce: sodium.to_base64(recoveryKeyNonce),
-                    encryptedKey: encRecoveryKey,
+                    encryptedKey: encryptedRecoveryKey,
                 },
                 asymmetricKeyBundle: {
                     nonce: sodium.to_base64(asymmetricKeyNonce),

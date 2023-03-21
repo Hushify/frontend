@@ -49,7 +49,7 @@ export function FolderRow({
     const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
         drop: async (items: SelectedNode[]) => {
-            onMove({
+            await onMove({
                 items,
                 destinationFolderId: folder.id,
                 destinationFolderKey: folder.key,

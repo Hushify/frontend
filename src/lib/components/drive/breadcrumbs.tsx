@@ -71,7 +71,7 @@ function MainCrumb({
     const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
         drop: async (items: SelectedNode[]) => {
-            onMove({
+            await onMove({
                 items: items,
                 destinationFolderId: workspaceId ?? '',
                 destinationFolderKey: masterKey ?? '',
@@ -129,7 +129,7 @@ function Crumb({
     const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
         drop: async (items: SelectedNode[]) => {
-            onMove({
+            await onMove({
                 items: items,
                 destinationFolderId: item.id,
                 destinationFolderKey: item.key,
