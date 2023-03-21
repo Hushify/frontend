@@ -13,13 +13,10 @@ class UploadWorker {
             return;
         }
 
-        const worker = new Worker(
-            new URL('@/lib/services/upload.worker', import.meta.url),
-            {
-                type: 'module',
-                name: 'hushify-upload-worker',
-            }
-        );
+        const worker = new Worker(new URL('@/lib/services/upload.worker', import.meta.url), {
+            type: 'module',
+            name: 'hushify-upload-worker',
+        });
 
         this.instance = wrap<typeof UploadService>(worker);
     }

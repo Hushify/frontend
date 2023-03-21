@@ -109,10 +109,7 @@ self.onfetch = event => {
     }
 
     if (headers.has('Content-Disposition')) {
-        responseHeaders.set(
-            'Content-Disposition',
-            headers.get('Content-Disposition')
-        );
+        responseHeaders.set('Content-Disposition', headers.get('Content-Disposition'));
     }
 
     // data, data.filename and size should not be used anymore
@@ -125,13 +122,8 @@ self.onfetch = event => {
     if (fileName) {
         console.warn('Depricated');
         // Make filename RFC5987 compatible
-        fileName = encodeURIComponent(fileName)
-            .replace(/['()]/g, escape)
-            .replace(/\*/g, '%2A');
-        responseHeaders.set(
-            'Content-Disposition',
-            "attachment; filename*=UTF-8''" + fileName
-        );
+        fileName = encodeURIComponent(fileName).replace(/['()]/g, escape).replace(/\*/g, '%2A');
+        responseHeaders.set('Content-Disposition', "attachment; filename*=UTF-8''" + fileName);
     }
 
     event.respondWith(new Response(stream, { headers: responseHeaders }));

@@ -8,16 +8,11 @@ import { cn } from '@/lib/utils/cn';
 export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
     return (
         <div className='flex w-full gap-2 overflow-x-auto border-b border-b-gray-300 py-2 px-5'>
-            <RadixToolbar.Root
-                className='hidden gap-2 md:flex'
-                aria-label='Toolbar'>
+            <RadixToolbar.Root className='hidden gap-2 md:flex' aria-label='Toolbar'>
                 {items.map(item => {
                     if (item.type === 'separator') {
                         return (
-                            <RadixToolbar.Separator
-                                key={item.id}
-                                className='w-px bg-gray-300'
-                            />
+                            <RadixToolbar.Separator key={item.id} className='w-px bg-gray-300' />
                         );
                     }
 
@@ -33,8 +28,7 @@ export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
                                     'bg-gray-600 hover:bg-gray-800 focus:shadow-gray-400':
                                         item.variant === 'secondary',
                                     'bg-brand-600 hover:bg-brand-800 focus:shadow-brand-400':
-                                        !item.variant ||
-                                        item.variant === 'primary',
+                                        !item.variant || item.variant === 'primary',
                                 },
                                 item.className
                             )}>
@@ -84,11 +78,9 @@ export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
                                                 'text-red-700 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-700':
                                                     item.variant === 'danger',
                                                 'text-gray-700 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-700':
-                                                    item.variant ===
-                                                    'secondary',
+                                                    item.variant === 'secondary',
                                                 'text-brand-700 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-700':
-                                                    !item.variant ||
-                                                    item.variant === 'primary',
+                                                    !item.variant || item.variant === 'primary',
                                             },
                                             item.className
                                         )}>

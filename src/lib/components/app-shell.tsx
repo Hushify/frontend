@@ -95,19 +95,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     return (
         <div className='flex h-full flex-col'>
             <div className='flex h-16 shrink-0 border-b bg-white shadow'>
-                <Dialog.Root
-                    open={mobileSidebarOpen}
-                    onOpenChange={setMobileSidebarOpen}>
+                <Dialog.Root open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
                     <Dialog.Trigger asChild>
                         <button
                             type='button'
                             className='px-4 text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 md:hidden'
                             onClick={() => setMobileSidebarOpen(true)}>
                             <span className='sr-only'>Open sidebar</span>
-                            <Menu
-                                className='h-5 w-5 shrink-0'
-                                aria-hidden='true'
-                            />
+                            <Menu className='h-5 w-5 shrink-0' aria-hidden='true' />
                         </button>
                     </Dialog.Trigger>
 
@@ -123,16 +118,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                                         <button
                                             type='button'
                                             className='rounded-full border border-gray-600 p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600'
-                                            onClick={() =>
-                                                setMobileSidebarOpen(false)
-                                            }>
-                                            <span className='sr-only'>
-                                                Close sidebar
-                                            </span>
-                                            <X
-                                                className='h-5 w-5'
-                                                aria-hidden='true'
-                                            />
+                                            onClick={() => setMobileSidebarOpen(false)}>
+                                            <span className='sr-only'>Close sidebar</span>
+                                            <X className='h-5 w-5' aria-hidden='true' />
                                         </button>
                                     </Dialog.Close>
                                 </div>
@@ -150,9 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                                         : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
                                                     'flex items-center gap-2 px-3 py-2 text-sm font-semibold'
                                                 )}
-                                                onClick={() =>
-                                                    setMobileSidebarOpen(false)
-                                                }>
+                                                onClick={() => setMobileSidebarOpen(false)}>
                                                 <item.icon
                                                     className='h-5 w-5 shrink-0'
                                                     aria-hidden='true'
@@ -177,18 +163,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                                                     aria-hidden='true'
                                                 />
                                                 <span>
-                                                    {humanFileSize(
-                                                        data.data.used,
-                                                        false,
-                                                        0
-                                                    )}{' '}
-                                                    /{' '}
-                                                    {humanFileSize(
-                                                        data.data.total,
-                                                        false,
-                                                        0
-                                                    )}{' '}
-                                                    (
+                                                    {humanFileSize(data.data.used, false, 0)} /{' '}
+                                                    {humanFileSize(data.data.total, false, 0)} (
                                                     {(
                                                         (data.data.used * 100) /
                                                         data.data.total
@@ -206,10 +182,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
                             {/* Dummy element to force sidebar to shrink to fit close icon */}
                             <Dialog.Close asChild>
-                                <div
-                                    className='w-14 shrink-0'
-                                    aria-hidden='true'
-                                />
+                                <div className='w-14 shrink-0' aria-hidden='true' />
                             </Dialog.Close>
                         </Dialog.Content>
                     </Dialog.Portal>
@@ -235,12 +208,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className='flex h-full flex-auto'>
                 <div className='hidden shrink-0 flex-col overflow-y-auto border-r bg-white md:flex'>
                     <nav
-                        className={cn(
-                            'flex flex-1 flex-col items-center gap-1',
-                            {
-                                'min-w-[16rem]': sidebarOpen,
-                            }
-                        )}>
+                        className={cn('flex flex-1 flex-col items-center gap-1', {
+                            'min-w-[16rem]': sidebarOpen,
+                        })}>
                         {navigation.map(item => {
                             const LinkComp = (
                                 <Link
@@ -253,10 +223,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                             : 'text-gray-600 hover:bg-brand-100 hover:text-brand-600',
                                         'flex w-full items-center gap-2 p-3 text-sm font-semibold'
                                     )}>
-                                    <item.icon
-                                        className='h-5 w-5 shrink-0'
-                                        aria-hidden='true'
-                                    />
+                                    <item.icon className='h-5 w-5 shrink-0' aria-hidden='true' />
                                     <span
                                         className={cn({
                                             'sr-only': !sidebarOpen,
@@ -270,9 +237,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                 <Fragment key={item.name}>{LinkComp}</Fragment>
                             ) : (
                                 <Tooltip.Root key={item.name}>
-                                    <Tooltip.Trigger asChild>
-                                        {LinkComp}
-                                    </Tooltip.Trigger>
+                                    <Tooltip.Trigger asChild>{LinkComp}</Tooltip.Trigger>
                                     <Tooltip.Portal>
                                         <Tooltip.Content
                                             side='right'
@@ -291,10 +256,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                 type='button'
                                 className='flex w-full items-center gap-2 p-3 text-sm font-semibold text-gray-600 hover:bg-brand-100 hover:text-brand-600'
                                 onClick={logout}>
-                                <LogOut
-                                    className='h-5 w-5 shrink-0'
-                                    aria-hidden='true'
-                                />
+                                <LogOut className='h-5 w-5 shrink-0' aria-hidden='true' />
                                 <span>Logout</span>
                             </button>
                         ) : (
@@ -304,10 +266,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                         type='button'
                                         className='flex w-full items-center gap-2 p-3 text-sm font-semibold text-gray-600 hover:bg-brand-100 hover:text-brand-600'
                                         onClick={logout}>
-                                        <LogOut
-                                            className='h-5 w-5 shrink-0'
-                                            aria-hidden='true'
-                                        />
+                                        <LogOut className='h-5 w-5 shrink-0' aria-hidden='true' />
                                         <span className='sr-only'>Logout</span>
                                     </button>
                                 </Tooltip.Trigger>
@@ -327,10 +286,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                             <div className='mt-auto p-2 text-center text-sm'>
                                 {humanFileSize(data.data.used, false, 0)} /{' '}
                                 {humanFileSize(data.data.total, false, 0)} (
-                                {(
-                                    (data.data.used * 100) /
-                                    data.data.total
-                                ).toFixed(2)}
+                                {((data.data.used * 100) / data.data.total).toFixed(2)}
                                 %)
                             </div>
                         ) : null}

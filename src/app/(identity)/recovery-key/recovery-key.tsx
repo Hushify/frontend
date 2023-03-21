@@ -9,9 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { downloadViaAnchor } from '@/lib/utils/download-via-anchor';
 
 export function RecoveryKey() {
-    const recoveryKeyMnemonic = useAuthStore(
-        state => state.recoveryKeyMnemonic
-    );
+    const recoveryKeyMnemonic = useAuthStore(state => state.recoveryKeyMnemonic);
 
     if (!recoveryKeyMnemonic) {
         return redirect(clientRoutes.index);
@@ -27,10 +25,7 @@ export function RecoveryKey() {
                 <button
                     type='button'
                     onClick={() => {
-                        downloadViaAnchor(
-                            recoveryKeyMnemonic,
-                            'hushify-recovery-key.txt'
-                        );
+                        downloadViaAnchor(recoveryKeyMnemonic, 'hushify-recovery-key.txt');
                     }}
                     className={cn(
                         'flex w-full items-center justify-center gap-2 rounded-lg py-1.5 font-medium',

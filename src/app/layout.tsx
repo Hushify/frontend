@@ -23,9 +23,7 @@ export const metadata = {
             default: 'Hushify',
             template: '%s',
         },
-        images: `https://${
-            process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io'
-        }/icon.png`,
+        images: `https://${process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io'}/icon.png`,
     },
     twitter: {
         description: 'Privacy built on open source.',

@@ -4,9 +4,7 @@ import orderBy from 'lodash/orderBy';
 import { DriveList, FileMetadata, FolderMetadata } from '@/lib/types/drive';
 
 export function useSortedNodes(data: DriveList | undefined) {
-    const [sortKey, setSortKey] = useState<
-        keyof FolderMetadata | keyof FileMetadata
-    >('name');
+    const [sortKey, setSortKey] = useState<keyof FolderMetadata | keyof FileMetadata>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
     const folders = useMemo(() => {

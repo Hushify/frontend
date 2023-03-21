@@ -5,11 +5,7 @@ import { toast } from 'react-hot-toast';
 import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { moveNodes } from '@/lib/services/drive';
-import {
-    DriveList,
-    FileNodeDecrypted,
-    FolderNodeDecrypted,
-} from '@/lib/types/drive';
+import { DriveList, SelectedNode } from '@/lib/types/drive';
 
 export function useMoveNodes(
     currentFolderId: string | null,
@@ -24,10 +20,7 @@ export function useMoveNodes(
 
     const move = useCallback(
         async (data: {
-            items: (
-                | { node: FolderNodeDecrypted; type: 'folder' }
-                | { node: FileNodeDecrypted; type: 'file' }
-            )[];
+            items: SelectedNode[];
             destinationFolderId: string;
             destinationFolderKey: string;
         }) => {
@@ -39,15 +32,11 @@ export function useMoveNodes(
                 data.items.map(async item => {
                     const node = item.node;
                     node.metadata.modified = currentDate;
-                    const { key, encryptedKey, nonce } =
-                        await crypto.reEncryptKey(
-                            data.destinationFolderKey,
-                            node.key
-                        );
-                    const metadataBundle = await crypto.encryptMetadata(
-                        key,
-                        node.metadata
+                    const { key, encryptedKey, nonce } = await crypto.reEncryptKey(
+                        data.destinationFolderKey,
+                        node.key
                     );
+                    const metadataBundle = await crypto.encryptMetadata(key, node.metadata);
                     return {
                         id: item.node.id,
                         type: item.type,
@@ -93,10 +82,7 @@ export function useMoveNodes(
 
     return useMutation({
         mutationFn: async (data: {
-            items: (
-                | { node: FolderNodeDecrypted; type: 'folder' }
-                | { node: FileNodeDecrypted; type: 'file' }
-            )[];
+            items: SelectedNode[];
             destinationFolderId: string;
             destinationFolderKey: string;
         }) => {

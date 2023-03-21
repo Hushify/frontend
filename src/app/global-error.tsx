@@ -5,13 +5,7 @@ import { ServerCrash } from 'lucide-react';
 
 import { cn } from '@/lib/utils/cn';
 
-export default function Error({
-    error,
-    reset,
-}: {
-    error: Error;
-    reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
     useEffect(() => {
         console.error(error);
     }, [error]);
@@ -23,9 +17,7 @@ export default function Error({
             </head>
             <body>
                 <div className='flex h-full w-full flex-col items-center justify-center gap-4 text-center'>
-                    <h2 className='text-2xl font-medium'>
-                        Something went wrong!
-                    </h2>
+                    <h2 className='text-2xl font-medium'>Something went wrong!</h2>
                     <button
                         onClick={reset}
                         className={cn(

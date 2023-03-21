@@ -94,9 +94,7 @@ export function RegisterConfirmForm() {
         },
         {
             onError: error => {
-                const message = error
-                    ? (error as Error).message
-                    : 'Something went wrong!';
+                const message = error ? (error as Error).message : 'Something went wrong!';
                 addServerErrors(
                     { errors: [message] },
                     setError,
@@ -108,10 +106,7 @@ export function RegisterConfirmForm() {
 
     const confirmMutation = useMutation(
         async (data: ConfirmFormInputs) => {
-            const pwStrengthResult = checkPasswordStrength(
-                data.password,
-                data.email
-            );
+            const pwStrengthResult = checkPasswordStrength(data.password, data.email);
 
             if (!pwStrengthResult.success) {
                 setError('password', {
@@ -134,11 +129,9 @@ export function RegisterConfirmForm() {
                 setData({
                     status: 'authenticated',
                     masterKey: keys.masterKey,
-                    publicKey:
-                        keys.cryptoProperties.asymmetricKeyBundle.publicKey,
+                    publicKey: keys.cryptoProperties.asymmetricKeyBundle.publicKey,
                     privateKey: keys.asymmetricPrivateKey,
-                    signingPublicKey:
-                        keys.cryptoProperties.signingKeyBundle.publicKey,
+                    signingPublicKey: keys.cryptoProperties.signingKeyBundle.publicKey,
                     signingPrivateKey: keys.signingPrivateKey,
                     recoveryKeyMnemonic: keys.recoveryMnemonic,
                 });
@@ -151,9 +144,7 @@ export function RegisterConfirmForm() {
         },
         {
             onError: error => {
-                const message = error
-                    ? (error as Error).message
-                    : 'Something went wrong!';
+                const message = error ? (error as Error).message : 'Something went wrong!';
                 addServerErrors(
                     { errors: [message] },
                     setError,
@@ -209,9 +200,7 @@ export function RegisterConfirmForm() {
                         </small>
                     ))
                 ) : (
-                    <small className='text-red-600'>
-                        {errors.password?.message}
-                    </small>
+                    <small className='text-red-600'>{errors.password?.message}</small>
                 )}
             </div>
             <InputWithLabel
@@ -226,23 +215,16 @@ export function RegisterConfirmForm() {
                 <div className='flex items-center justify-between'>
                     {resendTimer <= 0 ? (
                         <button
-                            disabled={
-                                resendMutation.isLoading ||
-                                confirmMutation.isLoading
-                            }
+                            disabled={resendMutation.isLoading || confirmMutation.isLoading}
                             type='button'
-                            onClick={async () =>
-                                await resendMutation.mutateAsync()
-                            }
+                            onClick={async () => await resendMutation.mutateAsync()}
                             className='underline disabled:cursor-not-allowed disabled:no-underline'>
                             Resend
                         </button>
                     ) : (
                         <span>Resend in {resendTimer}</span>
                     )}
-                    {resendMutation.isLoading && (
-                        <Loader size={16} className='animate-spin' />
-                    )}
+                    {resendMutation.isLoading && <Loader size={16} className='animate-spin' />}
                 </div>
             </InputWithLabel>
             <button
@@ -256,10 +238,7 @@ export function RegisterConfirmForm() {
                 <span>Continue</span>
                 <Loader
                     size={16}
-                    className={cn(
-                        'animate-spin',
-                        !confirmMutation.isLoading && 'hidden'
-                    )}
+                    className={cn('animate-spin', !confirmMutation.isLoading && 'hidden')}
                 />
             </button>
         </form>

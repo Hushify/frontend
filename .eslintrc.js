@@ -1,10 +1,6 @@
 module.exports = {
     root: true,
-    extends: [
-        'next/core-web-vitals',
-        'prettier',
-        'plugin:tailwindcss/recommended',
-    ],
+    extends: ['next/core-web-vitals', 'prettier', 'plugin:tailwindcss/recommended'],
     plugins: ['unused-imports', 'tailwindcss'],
     settings: {
         tailwindcss: {

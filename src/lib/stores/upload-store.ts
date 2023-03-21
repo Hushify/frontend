@@ -18,12 +18,7 @@ const uploadQueue = new PQueue({
     concurrency: 5,
 });
 
-export type FileUploadState =
-    | 'Pending'
-    | 'Uploading'
-    | 'Uploaded'
-    | 'Failed'
-    | 'Cancelled'; // TODO: Add support for pausing?
+export type FileUploadState = 'Pending' | 'Uploading' | 'Uploaded' | 'Failed' | 'Cancelled'; // TODO: Add support for pausing?
 
 export type FileWithVersion = {
     file: FileWithPath;
@@ -80,196 +75,175 @@ const initialState: UploadState = {
     files: [],
 };
 
-export const useUploadStore = create<UploadState & UploadActions>(
-    (set, get) => ({
-        ...initialState,
+export const useUploadStore = create<UploadState & UploadActions>((set, get) => ({
+    ...initialState,
 
-        queueForUpload: async (
-            // folderMap: Map<string, string | null>,
-            files: FileWithVersion[],
-            parentFolderId: string,
-            currentFolderKey: string,
-            accessToken: string,
-            onUploadCb: () => void
-        ) => {
-            const Uploader = await UploaderInstance;
-            const worker = CryptoWorker.instance;
+    queueForUpload: async (
+        // folderMap: Map<string, string | null>,
+        files: FileWithVersion[],
+        parentFolderId: string,
+        currentFolderKey: string,
+        accessToken: string,
+        onUploadCb: () => void
+    ) => {
+        const Uploader = await UploaderInstance;
+        const worker = CryptoWorker.instance;
 
-            const filesToAdd: FileWithState[] = files.map(
-                file =>
-                    ({
-                        abortController: new AbortController(),
-                        fileWithVersion: file,
-                        trackingId: crypto.randomUUID(),
-                        state: 'Pending',
-                        progress: 0,
-                        uploaded: 0,
+        const filesToAdd: FileWithState[] = files.map(
+            file =>
+                ({
+                    abortController: new AbortController(),
+                    fileWithVersion: file,
+                    trackingId: crypto.randomUUID(),
+                    state: 'Pending',
+                    progress: 0,
+                    uploaded: 0,
+                    parentFolderId,
+                    currentFolderKey,
+                    onUploadCb,
+                } as FileWithState)
+        );
+
+        set({
+            files: [...filesToAdd, ...get().files],
+        });
+
+        const { setFileProperty } = get();
+
+        for (const file of filesToAdd.filter(f => f.state === 'Pending')) {
+            uploadQueue.add(async () => {
+                setFileProperty(file.trackingId, 'state', 'Uploading');
+                try {
+                    const resp = await Uploader.prepareFileForMultipartUpload(
+                        file.abortController.signal,
                         parentFolderId,
-                        currentFolderKey,
-                        onUploadCb,
-                    } as FileWithState)
-            );
+                        file.fileWithVersion.file.name,
+                        file.fileWithVersion.previousVersionId,
+                        file.fileWithVersion.file.type,
+                        file.fileWithVersion.file.size,
+                        accessToken,
+                        currentFolderKey
+                    );
 
-            set({
-                files: [...filesToAdd, ...get().files],
-            });
+                    file.id = resp.data.fileId;
 
-            const { setFileProperty } = get();
+                    const onProgress = (uploaded: number) => {
+                        const currentFile = get().files.find(f => f.trackingId === file.trackingId);
 
-            for (const file of filesToAdd.filter(f => f.state === 'Pending')) {
-                uploadQueue.add(async () => {
-                    setFileProperty(file.trackingId, 'state', 'Uploading');
-                    try {
-                        const resp =
-                            await Uploader.prepareFileForMultipartUpload(
-                                file.abortController.signal,
-                                parentFolderId,
-                                file.fileWithVersion.file.name,
-                                file.fileWithVersion.previousVersionId,
-                                file.fileWithVersion.file.type,
-                                file.fileWithVersion.file.size,
-                                accessToken,
-                                currentFolderKey
-                            );
+                        if (!currentFile) {
+                            return;
+                        }
 
-                        file.id = resp.data.fileId;
-
-                        const onProgress = (uploaded: number) => {
-                            const currentFile = get().files.find(
-                                f => f.trackingId === file.trackingId
-                            );
-
-                            if (!currentFile) {
-                                return;
-                            }
-
-                            setFileProperty(
-                                file.trackingId,
-                                'progress',
-                                Math.min(
-                                    ((currentFile.uploaded + uploaded) * 100) /
-                                        currentFile.fileWithVersion.file.size,
-                                    100
-                                )
-                            );
-
-                            setFileProperty(
-                                file.trackingId,
-                                'uploaded',
-                                currentFile.uploaded + uploaded
-                            );
-                        };
-
-                        await UploadService.uploadMultipart(
-                            file.abortController.signal,
-                            file.fileWithVersion.file,
-                            resp.fileKey,
-                            accessToken,
-                            resp.data.fileId,
-                            resp.data.parts,
-                            // proxy(onProgress)
-                            onProgress
-                        );
-
-                        setFileProperty(file.trackingId, 'state', 'Uploaded');
-
-                        setFileProperty(file.trackingId, 'progress', 100);
-
-                        onUploadCb();
-                    } catch (error) {
-                        console.error(error);
-                        setFileProperty(file.trackingId, 'state', 'Failed');
                         setFileProperty(
                             file.trackingId,
-                            'error',
-                            typeof error === 'string'
-                                ? error
-                                : (error as Error).message
+                            'progress',
+                            Math.min(
+                                ((currentFile.uploaded + uploaded) * 100) /
+                                    currentFile.fileWithVersion.file.size,
+                                100
+                            )
                         );
-                        if (file.id) {
-                            await UploadService.cancelMultipart(
-                                file.id,
-                                accessToken
-                            );
-                        }
+
+                        setFileProperty(
+                            file.trackingId,
+                            'uploaded',
+                            currentFile.uploaded + uploaded
+                        );
+                    };
+
+                    await UploadService.uploadMultipart(
+                        file.abortController.signal,
+                        file.fileWithVersion.file,
+                        resp.fileKey,
+                        accessToken,
+                        resp.data.fileId,
+                        resp.data.parts,
+                        // proxy(onProgress)
+                        onProgress
+                    );
+
+                    setFileProperty(file.trackingId, 'state', 'Uploaded');
+
+                    setFileProperty(file.trackingId, 'progress', 100);
+
+                    onUploadCb();
+                } catch (error) {
+                    console.error(error);
+                    setFileProperty(file.trackingId, 'state', 'Failed');
+                    setFileProperty(
+                        file.trackingId,
+                        'error',
+                        typeof error === 'string' ? error : (error as Error).message
+                    );
+                    if (file.id) {
+                        await UploadService.cancelMultipart(file.id, accessToken);
                     }
-                });
-            }
-        },
-
-        setFileProperty: (
-            trackingId: string,
-            key: keyof Omit<FileWithState, 'file'>,
-            value: valueof<Omit<FileWithState, 'file'>>
-        ) =>
-            set(current => ({
-                files: current.files.map((file: FileWithState) => {
-                    if (file.trackingId !== trackingId) {
-                        return file;
-                    }
-
-                    // @ts-ignore
-                    file[key] = value;
-                    return file;
-                }),
-            })),
-
-        retry: (trackingId: string, accessToken: string) => {
-            const currentFile = get().files.find(
-                f => f.trackingId === trackingId
-            );
-
-            if (
-                !currentFile ||
-                (currentFile.state !== 'Cancelled' &&
-                    currentFile.state !== 'Failed')
-            ) {
-                return;
-            }
-
-            get().queueForUpload(
-                [currentFile.fileWithVersion],
-                currentFile.parentFolderId,
-                currentFile.currentFolderKey,
-                accessToken,
-                currentFile.onUploadCb
-            );
-
-            set(current => ({
-                files: current.files.filter(f => f.trackingId !== trackingId),
-            }));
-        },
-
-        removeFile: (trackingId: string) => {
-            const currentFile = get().files.find(
-                f => f.trackingId === trackingId
-            );
-
-            if (currentFile && currentFile.state === 'Uploading') {
-                currentFile.abortController.abort('User cancelled upload.');
-                currentFile.state = 'Cancelled';
-                return;
-            }
-
-            set(current => ({
-                files: current.files.filter(f => f.trackingId !== trackingId),
-            }));
-        },
-
-        clear: () => {
-            set({
-                files: get().files.filter(
-                    f =>
-                        f.state !== 'Uploaded' &&
-                        f.state !== 'Cancelled' &&
-                        f.state !== 'Failed'
-                ),
+                }
             });
-        },
+        }
+    },
 
-        clearAll: () => {
-            uploadQueue.clear();
-            set({ files: [] });
-        },
-    })
-);
+    setFileProperty: (
+        trackingId: string,
+        key: keyof Omit<FileWithState, 'file'>,
+        value: valueof<Omit<FileWithState, 'file'>>
+    ) =>
+        set(current => ({
+            files: current.files.map((file: FileWithState) => {
+                if (file.trackingId !== trackingId) {
+                    return file;
+                }
+
+                // @ts-ignore
+                file[key] = value;
+                return file;
+            }),
+        })),
+
+    retry: (trackingId: string, accessToken: string) => {
+        const currentFile = get().files.find(f => f.trackingId === trackingId);
+
+        if (!currentFile || (currentFile.state !== 'Cancelled' && currentFile.state !== 'Failed')) {
+            return;
+        }
+
+        get().queueForUpload(
+            [currentFile.fileWithVersion],
+            currentFile.parentFolderId,
+            currentFile.currentFolderKey,
+            accessToken,
+            currentFile.onUploadCb
+        );
+
+        set(current => ({
+            files: current.files.filter(f => f.trackingId !== trackingId),
+        }));
+    },
+
+    removeFile: (trackingId: string) => {
+        const currentFile = get().files.find(f => f.trackingId === trackingId);
+
+        if (currentFile && currentFile.state === 'Uploading') {
+            currentFile.abortController.abort('User cancelled upload.');
+            currentFile.state = 'Cancelled';
+            return;
+        }
+
+        set(current => ({
+            files: current.files.filter(f => f.trackingId !== trackingId),
+        }));
+    },
+
+    clear: () => {
+        set({
+            files: get().files.filter(
+                f => f.state !== 'Uploaded' && f.state !== 'Cancelled' && f.state !== 'Failed'
+            ),
+        });
+    },
+
+    clearAll: () => {
+        uploadQueue.clear();
+        set({ files: [] });
+    },
+}));

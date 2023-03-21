@@ -13,11 +13,7 @@ import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
 import { updateMetadata } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import {
-    DriveList,
-    FileNodeDecrypted,
-    FolderNodeDecrypted,
-} from '@/lib/types/drive';
+import { DriveList, FileNodeDecrypted, FolderNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { addServerErrors } from '@/lib/utils/add-server-errors';
 import { cn } from '@/lib/utils/cn';
 
@@ -37,20 +33,18 @@ const renameSchema = zod
     .required();
 
 export function Rename({
-    node,
+    selectedeNode: { node, type },
     nodes,
     currentFolderId,
     isRenameOpen,
     setIsRenameOpen,
-    type,
     onSuccess,
 }: {
-    node: FolderNodeDecrypted | FileNodeDecrypted;
+    selectedeNode: SelectedNode;
     nodes: undefined | FolderNodeDecrypted[] | FileNodeDecrypted[];
     currentFolderId: string | null;
     isRenameOpen: boolean;
     setIsRenameOpen: Dispatch<SetStateAction<boolean>>;
-    type: 'folder' | 'file';
     onSuccess: () => void;
 }) {
     const queryClient = useQueryClient();
@@ -92,13 +86,9 @@ export function Rename({
                     Object.keys(data)
                 );
                 throw new Error('Rename failed!');
-                return null;
             }
 
-            if (
-                nodes &&
-                nodes.findIndex(f => f.metadata.name === data.name) !== -1
-            ) {
+            if (nodes && nodes.findIndex(f => f.metadata.name === data.name) !== -1) {
                 addServerErrors(
                     {
                         name: [`A ${type} with that name already exists.`],
@@ -121,17 +111,9 @@ export function Rename({
                 key = (node as FolderNodeDecrypted).key;
             }
 
-            const metadataBundle = await crypto.encryptMetadata(
-                key,
-                node.metadata
-            );
+            const metadataBundle = await crypto.encryptMetadata(key, node.metadata);
 
-            const result = await updateMetadata(
-                accessToken,
-                node.id,
-                type,
-                metadataBundle
-            );
+            const result = await updateMetadata(accessToken, node.id, type, metadataBundle);
 
             if (result.success) {
                 queryClient.setQueryData<DriveList>([queryKey], queryData => {
@@ -217,12 +199,8 @@ export function Rename({
                     </div>
                     <form
                         className='mt-4 space-y-2'
-                        onSubmit={handleSubmit(data =>
-                            mutation.mutateAsync(data)
-                        )}>
-                        <small className='text-red-600'>
-                            {errors.errors?.message}
-                        </small>
+                        onSubmit={handleSubmit(data => mutation.mutateAsync(data))}>
+                        <small className='text-red-600'>{errors.errors?.message}</small>
 
                         <InputWithLabel
                             error={errors.name}
@@ -245,10 +223,7 @@ export function Rename({
                             <span>Rename</span>
                             <Loader
                                 size={16}
-                                className={cn(
-                                    'animate-spin',
-                                    !mutation.isLoading && 'hidden'
-                                )}
+                                className={cn('animate-spin', !mutation.isLoading && 'hidden')}
                             />
                         </button>
                     </form>

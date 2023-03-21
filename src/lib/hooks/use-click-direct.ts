@@ -1,9 +1,4 @@
-import {
-    MouseEventHandler,
-    RefObject,
-    TouchEventHandler,
-    useEffect,
-} from 'react';
+import { MouseEventHandler, RefObject, TouchEventHandler, useEffect } from 'react';
 
 export function useClickDirect(
     ref: RefObject<HTMLElement>,

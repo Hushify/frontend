@@ -18,10 +18,7 @@ export class StreamDecrypter {
         const worker = CryptoWorker.instance;
 
         if (this.chunkIndex === 0) {
-            this.state = await worker.streamingDecryptionInit(
-                new Uint8Array(chunk),
-                this.key
-            );
+            this.state = await worker.streamingDecryptionInit(new Uint8Array(chunk), this.key);
             this.chunkIndex++;
             return;
         }

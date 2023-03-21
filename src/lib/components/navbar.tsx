@@ -13,9 +13,7 @@ export function Navbar() {
                 </Link>
                 <ul className='flex items-center justify-center gap-4 md:gap-6'>
                     <li>
-                        <Link
-                            href={clientRoutes.blog.index}
-                            className='text-lg hover:underline'>
+                        <Link href={clientRoutes.blog.index} className='text-lg hover:underline'>
                             Blog
                         </Link>
                     </li>

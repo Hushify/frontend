@@ -9,6 +9,7 @@ import {
     BreadcrumbDecrypted,
     FileNodeDecrypted,
     FolderNodeDecrypted,
+    SelectedNode,
 } from '@/lib/types/drive';
 import { cn } from '@/lib/utils/cn';
 
@@ -30,18 +31,10 @@ type BreadcrumbsProps = {
     workspaceId: string | undefined;
 };
 
-export default function Breadcrumbs({
-    items,
-    onMove,
-    workspaceId,
-}: BreadcrumbsProps) {
+export function Breadcrumbs({ items, onMove, workspaceId }: BreadcrumbsProps) {
     return (
         <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 py-2 px-4 text-gray-700'>
-            <MainCrumb
-                workspaceId={workspaceId}
-                totalItems={items.length}
-                onMove={onMove}
-            />
+            <MainCrumb workspaceId={workspaceId} totalItems={items.length} onMove={onMove} />
             {items.map((item, idx) => (
                 <Crumb
                     key={item.id}
@@ -66,10 +59,7 @@ function MainCrumb({
         void,
         unknown,
         {
-            items: (
-                | { node: FolderNodeDecrypted; type: 'folder' }
-                | { node: FileNodeDecrypted; type: 'file' }
-            )[];
+            items: SelectedNode[];
             destinationFolderId: string;
             destinationFolderKey: string;
         },
@@ -78,24 +68,17 @@ function MainCrumb({
 }) {
     const masterKey = useAuthStore(state => state.masterKey);
 
-    const [[dropProps, drop]] = useMultiDrop<
-        unknown,
-        unknown,
-        { canDrop: boolean; isOver: boolean }
-    >({
+    const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
-        drop: async items => {
+        drop: async (items: SelectedNode[]) => {
             onMove({
-                items: items as (
-                    | { node: FolderNodeDecrypted; type: 'folder' }
-                    | { node: FileNodeDecrypted; type: 'file' }
-                )[],
+                items: items,
                 destinationFolderId: workspaceId ?? '',
                 destinationFolderKey: masterKey ?? '',
             });
         },
-        canDrop: (_item: any) => totalItems > 0,
-        collect: (monitor: any) => ({
+        canDrop: _item => totalItems > 0,
+        collect: monitor => ({
             canDrop: monitor.canDrop(),
             isOver: monitor.isOver(),
         }),
@@ -136,34 +119,24 @@ function Crumb({
         void,
         unknown,
         {
-            items: (
-                | { node: FolderNodeDecrypted; type: 'folder' }
-                | { node: FileNodeDecrypted; type: 'file' }
-            )[];
+            items: SelectedNode[];
             destinationFolderId: string;
             destinationFolderKey: string;
         },
         unknown
     >;
 }) {
-    const [[dropProps, drop]] = useMultiDrop<
-        unknown,
-        unknown,
-        { canDrop: boolean; isOver: boolean }
-    >({
+    const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
-        drop: async items => {
+        drop: async (items: SelectedNode[]) => {
             onMove({
-                items: items as (
-                    | { node: FolderNodeDecrypted; type: 'folder' }
-                    | { node: FileNodeDecrypted; type: 'file' }
-                )[],
+                items: items,
                 destinationFolderId: item.id,
                 destinationFolderKey: item.key,
             });
         },
-        canDrop: (_item: any) => idx !== totalItems - 1,
-        collect: (monitor: any) => ({
+        canDrop: _item => idx !== totalItems - 1,
+        collect: monitor => ({
             canDrop: monitor.canDrop(),
             isOver: monitor.isOver(),
         }),
@@ -175,8 +148,7 @@ function Crumb({
             <li
                 ref={drop}
                 className={cn('px-2', {
-                    'bg-brand-200 before:bg-transparent':
-                        dropProps.isOver && dropProps.canDrop,
+                    'bg-brand-200 before:bg-transparent': dropProps.isOver && dropProps.canDrop,
                 })}>
                 <Link
                     href={`${clientRoutes.drive}/${item.id}`}

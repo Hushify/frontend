@@ -14,9 +14,7 @@ export function DragPreview() {
         <div
             className='pointer-events-none fixed left-0 top-0 rounded bg-brand-400 px-2 py-1 text-sm text-white'
             style={{
-                transform: `translate(${offset?.x ?? 0}px, ${
-                    offset?.y ?? 0
-                }px)`,
+                transform: `translate(${offset?.x ?? 0}px, ${offset?.y ?? 0}px)`,
             }}>
             Moving {length} {length === 1 ? 'node' : 'nodes'}.
         </div>

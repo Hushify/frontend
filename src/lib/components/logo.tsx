@@ -2,11 +2,7 @@ import { SVGProps } from 'react';
 
 export function Logo(props: SVGProps<SVGSVGElement>) {
     return (
-        <svg
-            viewBox='0 0 634 724'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            {...props}>
+        <svg viewBox='0 0 634 724' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
             <path
                 fillRule='evenodd'
                 clipRule='evenodd'

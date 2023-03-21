@@ -6,9 +6,7 @@ import { UserCryptoProperties } from '@/lib/types/crypto';
 import { ResponseMessage, SuccessResponse } from '@/lib/types/http';
 import { zxcvbn } from '@/lib/utils/zxcvbn';
 
-export async function register<T>(
-    email: string
-): Promise<ResponseMessage<T, null>> {
+export async function register<T>(email: string): Promise<ResponseMessage<T, null>> {
     const response = await fetch(apiRoutes.identity.register, {
         method: 'POST',
         body: JSON.stringify({
@@ -54,9 +52,7 @@ export async function registerConfirm<T>(
     return { success: false, errors };
 }
 
-export async function resetPassword<T>(
-    email: string
-): Promise<ResponseMessage<T, null>> {
+export async function resetPassword<T>(email: string): Promise<ResponseMessage<T, null>> {
     const response = await fetch(apiRoutes.identity.resetPassword, {
         method: 'POST',
         body: JSON.stringify({
@@ -103,9 +99,7 @@ export async function resetPasswordConfirm<T>(
     return { success: false, errors };
 }
 
-export async function initiateLogin<T>(
-    email: string
-): Promise<ResponseMessage<T, undefined>> {
+export async function initiateLogin<T>(email: string): Promise<ResponseMessage<T, undefined>> {
     const response = await fetch(apiRoutes.identity.initiateLogin, {
         method: 'POST',
         body: JSON.stringify({

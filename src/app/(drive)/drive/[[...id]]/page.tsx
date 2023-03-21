@@ -1,19 +1,12 @@
 'use client';
 
-import {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Loader } from 'lucide-react';
 import { HTML5toTouch } from 'rdndmb-html5-to-touch';
 import { DndProvider } from 'react-dnd-multi-backend';
 import useMeasure from 'react-use-measure';
 
-import Breadcrumbs from '@/lib/components/drive/breadcrumbs';
+import { Breadcrumbs } from '@/lib/components/drive/breadcrumbs';
 import { DragPreview } from '@/lib/components/drive/drag-preview';
 import { Explorer } from '@/lib/components/drive/explorer';
 import { FullscreenUpload } from '@/lib/components/drive/fullscreen-upload';
@@ -26,100 +19,38 @@ import { useCustomDropzone } from '@/lib/hooks/drive/use-custom-dropzone';
 import { useDriveList } from '@/lib/hooks/drive/use-drive-list';
 import { useMenuItems } from '@/lib/hooks/drive/use-menu-items';
 import { useMoveNodes } from '@/lib/hooks/drive/use-move-nodes';
-import { useClickDirect } from '@/lib/hooks/use-click-direct';
 import { deleteNodes } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import {
-    BreadcrumbDecrypted,
-    FileNodeDecrypted,
-    SelectedNode,
-} from '@/lib/types/drive';
+import { BreadcrumbDecrypted, FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 
-export default function Drive({
-    params: { id },
-}: {
-    params: { id?: string[] };
-}) {
+export default function Drive({ params: { id } }: { params: { id?: string[] } }) {
     const accessToken = useAuthStore(state => state.accessToken)!;
     const masterKey = useAuthStore(state => state.masterKey)!;
 
     const currentFolderId = id?.at(0) ?? null;
 
-    const { data, status, refetch } = useDriveList(
-        currentFolderId,
-        accessToken,
-        masterKey
-    );
+    const { data, status, refetch } = useDriveList(currentFolderId, accessToken, masterKey);
 
     const currentFolderKey = useMemo(
         () =>
             data && data.breadcrumbs.length > 0
-                ? data?.breadcrumbs.find(c => c.id === currentFolderId)?.key ??
-                  masterKey
+                ? data?.breadcrumbs.find(c => c.id === currentFolderId)?.key ?? masterKey
                 : masterKey,
         [currentFolderId, data, masterKey]
     );
 
-    const selectAllRef = useRef<HTMLInputElement>(null);
     const [selectedNodes, setSelectedNodes] = useState<SelectedNode[]>([]);
 
     useEffect(() => {
         setSelectedNodes([]);
     }, [currentFolderId]);
-    useLayoutEffect(() => {
-        if (!selectAllRef.current) {
-            return;
-        }
-
-        if (selectedNodes.length <= 0) {
-            selectAllRef.current.indeterminate = false;
-            selectAllRef.current.checked = false;
-            return;
-        }
-
-        if (
-            selectedNodes.length ===
-            (data?.folders.length ?? 0) + (data?.files.length ?? 0)
-        ) {
-            selectAllRef.current.indeterminate = false;
-            selectAllRef.current.checked = true;
-            return;
-        }
-
-        selectAllRef.current.indeterminate = true;
-    }, [data?.files.length, data?.folders.length, selectedNodes.length]);
-
-    const selectAll = useCallback(() => {
-        if (!selectAllRef.current || !data) {
-            return null;
-        }
-
-        if (!selectAllRef.current.checked) {
-            setSelectedNodes([]);
-            return null;
-        }
-
-        setSelectedNodes([
-            ...data.folders.map(node => ({
-                node,
-                type: 'folder' as const,
-            })),
-            ...data.files.map(node => ({ node, type: 'file' as const })),
-        ]);
-    }, [data]);
 
     const clearSelection = useCallback(() => {
         setSelectedNodes([]);
     }, []);
 
     const deleteCb = useCallback(
-        async ({
-            folderIds,
-            fileIds,
-        }: {
-            folderIds: string[];
-            fileIds: string[];
-        }) => {
+        async ({ folderIds, fileIds }: { folderIds: string[]; fileIds: string[] }) => {
             const result = await deleteNodes(folderIds, fileIds, accessToken);
             if (!result.success) {
                 throw new Error('Deletion failed!');
@@ -131,29 +62,16 @@ export default function Drive({
         [accessToken, clearSelection, refetch]
     );
 
-    const moveMutation = useMoveNodes(
-        currentFolderId,
-        accessToken,
-        clearSelection
-    );
+    const moveMutation = useMoveNodes(currentFolderId, accessToken, clearSelection);
 
-    const {
-        fileRef,
-        folderRef,
-        getFolderInputProps,
-        getRootProps,
-        inputProps,
-        isDragActive,
-    } = useCustomDropzone(accessToken, currentFolderKey, data, refetch);
+    const { fileRef, folderRef, getFolderInputProps, rootProps, inputProps, isDragActive } =
+        useCustomDropzone(accessToken, currentFolderKey, data, refetch);
 
     const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
     const [isRenameOpen, setIsRenameOpen] = useState(false);
 
     const [fileForPreview, setFileForPreview] = useState<FileNodeDecrypted>();
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-    const divRef = useRef<HTMLDivElement>(null);
-    useClickDirect(divRef, clearSelection);
 
     const [ref, bounds] = useMeasure();
     const [refRest, boundsRest] = useMeasure();
@@ -177,11 +95,8 @@ export default function Drive({
                     return backend;
                 }),
             }}>
-            <div className='h-full w-full' {...getRootProps()}>
-                <FullscreenUpload
-                    isDragActive={isDragActive}
-                    inputProps={inputProps}
-                />
+            <div className='h-full w-full' {...rootProps}>
+                <FullscreenUpload isDragActive={isDragActive} inputProps={inputProps} />
 
                 <input
                     {...getFolderInputProps()}
@@ -203,10 +118,7 @@ export default function Drive({
 
                     {status === 'loading' && (
                         <div className='absolute inset-0 grid place-items-center'>
-                            <Loader
-                                size={32}
-                                className='animate-spin stroke-brand-600'
-                            />
+                            <Loader size={32} className='animate-spin stroke-brand-600' />
                         </div>
                     )}
 
@@ -237,8 +149,7 @@ export default function Drive({
                                             ? data?.folders
                                             : data?.files
                                     }
-                                    type={selectedNodes.at(0)!.type}
-                                    node={selectedNodes.at(0)!.node}
+                                    selectedeNode={selectedNodes.at(0)!}
                                     isRenameOpen={isRenameOpen}
                                     setIsRenameOpen={setIsRenameOpen}
                                     currentFolderId={currentFolderId}
@@ -250,10 +161,7 @@ export default function Drive({
                         <Toolbar items={menuItems} />
 
                         <Breadcrumbs
-                            items={
-                                data?.breadcrumbs ??
-                                ([] as BreadcrumbDecrypted[])
-                            }
+                            items={data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])}
                             workspaceId={data?.workspaceFolderId}
                             onMove={moveMutation.mutateAsync}
                         />
@@ -265,9 +173,6 @@ export default function Drive({
                         menuItems={menuItems}
                         bounds={bounds}
                         boundsRest={boundsRest}
-                        divRef={divRef}
-                        selectAll={selectAll}
-                        selectAllRef={selectAllRef}
                         selectedNodes={selectedNodes}
                         setSelectedNodes={setSelectedNodes}
                         moveMutation={moveMutation}

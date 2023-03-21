@@ -28,10 +28,7 @@ const newFolderSchema = zod
             .string()
             .trim()
             .min(1, 'Folder Name is required.')
-            .refine(
-                folderName => sanitize(folderName) === folderName,
-                'Folder Name is not valid.'
-            ),
+            .refine(folderName => sanitize(folderName) === folderName, 'Folder Name is not valid.'),
     })
     .required();
 
@@ -75,11 +72,7 @@ export function NewFolder({
 
     const mutation = useMutation(
         async (data: NewFolderInputs) => {
-            if (
-                folders &&
-                folders.findIndex(f => f.metadata.name === data.folderName) !==
-                    -1
-            ) {
+            if (folders && folders.findIndex(f => f.metadata.name === data.folderName) !== -1) {
                 addServerErrors(
                     {
                         folderName: ['Folder already exists.'],
@@ -100,10 +93,7 @@ export function NewFolder({
                 created: new Date().toISOString(),
             };
 
-            const metadataBundle = await crypto.encryptMetadata(
-                keyBundle.folderKey,
-                metadata
-            );
+            const metadataBundle = await crypto.encryptMetadata(keyBundle.folderKey, metadata);
 
             const result = await createFolder(
                 accessToken,
@@ -178,12 +168,8 @@ export function NewFolder({
                     </div>
                     <form
                         className='mt-4 space-y-2'
-                        onSubmit={handleSubmit(data =>
-                            mutation.mutateAsync(data)
-                        )}>
-                        <small className='text-red-600'>
-                            {errors.errors?.message}
-                        </small>
+                        onSubmit={handleSubmit(data => mutation.mutateAsync(data))}>
+                        <small className='text-red-600'>{errors.errors?.message}</small>
 
                         <InputWithLabel
                             error={errors.folderName}
@@ -205,10 +191,7 @@ export function NewFolder({
                             <span>Create</span>
                             <Loader
                                 size={16}
-                                className={cn(
-                                    'animate-spin',
-                                    !mutation.isLoading && 'hidden'
-                                )}
+                                className={cn('animate-spin', !mutation.isLoading && 'hidden')}
                             />
                         </button>
                     </form>

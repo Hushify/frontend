@@ -1,13 +1,5 @@
 import { Dispatch, RefObject, SetStateAction, useMemo } from 'react';
-import {
-    Download,
-    Eye,
-    Folder,
-    Pencil,
-    Plus,
-    Trash2,
-    Upload,
-} from 'lucide-react';
+import { Download, Eye, Folder, Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
@@ -83,9 +75,7 @@ export function useMenuItems(
                 action: async () => {
                     if (selectedNodes.length === 1) {
                         await toast.promise(
-                            downloadFile(
-                                selectedNodes[0].node as FileNodeDecrypted
-                            ),
+                            downloadFile(selectedNodes[0].node as FileNodeDecrypted),
                             {
                                 success: 'Downloaded!',
                                 error: 'Download failed!',
@@ -125,18 +115,14 @@ export function useMenuItems(
             (selectedNodes[0].node.metadata.mimeType.startsWith('image/') ||
                 selectedNodes[0].node.metadata.mimeType.startsWith('video/') ||
                 selectedNodes[0].node.metadata.mimeType.startsWith('audio/') ||
-                selectedNodes[0].node.metadata.mimeType.startsWith(
-                    'application/pdf'
-                )) &&
+                selectedNodes[0].node.metadata.mimeType.startsWith('application/pdf')) &&
             selectedNodes[0].node.metadata.size <= 5 * 1024 * 1024
         ) {
             items.push({
                 type: 'item' as const,
                 name: 'Preview',
                 action: () => {
-                    setFileForPreview(
-                        selectedNodes[0].node as FileNodeDecrypted
-                    );
+                    setFileForPreview(selectedNodes[0].node as FileNodeDecrypted);
                     setIsPreviewOpen(true);
                 },
                 icon: Eye,
@@ -160,9 +146,7 @@ export function useMenuItems(
                         folderIds: selectedNodes
                             .filter(n => n.type === 'folder')
                             .map(n => n.node.id),
-                        fileIds: selectedNodes
-                            .filter(n => n.type === 'file')
-                            .map(n => n.node.id),
+                        fileIds: selectedNodes.filter(n => n.type === 'file').map(n => n.node.id),
                     }),
                     {
                         error: 'Failed to delete!',

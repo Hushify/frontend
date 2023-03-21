@@ -13,13 +13,10 @@ class CryptoWorker {
             return;
         }
 
-        const worker = new Worker(
-            new URL('@/lib/services/crypto.worker', import.meta.url),
-            {
-                type: 'module',
-                name: 'hushify-crypto-worker',
-            }
-        );
+        const worker = new Worker(new URL('@/lib/services/crypto.worker', import.meta.url), {
+            type: 'module',
+            name: 'hushify-crypto-worker',
+        });
 
         this.instance = wrap<typeof CryptoService>(worker);
     }

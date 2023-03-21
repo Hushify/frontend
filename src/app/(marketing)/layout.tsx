@@ -7,9 +7,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <>
             <div className='flex h-full flex-col'>
                 <Navbar />
-                <div className='container relative mx-auto mt-16 flex-auto px-4'>
-                    {children}
-                </div>
+                <div className='container relative mx-auto mt-16 flex-auto px-4'>{children}</div>
             </div>
         </>
     );

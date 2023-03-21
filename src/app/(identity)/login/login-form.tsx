@@ -63,9 +63,7 @@ export function LoginForm() {
         },
         {
             onError: error => {
-                const message = error
-                    ? (error as Error).message
-                    : 'Something went wrong!';
+                const message = error ? (error as Error).message : 'Something went wrong!';
                 setError('errors', { message });
                 logout();
             },
@@ -96,13 +94,7 @@ export function LoginForm() {
                     'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                 )}>
                 <span>Continue</span>
-                <Loader
-                    size={16}
-                    className={cn(
-                        'animate-spin',
-                        !mutation.isLoading && 'hidden'
-                    )}
-                />
+                <Loader size={16} className={cn('animate-spin', !mutation.isLoading && 'hidden')} />
             </button>
         </form>
     );

@@ -1,14 +1,16 @@
 import { MetadataBundle, SecretKeyBundle } from '@/lib/types/crypto';
 
-export type SelectedNode =
-    | {
-          node: FolderNodeDecrypted;
-          type: 'folder';
-      }
-    | {
-          node: FileNodeDecrypted;
-          type: 'file';
-      };
+export type SelectedFolderNode = {
+    node: FolderNodeDecrypted;
+    type: 'folder';
+};
+
+export type SelectedFileNode = {
+    node: FileNodeDecrypted;
+    type: 'file';
+};
+
+export type SelectedNode = SelectedFolderNode | SelectedFileNode;
 
 export type Node = {
     id: string;

@@ -3,7 +3,7 @@ import { intlFormat, isToday } from 'date-fns';
 import { File } from 'lucide-react';
 import { useMultiDrag } from 'react-dnd-multi-backend';
 
-import { FileNodeDecrypted, FolderNodeDecrypted } from '@/lib/types/drive';
+import { FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { cn } from '@/lib/utils/cn';
 import { getEmptyImage } from '@/lib/utils/get-empty-image';
 import { humanFileSize } from '@/lib/utils/humanized-file-size';
@@ -15,48 +15,16 @@ export function FileRow({
     setSelectedNodes,
 }: {
     file: FileNodeDecrypted;
-    selectNode: (
-        node: FolderNodeDecrypted | FileNodeDecrypted,
-        type: 'folder' | 'file'
-    ) => void;
-    selectedNodes: (
-        | {
-              node: FolderNodeDecrypted;
-              type: 'folder';
-          }
-        | {
-              node: FileNodeDecrypted;
-              type: 'file';
-          }
-    )[];
-    setSelectedNodes: Dispatch<
-        SetStateAction<
-            (
-                | {
-                      node: FolderNodeDecrypted;
-                      type: 'folder';
-                  }
-                | {
-                      node: FileNodeDecrypted;
-                      type: 'file';
-                  }
-            )[]
-        >
-    >;
+    selectNode: (node: SelectedNode) => void;
+    selectedNodes: SelectedNode[];
+    setSelectedNodes: Dispatch<SetStateAction<SelectedNode[]>>;
 }) {
     const isSelected = selectedNodes.findIndex(n => n.node.id === file.id) >= 0;
 
-    const [[_, drag, preview]] = useMultiDrag<
-        unknown,
-        unknown,
-        { isDragging: boolean }
-    >({
+    const [[_, drag, preview]] = useMultiDrag({
         type: 'NODE',
-        item:
-            selectedNodes.length > 0
-                ? selectedNodes
-                : [{ node: file, type: 'file' as const }],
-        collect: (monitor: any) => ({
+        item: selectedNodes.length > 0 ? selectedNodes : [{ node: file, type: 'file' as const }],
+        collect: monitor => ({
             isDragging: monitor.isDragging(),
         }),
         canDrag: isSelected || selectedNodes.length === 0,
@@ -110,16 +78,14 @@ export function FileRow({
                 </label>
                 <input
                     onClick={e => e.stopPropagation()}
-                    onChange={() => selectNode(file, 'file')}
+                    onChange={() => selectNode({ node: file, type: 'file' })}
                     checked={isSelected}
                     className='-mt-1 cursor-pointer rounded'
                     type='checkbox'
                     id={`checkbox-${file.id}`}
                 />
             </td>
-            <td
-                ref={drag}
-                className='max-w-[300px] whitespace-nowrap py-2 text-left'>
+            <td ref={drag} className='max-w-[300px] whitespace-nowrap py-2 text-left'>
                 <div className='flex items-center gap-2'>
                     <File className='h-5 w-5 shrink-0' />
                     <span className='max-w-[8rem] truncate text-sm sm:max-w-[16rem] md:max-w-full'>

@@ -50,45 +50,25 @@ export function UploadProgressBox() {
                         )}>
                         <ul className='flex flex-col gap-4 p-4'>
                             {files.map(fileWithState => (
-                                <li
-                                    className='space-y-2'
-                                    key={fileWithState.trackingId}>
+                                <li className='space-y-2' key={fileWithState.trackingId}>
                                     <div className='flex items-center justify-between gap-4'>
                                         <div className='flex w-[180px] items-center gap-1 sm:w-[292px]'>
                                             <File className='h-4 w-4 shrink-0' />
                                             <div
                                                 className='w-[160px] truncate text-sm'
-                                                title={
-                                                    fileWithState
-                                                        .fileWithVersion.file
-                                                        .name
-                                                }>
-                                                {
-                                                    fileWithState
-                                                        .fileWithVersion.file
-                                                        .name
-                                                }
+                                                title={fileWithState.fileWithVersion.file.name}>
+                                                {fileWithState.fileWithVersion.file.name}
                                             </div>
                                         </div>
                                         <div className='flex items-center justify-center gap-2 pr-3'>
-                                            <div className='text-sm'>
-                                                {fileWithState.state}
-                                            </div>
+                                            <div className='text-sm'>{fileWithState.state}</div>
                                             <button
                                                 onClick={() => {
-                                                    if (
-                                                        fileWithState.state !==
-                                                        'Failed'
-                                                    ) {
-                                                        removeFile(
-                                                            fileWithState.trackingId
-                                                        );
+                                                    if (fileWithState.state !== 'Failed') {
+                                                        removeFile(fileWithState.trackingId);
                                                     }
 
-                                                    if (
-                                                        fileWithState.state ===
-                                                        'Failed'
-                                                    ) {
+                                                    if (fileWithState.state === 'Failed') {
                                                         retry(
                                                             fileWithState.trackingId,
                                                             accessToken
@@ -97,8 +77,7 @@ export function UploadProgressBox() {
                                                 }}
                                                 type='button'
                                                 className='flex items-center justify-center gap-2'>
-                                                {fileWithState.state ===
-                                                'Failed' ? (
+                                                {fileWithState.state === 'Failed' ? (
                                                     <RefreshCw className='h-4 w-4' />
                                                 ) : (
                                                     <X className='h-4 w-4' />
@@ -112,22 +91,13 @@ export function UploadProgressBox() {
                                             style={{
                                                 width: `${fileWithState.progress}%`,
                                             }}
-                                            className={cn(
-                                                'h-1 rounded-full bg-green-600',
-                                                {
-                                                    'bg-yellow-600':
-                                                        fileWithState.state ===
-                                                            'Uploading' ||
-                                                        fileWithState.state ===
-                                                            'Pending',
-                                                    'bg-red-600':
-                                                        fileWithState.state ===
-                                                        'Failed',
-                                                    'bg-green-600':
-                                                        fileWithState.state ===
-                                                        'Uploaded',
-                                                }
-                                            )}
+                                            className={cn('h-1 rounded-full bg-green-600', {
+                                                'bg-yellow-600':
+                                                    fileWithState.state === 'Uploading' ||
+                                                    fileWithState.state === 'Pending',
+                                                'bg-red-600': fileWithState.state === 'Failed',
+                                                'bg-green-600': fileWithState.state === 'Uploaded',
+                                            })}
                                         />
                                         <progress
                                             className='sr-only'

@@ -15,14 +15,7 @@ export const metadata = {
 
 export default async function Privacy() {
     const markdown = await fs.readFile(
-        path.join(
-            process.cwd(),
-            'src',
-            'app',
-            '(marketing)',
-            'privacy',
-            'privacy.md'
-        ),
+        path.join(process.cwd(), 'src', 'app', '(marketing)', 'privacy', 'privacy.md'),
         'utf8'
     );
     const html = await markdownToHtml(markdown);

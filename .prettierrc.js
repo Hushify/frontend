@@ -8,7 +8,7 @@ module.exports = {
     endOfLine: 'lf',
     arrowParens: 'avoid',
     tabWidth: 4,
-    printWidth: 80,
+    printWidth: 100,
     semi: true,
 
     importOrder: [
@@ -30,8 +30,5 @@ module.exports = {
     importOrderMergeDuplicateImports: true,
     importOrderCombineTypeAndValueImports: true,
 
-    plugins: [
-        '@ianvs/prettier-plugin-sort-imports',
-        'prettier-plugin-tailwindcss',
-    ],
+    plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
 };

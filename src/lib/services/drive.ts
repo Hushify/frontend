@@ -52,8 +52,7 @@ export async function list(
         });
     }, Promise.resolve());
 
-    const currentFolderKey =
-        breadcrumbs.find(b => b.id === data.currentFolderId)?.key ?? masterKey;
+    const currentFolderKey = breadcrumbs.find(b => b.id === data.currentFolderId)?.key ?? masterKey;
 
     const folders: FolderNodeDecrypted[] = await Promise.all(
         data.folders.map(async f => {

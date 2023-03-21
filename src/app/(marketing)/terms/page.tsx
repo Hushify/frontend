@@ -15,14 +15,7 @@ export const metadata = {
 
 export default async function Terms() {
     const markdown = await fs.readFile(
-        path.join(
-            process.cwd(),
-            'src',
-            'app',
-            '(marketing)',
-            'terms',
-            'terms.md'
-        ),
+        path.join(process.cwd(), 'src', 'app', '(marketing)', 'terms', 'terms.md'),
         'utf8'
     );
     const html = await markdownToHtml(markdown);

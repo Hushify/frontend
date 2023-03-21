@@ -54,8 +54,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 return !!(masterKey && privateKey && signingPrivateKey);
             },
 
-            isLoggedIn: () =>
-                get().hasRequiredKeys() && get().status === 'authenticated',
+            isLoggedIn: () => get().hasRequiredKeys() && get().status === 'authenticated',
 
             logout: async () => {
                 try {

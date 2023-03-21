@@ -7,7 +7,7 @@ import { Folder } from 'lucide-react';
 import { useMultiDrag, useMultiDrop } from 'react-dnd-multi-backend';
 
 import { clientRoutes } from '@/lib/data/routes';
-import { FileNodeDecrypted, FolderNodeDecrypted } from '@/lib/types/drive';
+import { FolderNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { cn } from '@/lib/utils/cn';
 import { getEmptyImage } from '@/lib/utils/get-empty-image';
 
@@ -19,42 +19,14 @@ export function FolderRow({
     onMove,
 }: {
     folder: FolderNodeDecrypted;
-    selectNode: (
-        node: FolderNodeDecrypted | FileNodeDecrypted,
-        type: 'folder' | 'file'
-    ) => void;
-    selectedNodes: (
-        | {
-              node: FolderNodeDecrypted;
-              type: 'folder';
-          }
-        | {
-              node: FileNodeDecrypted;
-              type: 'file';
-          }
-    )[];
-    setSelectedNodes: Dispatch<
-        SetStateAction<
-            (
-                | {
-                      node: FolderNodeDecrypted;
-                      type: 'folder';
-                  }
-                | {
-                      node: FileNodeDecrypted;
-                      type: 'file';
-                  }
-            )[]
-        >
-    >;
+    selectNode: (node: SelectedNode) => void;
+    selectedNodes: SelectedNode[];
+    setSelectedNodes: Dispatch<SetStateAction<SelectedNode[]>>;
     onMove: UseMutateAsyncFunction<
         void,
         unknown,
         {
-            items: (
-                | { node: FolderNodeDecrypted; type: 'folder' }
-                | { node: FileNodeDecrypted; type: 'file' }
-            )[];
+            items: SelectedNode[];
             destinationFolderId: string;
             destinationFolderKey: string;
         },
@@ -62,43 +34,29 @@ export function FolderRow({
     >;
 }) {
     const router = useRouter();
-    const isSelected =
-        selectedNodes.findIndex(n => n.node.id === folder.id) >= 0;
+    const isSelected = selectedNodes.findIndex(n => n.node.id === folder.id) >= 0;
 
     const [[_, drag, preview]] = useMultiDrag({
         type: 'NODE',
         item:
-            selectedNodes.length > 0
-                ? selectedNodes
-                : [{ node: folder, type: 'folder' as const }],
-        collect: (monitor: any) => ({
+            selectedNodes.length > 0 ? selectedNodes : [{ node: folder, type: 'folder' as const }],
+        collect: monitor => ({
             isDragging: monitor.isDragging(),
         }),
         canDrag: isSelected || selectedNodes.length === 0,
     });
 
-    const [[dropProps, drop]] = useMultiDrop<
-        unknown,
-        unknown,
-        { canDrop: boolean; isOver: boolean }
-    >({
+    const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
-        drop: async items => {
+        drop: async (items: SelectedNode[]) => {
             onMove({
-                items: items as (
-                    | { node: FolderNodeDecrypted; type: 'folder' }
-                    | { node: FileNodeDecrypted; type: 'file' }
-                )[],
+                items,
                 destinationFolderId: folder.id,
                 destinationFolderKey: folder.key,
             });
         },
-        canDrop: items =>
-            !isSelected &&
-            (items as { node: FileNodeDecrypted; type: 'folder' }[]).some(
-                i => i.node.id !== folder.id
-            ),
-        collect: (monitor: any) => ({
+        canDrop: (items: SelectedNode[]) => !isSelected && items.some(i => i.node.id !== folder.id),
+        collect: monitor => ({
             canDrop: monitor.canDrop(),
             isOver: monitor.isOver(),
         }),
@@ -153,7 +111,7 @@ export function FolderRow({
                 </label>
                 <input
                     onClick={e => e.stopPropagation()}
-                    onChange={() => selectNode(folder, 'folder')}
+                    onChange={() => selectNode({ node: folder, type: 'folder' })}
                     checked={isSelected}
                     className='-mt-1 cursor-pointer rounded'
                     type='checkbox'
@@ -166,9 +124,7 @@ export function FolderRow({
                     drop(el);
                 }}
                 className='max-w-[300px] select-none whitespace-nowrap py-2 text-left'
-                onDoubleClick={() =>
-                    router.push(`${clientRoutes.drive}/${folder.id}`)
-                }>
+                onDoubleClick={() => router.push(`${clientRoutes.drive}/${folder.id}`)}>
                 <div className='flex items-center gap-2'>
                     <Folder className='h-5 w-5 shrink-0 fill-brand-600 text-brand-600' />
                     <Link

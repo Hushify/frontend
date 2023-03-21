@@ -35,8 +35,7 @@ export function Providers({ children }: { children: ReactNode }) {
                         window.plausible =
                             window.plausible ||
                             function () {
-                                (window.plausible.q =
-                                    window.plausible.q || []).push(
+                                (window.plausible.q = window.plausible.q || []).push(
                                     arguments as unknown as PlausibleArgs
                                 );
                             };

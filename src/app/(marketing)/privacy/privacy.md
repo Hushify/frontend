@@ -6,19 +6,19 @@ Thank you for using our end-to-end encrypted, open-source cloud storage service.
 
 We collect the following information from you:
 
-- Email: We collect your email address so that we can communicate with you about your account and provide you with important information about our service.
-- User Agent for Session Management: We collect this information to ensure that your account is secure and to prevent unauthorized access.
-- Server logs for 7 number of days, which includes IP Address: We collect this information to monitor and troubleshoot our service and to ensure that our systems are secure.
+-   Email: We collect your email address so that we can communicate with you about your account and provide you with important information about our service.
+-   User Agent for Session Management: We collect this information to ensure that your account is secure and to prevent unauthorized access.
+-   Server logs for 7 number of days, which includes IP Address: We collect this information to monitor and troubleshoot our service and to ensure that our systems are secure.
 
 ## Who do we share your information with?
 
 We use a number of third-party subprocessors to help us provide our service. We share the following information with our subprocessors:
 
-- Stripe: We share payment information with Stripe so that they can process payments on our behalf.
-- Cloudflare: We share DNS, Captcha, and caching information with Cloudflare to ensure that our service is secure and performant.
-- AWS: We use AWS to host our S3 and CloudFront services.
-- neon.tech: We use neon.tech to host our database.
-- Mailgun: We use Mailgun to send OTP emails.
+-   Stripe: We share payment information with Stripe so that they can process payments on our behalf.
+-   Cloudflare: We share DNS, Captcha, and caching information with Cloudflare to ensure that our service is secure and performant.
+-   AWS: We use AWS to host our S3 and CloudFront services.
+-   neon.tech: We use neon.tech to host our database.
+-   Mailgun: We use Mailgun to send OTP emails.
 
 We only share your information with our subprocessors to the extent necessary to provide our service, and we require all of our subprocessors to comply with the same privacy and security standards that we do.
 
@@ -74,10 +74,10 @@ The data controller for the personal data we collect and process is Hushify UG. 
 
 We collect the following personal data:
 
-- Email: We collect your email address to create and manage your account and to send you important information about our service.
-- User Agent: We collect your user agent for session management purposes.
-- Server logs: We collect server logs for 7 days, which includes your IP address, for security and troubleshooting purposes.
-- Refresh Token: We store one cookie, Refresh Token, which is essential to use the service, and is used to get new access tokens.
+-   Email: We collect your email address to create and manage your account and to send you important information about our service.
+-   User Agent: We collect your user agent for session management purposes.
+-   Server logs: We collect server logs for 7 days, which includes your IP address, for security and troubleshooting purposes.
+-   Refresh Token: We store one cookie, Refresh Token, which is essential to use the service, and is used to get new access tokens.
 
 ### Purposes and Legal Basis for Processing Personal Data
 
@@ -95,11 +95,11 @@ Our legal basis for processing personal data is your consent, which is obtained 
 
 We may share your personal data with the following subprocessors:
 
-- Stripe: For payment processing and payment information.
-- Cloudflare: For DNS, Captcha, and caching.
-- AWS: For S3 and CloudFront.
-- neon.tech: For hosting our DB.
-- Mailgun: For sending OTP emails.
+-   Stripe: For payment processing and payment information.
+-   Cloudflare: For DNS, Captcha, and caching.
+-   AWS: For S3 and CloudFront.
+-   neon.tech: For hosting our DB.
+-   Mailgun: For sending OTP emails.
 
 We may also share your personal data with law enforcement agencies and other third parties as necessary to comply with applicable laws and regulations.
 
@@ -111,13 +111,13 @@ We retain your personal data for as long as necessary to provide our service and
 
 You have the following rights with respect to your personal data:
 
-- The right to access your personal data
-- The right to rectify your personal data
-- The right to erasure of your personal data
-- The right to restrict processing of your personal data
-- The right to data portability
-- The right to object to processing of your personal data
-- The right to withdraw your consent to processing of your personal data
+-   The right to access your personal data
+-   The right to rectify your personal data
+-   The right to erasure of your personal data
+-   The right to restrict processing of your personal data
+-   The right to data portability
+-   The right to object to processing of your personal data
+-   The right to withdraw your consent to processing of your personal data
 
 To exercise your rights, please contact us at dpo@hushify.io.
 

@@ -1,7 +1,5 @@
-import { RefObject, useCallback } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
-import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import * as RadixScrollArea from '@radix-ui/react-scroll-area';
 import { QueryStatus } from '@tanstack/react-query';
 import { ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { RectReadOnly } from 'react-use-measure';
@@ -10,14 +8,11 @@ import undrawFileManager from '@/lib/assets/undraw_file_manager.svg';
 import { ContextMenu } from '@/lib/components/context-menu';
 import { FileRow } from '@/lib/components/drive/file-row';
 import { FolderRow } from '@/lib/components/drive/folder-row';
+import { ScrollArea } from '@/lib/components/scroll-area';
 import { useMoveNodes } from '@/lib/hooks/drive/use-move-nodes';
 import { useSortedNodes } from '@/lib/hooks/drive/use-sorted-nodes';
-import {
-    DriveList,
-    FileNodeDecrypted,
-    FolderNodeDecrypted,
-    SelectedNode,
-} from '@/lib/types/drive';
+import { useClickDirect } from '@/lib/hooks/use-click-direct';
+import { DriveList, SelectedNode } from '@/lib/types/drive';
 import { MenuItem, MenuSeparator } from '@/lib/types/menu';
 import { cn } from '@/lib/utils/cn';
 
@@ -27,9 +22,6 @@ export function Explorer({
     menuItems,
     bounds,
     boundsRest,
-    divRef,
-    selectAll,
-    selectAllRef,
     selectedNodes,
     setSelectedNodes,
     moveMutation,
@@ -39,61 +31,79 @@ export function Explorer({
     menuItems: (MenuItem | MenuSeparator)[];
     bounds: RectReadOnly;
     boundsRest: RectReadOnly;
-    divRef: RefObject<HTMLDivElement>;
-    selectAll: () => void;
-    selectAllRef: RefObject<HTMLInputElement>;
     selectedNodes: SelectedNode[];
     setSelectedNodes: React.Dispatch<React.SetStateAction<SelectedNode[]>>;
     moveMutation: ReturnType<typeof useMoveNodes>;
 }) {
-    const { sortKey, setSortKey, sortOrder, setSortOrder, files, folders } =
-        useSortedNodes(data);
+    const { sortKey, setSortKey, sortOrder, setSortOrder, files, folders } = useSortedNodes(data);
+
+    const divRef = useRef<HTMLDivElement>(null);
+    useClickDirect(divRef, () => setSelectedNodes([]));
+
+    const selectAllRef = useRef<HTMLInputElement>(null);
+
+    useLayoutEffect(() => {
+        if (!selectAllRef.current) {
+            return;
+        }
+
+        if (selectedNodes.length <= 0) {
+            selectAllRef.current.indeterminate = false;
+            selectAllRef.current.checked = false;
+            return;
+        }
+
+        if (selectedNodes.length === (data?.folders.length ?? 0) + (data?.files.length ?? 0)) {
+            selectAllRef.current.indeterminate = false;
+            selectAllRef.current.checked = true;
+            return;
+        }
+
+        selectAllRef.current.indeterminate = true;
+    }, [data?.files.length, data?.folders.length, selectedNodes.length]);
+
+    const selectAll = useCallback(() => {
+        if (!selectAllRef.current || !data) {
+            return;
+        }
+
+        setSelectedNodes(
+            selectAllRef.current.checked
+                ? [
+                      ...data.folders.map(node => ({ node, type: 'folder' as const })),
+                      ...data.files.map(node => ({ node, type: 'file' as const })),
+                  ]
+                : []
+        );
+    }, [data, setSelectedNodes]);
 
     const selectNode = useCallback(
-        (
-            node: FolderNodeDecrypted | FileNodeDecrypted,
-            type: 'folder' | 'file'
-        ) => {
+        (node: SelectedNode) => {
             setSelectedNodes(prev => {
-                const selected = prev.find(n => n.node.id === node.id);
+                const selected = prev.find(n => n.node.id === node.node.id);
                 if (selected) {
-                    return prev.filter(n => n.node.id !== node.id);
+                    return prev.filter(n => n.node.id !== node.node.id);
                 }
 
-                if (type === 'folder') {
-                    return [
-                        ...prev,
-                        { node: node as FolderNodeDecrypted, type },
-                    ];
-                }
-
-                return [...prev, { node: node as FileNodeDecrypted, type }];
+                return [...prev, node];
             });
         },
         [setSelectedNodes]
     );
 
     return (
-        <RadixScrollArea.Root
+        <ScrollArea
             style={{
-                height:
-                    document.body.clientHeight - bounds.top - boundsRest.height,
-            }}
-            className='w-full overflow-hidden'>
-            <RadixContextMenu.Root>
-                <RadixContextMenu.Trigger asChild>
-                    <RadixScrollArea.Viewport
-                        className='h-full w-full rounded'
-                        ref={divRef}>
+                height: document.body.clientHeight - bounds.top - boundsRest.height,
+            }}>
+            <ContextMenu.Root>
+                <ContextMenu.Trigger asChild>
+                    <ScrollArea.Viewport className='h-full w-full rounded' ref={divRef}>
                         <table className='w-full'>
                             <thead className='sticky top-0 select-none border-b border-b-gray-400 bg-white text-sm text-gray-600'>
                                 <tr>
-                                    <th
-                                        scope='col'
-                                        className='w-16 py-3 text-center font-light'>
-                                        <label
-                                            className='sr-only'
-                                            htmlFor='SelectAllOrNone'>
+                                    <th scope='col' className='w-16 py-3 text-center font-light'>
+                                        <label className='sr-only' htmlFor='SelectAllOrNone'>
                                             Select All
                                         </label>
                                         <input
@@ -110,9 +120,7 @@ export function Explorer({
                                             onClick={() => {
                                                 if (sortKey === 'name') {
                                                     setSortOrder(prev =>
-                                                        prev === 'asc'
-                                                            ? 'desc'
-                                                            : 'asc'
+                                                        prev === 'asc' ? 'desc' : 'asc'
                                                     );
                                                 } else {
                                                     setSortKey('name');
@@ -124,9 +132,7 @@ export function Explorer({
                                             {sortKey === 'name' ? (
                                                 <ChevronUp
                                                     className={cn('h-4', {
-                                                        'rotate-180':
-                                                            sortOrder ===
-                                                            'desc',
+                                                        'rotate-180': sortOrder === 'desc',
                                                     })}
                                                 />
                                             ) : (
@@ -134,17 +140,13 @@ export function Explorer({
                                             )}
                                         </button>
                                     </th>
-                                    <th
-                                        scope='col'
-                                        className='w-48 py-3 text-left lg:w-56'>
+                                    <th scope='col' className='w-48 py-3 text-left lg:w-56'>
                                         <button
                                             type='button'
                                             onClick={() => {
                                                 if (sortKey === 'modified') {
                                                     setSortOrder(prev =>
-                                                        prev === 'asc'
-                                                            ? 'desc'
-                                                            : 'asc'
+                                                        prev === 'asc' ? 'desc' : 'asc'
                                                     );
                                                 } else {
                                                     setSortKey('modified');
@@ -156,9 +158,7 @@ export function Explorer({
                                             {sortKey === 'modified' ? (
                                                 <ChevronUp
                                                     className={cn('h-4', {
-                                                        'rotate-180':
-                                                            sortOrder ===
-                                                            'desc',
+                                                        'rotate-180': sortOrder === 'desc',
                                                     })}
                                                 />
                                             ) : (
@@ -174,9 +174,7 @@ export function Explorer({
                                             onClick={() => {
                                                 if (sortKey === 'size') {
                                                     setSortOrder(prev =>
-                                                        prev === 'asc'
-                                                            ? 'desc'
-                                                            : 'asc'
+                                                        prev === 'asc' ? 'desc' : 'asc'
                                                     );
                                                 } else {
                                                     setSortKey('size');
@@ -188,9 +186,7 @@ export function Explorer({
                                             {sortKey === 'size' ? (
                                                 <ChevronUp
                                                     className={cn('h-4', {
-                                                        'rotate-180':
-                                                            sortOrder ===
-                                                            'desc',
+                                                        'rotate-180': sortOrder === 'desc',
                                                     })}
                                                 />
                                             ) : (
@@ -201,9 +197,8 @@ export function Explorer({
                                 </tr>
                             </thead>
                             {status === 'success' &&
-                                data &&
-                                data.folders.length === 0 &&
-                                data.files.length === 0 && (
+                                data?.folders.length === 0 &&
+                                data?.files.length === 0 && (
                                     <tbody>
                                         <tr>
                                             <td colSpan={10}>
@@ -221,8 +216,7 @@ export function Explorer({
                                 )}
                             {status === 'success' &&
                                 data &&
-                                (data.folders.length || data.files.length > 0) >
-                                    0 && (
+                                (data.folders.length || data.files.length > 0) > 0 && (
                                     <tbody className='divide-y divide-gray-200'>
                                         {folders.map(folder => (
                                             <FolderRow
@@ -230,12 +224,8 @@ export function Explorer({
                                                 selectNode={selectNode}
                                                 folder={folder}
                                                 selectedNodes={selectedNodes}
-                                                setSelectedNodes={
-                                                    setSelectedNodes
-                                                }
-                                                onMove={
-                                                    moveMutation.mutateAsync
-                                                }
+                                                setSelectedNodes={setSelectedNodes}
+                                                onMove={moveMutation.mutateAsync}
                                             />
                                         ))}
                                         {files.map(file => (
@@ -244,29 +234,16 @@ export function Explorer({
                                                 selectNode={selectNode}
                                                 file={file}
                                                 selectedNodes={selectedNodes}
-                                                setSelectedNodes={
-                                                    setSelectedNodes
-                                                }
+                                                setSelectedNodes={setSelectedNodes}
                                             />
                                         ))}
                                     </tbody>
                                 )}
                         </table>
-                    </RadixScrollArea.Viewport>
-                </RadixContextMenu.Trigger>
+                    </ScrollArea.Viewport>
+                </ContextMenu.Trigger>
                 <ContextMenu items={menuItems} />
-            </RadixContextMenu.Root>
-            <RadixScrollArea.Scrollbar
-                className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                orientation='vertical'>
-                <RadixScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-            </RadixScrollArea.Scrollbar>
-            <RadixScrollArea.Scrollbar
-                className='flex touch-none select-none bg-gray-200 p-0.5 transition-colors duration-150 ease-out hover:bg-gray-400 data-[orientation=horizontal]:h-2.5 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col'
-                orientation='horizontal'>
-                <RadixScrollArea.Thumb className="relative flex-1 rounded-[10px] bg-gray-500 before:absolute before:top-1/2 before:left-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']" />
-            </RadixScrollArea.Scrollbar>
-            <RadixScrollArea.Corner className='bg-gray-500' />
-        </RadixScrollArea.Root>
+            </ContextMenu.Root>
+        </ScrollArea>
     );
 }

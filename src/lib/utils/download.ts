@@ -48,9 +48,7 @@ async function* downloadGenerator(nodes: FileNodeDecrypted[]) {
                 }
                 return response.body
                     .pipeThrough(new TransformStream(new StreamSlicer()))
-                    .pipeThrough(
-                        new TransformStream(new StreamDecrypter(node.key))
-                    );
+                    .pipeThrough(new TransformStream(new StreamDecrypter(node.key)));
             }),
             name: node.metadata.name,
         };
@@ -59,9 +57,7 @@ async function* downloadGenerator(nodes: FileNodeDecrypted[]) {
 export async function downloadMultiple(selectedNodes: SelectedNode[]) {
     const zip = downloadZip(
         downloadGenerator(
-            selectedNodes
-                .filter(f => f.type === 'file')
-                .map(f => f.node as FileNodeDecrypted)
+            selectedNodes.filter(f => f.type === 'file').map(f => f.node as FileNodeDecrypted)
         )
     );
 

@@ -12,20 +12,15 @@ const signalFinalizers =
 
 Comlink.transferHandlers.set('abortsignal', {
     canHandle(value) {
-        return (
-            value instanceof AbortSignal ||
-            value?.constructor?.name === 'AbortSignal'
-        );
+        return value instanceof AbortSignal || value?.constructor?.name === 'AbortSignal';
     },
     serialize(signal) {
         if (signal.aborted) return [{ aborted: true }];
 
         const { port1, port2 } = new MessageChannel();
-        signal.addEventListener(
-            'abort',
-            () => port1.postMessage({ reason: signal.reason }),
-            { once: true }
-        );
+        signal.addEventListener('abort', () => port1.postMessage({ reason: signal.reason }), {
+            once: true,
+        });
 
         signalFinalizers?.register(signal, port1);
 

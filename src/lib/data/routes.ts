@@ -1,5 +1,4 @@
-export const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ?? 'https://api.hushify.io';
+export const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.hushify.io';
 
 export const clientRoutes = {
     index: '/',
@@ -72,8 +71,7 @@ export const apiRoutes = {
         forgotPassword: apiUrl + nakedApiRoutes.identity.forgotPassword,
 
         resetPassword: apiUrl + nakedApiRoutes.identity.resetPassword,
-        resetPasswordConfirm:
-            apiUrl + nakedApiRoutes.identity.resetPasswordConfirm,
+        resetPasswordConfirm: apiUrl + nakedApiRoutes.identity.resetPasswordConfirm,
         getUserClaims: apiUrl + nakedApiRoutes.identity.getUserClaims,
     },
     drive: {

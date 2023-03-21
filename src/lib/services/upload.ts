@@ -30,21 +30,23 @@ export const UploadService = {
     ) => {
         const encryptedSize = getEncryptedSize(fileSize);
 
-        const numberOfEncryptedChunks = Math.ceil(
-            encryptedSize / AMZ_MIN_CHUNK_SIZE
-        );
+        const numberOfEncryptedChunks = Math.ceil(encryptedSize / AMZ_MIN_CHUNK_SIZE);
 
         const cryptoWorker = CryptoWorker.instance;
-        const { fileKey, fileKeyB64, encryptedFileKey, nonce } =
-            await cryptoWorker.generateFileKey(currentFolderKey);
+        const { fileKey, fileKeyB64, encryptedFileKey, nonce } = await cryptoWorker.generateFileKey(
+            currentFolderKey
+        );
 
         const created = new Date().toISOString();
         const modified = new Date().toISOString();
 
-        const encryptedMetadataBundle = await cryptoWorker.encryptMetadata(
-            fileKey,
-            { name, size: fileSize, created, modified, mimeType }
-        );
+        const encryptedMetadataBundle = await cryptoWorker.encryptMetadata(fileKey, {
+            name,
+            size: fileSize,
+            created,
+            modified,
+            mimeType,
+        });
 
         const response = await fetch(apiRoutes.drive.multipart.create, {
             method: 'POST',
@@ -89,9 +91,7 @@ export const UploadService = {
         onProgress: (uploaded: number) => void
     ) => {
         const cryptoWorker = CryptoWorker.instance;
-        const { state, header } = await cryptoWorker.streamingEncryptionInit(
-            fileKey
-        );
+        const { state, header } = await cryptoWorker.streamingEncryptionInit(fileKey);
 
         const eTags: { eTag: string; partNumber: number }[] = [];
 
@@ -116,21 +116,16 @@ export const UploadService = {
                     }
 
                     const chunkArrayBuffer = await chunk.arrayBuffer();
-                    const encryptedChunk =
-                        await cryptoWorker.streamingEncryptionPush(
-                            state,
-                            new Uint8Array(chunkArrayBuffer),
-                            i + 1 === parts.length &&
-                                chunk.size < DEFAULT_CHUNK_SIZE
-                        );
+                    const encryptedChunk = await cryptoWorker.streamingEncryptionPush(
+                        state,
+                        new Uint8Array(chunkArrayBuffer),
+                        i + 1 === parts.length && chunk.size < DEFAULT_CHUNK_SIZE
+                    );
 
                     if (amzChunk === null) {
                         amzChunk = encryptedChunk;
                     } else {
-                        amzChunk = new Uint8Array([
-                            ...amzChunk,
-                            ...encryptedChunk,
-                        ]);
+                        amzChunk = new Uint8Array([...amzChunk, ...encryptedChunk]);
                     }
 
                     onProgress(chunk.size);
@@ -167,20 +162,17 @@ export const UploadService = {
             }
         }
 
-        const response = await fetch(
-            `${apiRoutes.drive.multipart.commit}/${fileId}`,
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    parts: eTags,
-                }),
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-                signal,
-            }
-        );
+        const response = await fetch(`${apiRoutes.drive.multipart.commit}/${fileId}`, {
+            method: 'POST',
+            body: JSON.stringify({
+                parts: eTags,
+            }),
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            signal,
+        });
 
         if (!response.ok) {
             throw new Error('Failed to commit multipart upload.');

@@ -3,11 +3,7 @@ import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { MenuItem, MenuSeparator } from '@/lib/types/menu';
 import { cn } from '@/lib/utils/cn';
 
-export function ContextMenu({
-    items,
-}: {
-    items: (MenuItem | MenuSeparator)[];
-}) {
+export function ContextMenu({ items }: { items: (MenuItem | MenuSeparator)[] }) {
     return (
         <RadixContextMenu.Portal>
             <RadixContextMenu.Content className='min-w-[192px] overflow-hidden rounded-md border border-gray-300 bg-white p-[5px] shadow-xl'>
@@ -34,8 +30,7 @@ export function ContextMenu({
                                     'text-gray-700 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-700':
                                         item.variant === 'secondary',
                                     'text-brand-700 data-[highlighted]:bg-brand-200 data-[highlighted]:text-brand-700':
-                                        !item.variant ||
-                                        item.variant === 'primary',
+                                        !item.variant || item.variant === 'primary',
                                 },
                                 item.className
                             )}>
@@ -52,3 +47,6 @@ export function ContextMenu({
         </RadixContextMenu.Portal>
     );
 }
+
+ContextMenu.Root = RadixContextMenu.Root;
+ContextMenu.Trigger = RadixContextMenu.Trigger;

@@ -22,9 +22,7 @@ export function useCustomDropzone(
 
             const files: FileWithVersion[] = acceptedFiles.map(file => ({
                 file,
-                previousVersionId: data.files.find(
-                    f => f.metadata.name === file.name
-                )?.id,
+                previousVersionId: data.files.find(f => f.metadata.name === file.name)?.id,
             }));
 
             await queueForUpload(
@@ -50,22 +48,22 @@ export function useCustomDropzone(
         noKeyboard: true,
     });
 
-    const { getInputProps: getFolderInputProps, inputRef: folderRef } =
-        useDropzone({
-            onDrop,
-            multiple: true,
-            noClick: true,
-            noKeyboard: true,
-            noDrag: true,
-        });
+    const { getInputProps: getFolderInputProps, inputRef: folderRef } = useDropzone({
+        onDrop,
+        multiple: true,
+        noClick: true,
+        noKeyboard: true,
+        noDrag: true,
+    });
 
     const inputProps = useMemo(getInputProps, [getInputProps]);
+    const rootProps = useMemo(getRootProps, [getRootProps]);
 
     return {
         inputProps,
+        rootProps,
         isDragActive,
         getFolderInputProps,
-        getRootProps,
         fileRef,
         folderRef,
     };

@@ -1,10 +1,4 @@
-import {
-    Dispatch,
-    SetStateAction,
-    useCallback,
-    useEffect,
-    useState,
-} from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Download, Loader, X } from 'lucide-react';
 
@@ -40,9 +34,7 @@ export function Preivew({
 
                     return response.body
                         .pipeThrough(new TransformStream(new StreamSlicer()))
-                        .pipeThrough(
-                            new TransformStream(new StreamDecrypter(file.key))
-                        );
+                        .pipeThrough(new TransformStream(new StreamDecrypter(file.key)));
                 })
                 .then(response => {
                     if (!response) {
@@ -52,10 +44,7 @@ export function Preivew({
                     let content = new Uint8Array();
                     const reader = response.getReader();
 
-                    function saveChunk({
-                        done,
-                        value,
-                    }: ReadableStreamReadResult<Uint8Array>) {
+                    function saveChunk({ done, value }: ReadableStreamReadResult<Uint8Array>) {
                         if (done) {
                             url = URL.createObjectURL(
                                 new Blob([content], {
@@ -110,9 +99,7 @@ export function Preivew({
                     <div className='flex shrink-0 items-start justify-between gap-2'>
                         <Dialog.Title className='m-0 font-medium text-gray-900'>
                             <span>Preview: </span>
-                            <span className='break-all font-normal'>
-                                {file.metadata.name}
-                            </span>
+                            <span className='break-all font-normal'>{file.metadata.name}</span>
                         </Dialog.Title>
                         <div className='flex items-center gap-4'>
                             <button
@@ -133,51 +120,36 @@ export function Preivew({
                         </div>
                     </div>
                     <div className='relative my-4 flex-auto'>
-                        {fileToPreview &&
-                            file.metadata.mimeType.startsWith('image/') && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
+                        {fileToPreview && file.metadata.mimeType.startsWith('image/') && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={fileToPreview}
+                                alt={file.metadata.name}
+                                className='aspect-auto object-contain'
+                            />
+                        )}
+                        {fileToPreview && file.metadata.mimeType.startsWith('video/') && (
+                            <div className='absolute inset-0'>
+                                <video controls autoPlay className='h-full w-full object-contain'>
+                                    <source src={fileToPreview} type={file.metadata.mimeType} />
+                                </video>
+                            </div>
+                        )}
+                        {fileToPreview && file.metadata.mimeType.startsWith('audio/') && (
+                            <div className='absolute inset-0 flex h-full w-full items-center justify-center'>
+                                <audio controls autoPlay>
+                                    <source src={fileToPreview} type={file.metadata.mimeType} />
+                                </audio>
+                            </div>
+                        )}
+                        {fileToPreview && file.metadata.mimeType.startsWith('application/pdf') && (
+                            <div className='absolute inset-0'>
+                                <iframe
                                     src={fileToPreview}
-                                    alt={file.metadata.name}
-                                    className='aspect-auto object-contain'
+                                    className='h-full w-full object-contain'
                                 />
-                            )}
-                        {fileToPreview &&
-                            file.metadata.mimeType.startsWith('video/') && (
-                                <div className='absolute inset-0'>
-                                    <video
-                                        controls
-                                        autoPlay
-                                        className='h-full w-full object-contain'>
-                                        <source
-                                            src={fileToPreview}
-                                            type={file.metadata.mimeType}
-                                        />
-                                    </video>
-                                </div>
-                            )}
-                        {fileToPreview &&
-                            file.metadata.mimeType.startsWith('audio/') && (
-                                <div className='absolute inset-0 flex h-full w-full items-center justify-center'>
-                                    <audio controls autoPlay>
-                                        <source
-                                            src={fileToPreview}
-                                            type={file.metadata.mimeType}
-                                        />
-                                    </audio>
-                                </div>
-                            )}
-                        {fileToPreview &&
-                            file.metadata.mimeType.startsWith(
-                                'application/pdf'
-                            ) && (
-                                <div className='absolute inset-0'>
-                                    <iframe
-                                        src={fileToPreview}
-                                        className='h-full w-full object-contain'
-                                    />
-                                </div>
-                            )}
+                            </div>
+                        )}
                         {!fileToPreview && !error && (
                             <div className='absolute inset-0 flex items-center justify-center'>
                                 <Loader className='h-5 w-5 animate-spin text-brand-600' />

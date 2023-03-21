@@ -9,11 +9,7 @@
  *
  * @return Formatted string.
  */
-export function humanFileSize(
-    bytes: number,
-    si: boolean = false,
-    dp: number = 2
-) {
+export function humanFileSize(bytes: number, si: boolean = false, dp: number = 2) {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {
@@ -31,10 +27,7 @@ export function humanFileSize(
         bytes /= thresh;
         // eslint-disable-next-line no-plusplus
         ++u;
-    } while (
-        Math.round(Math.abs(bytes) * r) / r >= thresh &&
-        u < units.length - 1
-    );
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
 
     return `${bytes.toFixed(dp)} ${units[u]}`;
 }

@@ -86,9 +86,7 @@ export function LoginConfirmForm() {
         },
         {
             onError: error => {
-                const message = error
-                    ? (error as Error).message
-                    : 'Something went wrong!';
+                const message = error ? (error as Error).message : 'Something went wrong!';
                 setError('errors', { message });
             },
         }
@@ -96,10 +94,7 @@ export function LoginConfirmForm() {
 
     const mutation = useMutation(
         async (data: ConfirmFormInputs) => {
-            const result = await login<ConfirmFormInputs>(
-                data.email,
-                data.code
-            );
+            const result = await login<ConfirmFormInputs>(data.email, data.code);
 
             if (!result.success) {
                 addServerErrors(result.errors, setError, Object.keys(data));
@@ -124,12 +119,9 @@ export function LoginConfirmForm() {
                 setData({
                     status: 'authenticated',
                     masterKey: keys.masterKey,
-                    publicKey:
-                        result.data.cryptoProperties.asymmetricKeyBundle
-                            .publicKey,
+                    publicKey: result.data.cryptoProperties.asymmetricKeyBundle.publicKey,
                     privateKey: keys.asymmetricPrivateKey,
-                    signingPublicKey:
-                        result.data.cryptoProperties.signingKeyBundle.publicKey,
+                    signingPublicKey: result.data.cryptoProperties.signingKeyBundle.publicKey,
                     signingPrivateKey: keys.signingPrivateKey,
                     accessToken,
                 });
@@ -141,9 +133,7 @@ export function LoginConfirmForm() {
         },
         {
             onError: error => {
-                const message = error
-                    ? (error as Error).message
-                    : 'Something went wrong!';
+                const message = error ? (error as Error).message : 'Something went wrong!';
                 setError('errors', { message });
             },
         }
@@ -195,9 +185,7 @@ export function LoginConfirmForm() {
                         </small>
                     ))
                 ) : (
-                    <small className='text-red-600'>
-                        {errors.password?.message}
-                    </small>
+                    <small className='text-red-600'>{errors.password?.message}</small>
                 )}
             </div>
             <InputWithLabel
@@ -212,22 +200,16 @@ export function LoginConfirmForm() {
                 <div className='flex items-center justify-center gap-1'>
                     {resendTimer <= 0 ? (
                         <button
-                            disabled={
-                                resendMutation.isLoading || mutation.isLoading
-                            }
+                            disabled={resendMutation.isLoading || mutation.isLoading}
                             type='button'
-                            onClick={async () =>
-                                await resendMutation.mutateAsync()
-                            }
+                            onClick={async () => await resendMutation.mutateAsync()}
                             className='underline disabled:cursor-not-allowed disabled:no-underline'>
                             Resend
                         </button>
                     ) : (
                         <span>Resend in {resendTimer}</span>
                     )}
-                    {resendMutation.isLoading && (
-                        <Loader size={16} className='animate-spin' />
-                    )}
+                    {resendMutation.isLoading && <Loader size={16} className='animate-spin' />}
                 </div>
             </InputWithLabel>
             <button
@@ -239,13 +221,7 @@ export function LoginConfirmForm() {
                     'bg-brand-600 text-white focus-visible:ring-brand-600/75'
                 )}>
                 <span>Continue</span>
-                <Loader
-                    size={16}
-                    className={cn(
-                        'animate-spin',
-                        !mutation.isLoading && 'hidden'
-                    )}
-                />
+                <Loader size={16} className={cn('animate-spin', !mutation.isLoading && 'hidden')} />
             </button>
         </form>
     );

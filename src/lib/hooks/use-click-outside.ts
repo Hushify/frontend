@@ -1,9 +1,4 @@
-import {
-    MouseEventHandler,
-    RefObject,
-    TouchEventHandler,
-    useEffect,
-} from 'react';
+import { MouseEventHandler, RefObject, TouchEventHandler, useEffect } from 'react';
 
 // https://usehooks.com/useOnClickOutside/
 export function useClickOutside(

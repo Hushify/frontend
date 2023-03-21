@@ -1,9 +1,6 @@
 export function addServerErrors<T>(
     errors: { [P in string]?: string[] },
-    setError: (
-        fieldName: keyof T,
-        error: { type: string; message: string }
-    ) => void,
+    setError: (fieldName: keyof T, error: { type: string; message: string }) => void,
     dataKeys: string[]
 ) {
     const errorKeys = Object.keys(errors);
