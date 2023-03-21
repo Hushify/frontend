@@ -95,7 +95,7 @@ export function Preivew({
     return (
         <Dialog.Root open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
             <Dialog.Portal>
-                <Dialog.Content className='fixed inset-0 flex h-full w-full flex-col gap-1 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-previewShow'>
+                <Dialog.Content className='fixed inset-0 z-30 flex h-full w-full flex-col gap-1 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-previewShow'>
                     <div className='flex shrink-0 items-start justify-between gap-2'>
                         <Dialog.Title className='m-0 font-medium text-gray-900'>
                             <span>Preview: </span>
