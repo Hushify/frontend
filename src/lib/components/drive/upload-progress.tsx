@@ -15,7 +15,7 @@ export function UploadProgressBox() {
     if (files.length <= 0) return null;
 
     return (
-        <div className='fixed bottom-4 right-4 z-20 space-y-4 rounded bg-white shadow-2xl ring ring-gray-600/25'>
+        <div className='fixed bottom-4 right-4 space-y-4 rounded bg-white shadow-2xl ring ring-gray-600/25'>
             <Accordion.Root
                 className='w-80 rounded-md bg-gray-50 shadow shadow-black/5'
                 defaultValue='single'

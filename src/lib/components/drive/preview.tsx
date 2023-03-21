@@ -125,7 +125,7 @@ export function Preivew({
                             <img
                                 src={fileToPreview}
                                 alt={file.metadata.name}
-                                className='aspect-auto object-contain'
+                                className='flex aspect-auto h-full items-center justify-center object-contain'
                             />
                         )}
                         {fileToPreview && file.metadata.mimeType.startsWith('video/') && (
