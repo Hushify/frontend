@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
-import { format, isToday, parseISO } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { Folder } from 'lucide-react';
 import { useMultiDrag, useMultiDrop } from 'react-dnd-multi-backend';
 
@@ -180,10 +180,25 @@ export function FolderRow({
                 </div>
             </td>
             <td className='py-2 text-left text-sm'>
-                {isToday(parseISO(folder.metadata.modified))
-                    ? format(parseISO(folder.metadata.modified), 'h:mm:ss b')
+                {isToday(
+                    new Date(
+                        new Date(folder.metadata.modified).toLocaleString()
+                    )
+                )
+                    ? format(
+                          new Date(
+                              new Date(
+                                  folder.metadata.modified
+                              ).toLocaleString()
+                          ),
+                          'h:mm:ss b'
+                      )
                     : format(
-                          parseISO(folder.metadata.modified),
+                          new Date(
+                              new Date(
+                                  folder.metadata.modified
+                              ).toLocaleString()
+                          ),
                           'MMM d, y, h:mm b'
                       )}
             </td>
