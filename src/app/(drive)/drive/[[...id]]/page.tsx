@@ -13,7 +13,7 @@ import { FullscreenUpload } from '@/lib/components/drive/fullscreen-upload';
 import { NewFolder } from '@/lib/components/drive/new-folder';
 import { Preivew } from '@/lib/components/drive/preview';
 import { Rename } from '@/lib/components/drive/rename';
-import { UploadProgressBox } from '@/lib/components/drive/upload-progress';
+import { UploadProgress } from '@/lib/components/drive/upload-progress';
 import { Toolbar } from '@/lib/components/toolbar';
 import { useCustomDropzone } from '@/lib/hooks/drive/use-custom-dropzone';
 import { useDriveList } from '@/lib/hooks/drive/use-drive-list';
@@ -26,9 +26,7 @@ import { BreadcrumbDecrypted, FileNodeDecrypted, SelectedNode } from '@/lib/type
 export default function Drive({ params: { id } }: { params: { id?: string[] } }) {
     const accessToken = useAuthStore(state => state.accessToken)!;
     const masterKey = useAuthStore(state => state.masterKey)!;
-
     const currentFolderId = id?.at(0) ?? null;
-
     const { data, status, refetch } = useDriveList(currentFolderId, accessToken, masterKey);
 
     const currentFolderKey = useMemo(
@@ -40,14 +38,8 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
     );
 
     const [selectedNodes, setSelectedNodes] = useState<SelectedNode[]>([]);
-
-    useEffect(() => {
-        setSelectedNodes([]);
-    }, [currentFolderId]);
-
-    const clearSelection = useCallback(() => {
-        setSelectedNodes([]);
-    }, []);
+    const clearSelection = useCallback(() => setSelectedNodes([]), []);
+    useEffect(clearSelection, [clearSelection, currentFolderId]);
 
     const deleteCb = useCallback(
         async ({ folderIds, fileIds }: { folderIds: string[]; fileIds: string[] }) => {
@@ -90,10 +82,7 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
     return (
         <DndProvider
             options={{
-                backends: HTML5toTouch.backends.map(backend => {
-                    backend.preview = true;
-                    return backend;
-                }),
+                backends: HTML5toTouch.backends.map(backend => ({ ...backend, preview: true })),
             }}>
             <div className='h-full w-full' {...rootProps}>
                 <FullscreenUpload isDragActive={isDragActive} inputProps={inputProps} />
@@ -107,7 +96,7 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
                     directory=''
                 />
 
-                <UploadProgressBox />
+                <UploadProgress />
 
                 <div className='relative h-full' ref={ref}>
                     {status === 'error' && (
@@ -124,13 +113,11 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
 
                     <div ref={refRest}>
                         <div className='relative z-10'>
-                            {fileForPreview && (
-                                <Preivew
-                                    file={fileForPreview}
-                                    isPreviewOpen={isPreviewOpen}
-                                    setIsPreviewOpen={setIsPreviewOpen}
-                                />
-                            )}
+                            <Preivew
+                                file={fileForPreview}
+                                isPreviewOpen={isPreviewOpen}
+                                setIsPreviewOpen={setIsPreviewOpen}
+                            />
 
                             {/* <Share /> */}
 
@@ -145,11 +132,11 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
                             {selectedNodes.length === 1 && (
                                 <Rename
                                     nodes={
-                                        selectedNodes.at(0)!.type === 'folder'
+                                        selectedNodes[0].type === 'folder'
                                             ? data?.folders
                                             : data?.files
                                     }
-                                    selectedeNode={selectedNodes.at(0)!}
+                                    selectedeNode={selectedNodes[0]}
                                     isRenameOpen={isRenameOpen}
                                     setIsRenameOpen={setIsRenameOpen}
                                     currentFolderId={currentFolderId}

@@ -1,11 +1,10 @@
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { intlFormat, isToday } from 'date-fns';
 import { File } from 'lucide-react';
-import { useMultiDrag } from 'react-dnd-multi-backend';
 
+import { useDrag } from '@/lib/hooks/drive/use-drag';
 import { FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { cn } from '@/lib/utils/cn';
-import { getEmptyImage } from '@/lib/utils/get-empty-image';
 import { humanFileSize } from '@/lib/utils/humanized-file-size';
 
 export function FileRow({
@@ -19,22 +18,7 @@ export function FileRow({
     selectedNodes: SelectedNode[];
     setSelectedNodes: Dispatch<SetStateAction<SelectedNode[]>>;
 }) {
-    const isSelected = selectedNodes.findIndex(n => n.node.id === file.id) >= 0;
-
-    const [[_, drag, preview]] = useMultiDrag({
-        type: 'NODE',
-        item: selectedNodes.length > 0 ? selectedNodes : [{ node: file, type: 'file' as const }],
-        collect: monitor => ({
-            isDragging: monitor.isDragging(),
-        }),
-        canDrag: isSelected || selectedNodes.length === 0,
-    });
-
-    useEffect(() => {
-        preview(getEmptyImage(), {
-            captureDraggingState: true,
-        });
-    }, [preview]);
+    const { drag, isSelected } = useDrag({ node: file, type: 'file' }, selectedNodes);
 
     return (
         <tr
@@ -44,33 +28,14 @@ export function FileRow({
                 'hover:bg-gray-200': !isSelected,
             })}
             onClick={() =>
-                setSelectedNodes(prev => {
-                    if (isSelected) {
-                        return prev.filter(n => n.node.id !== file.id);
-                    }
-
-                    return [
-                        ...prev,
-                        {
-                            node: file as FileNodeDecrypted,
-                            type: 'file',
-                        },
-                    ];
-                })
+                setSelectedNodes(prev =>
+                    isSelected
+                        ? prev.filter(n => n.node.id !== file.id)
+                        : [...prev, { node: file, type: 'file' }]
+                )
             }
             onContextMenu={() =>
-                setSelectedNodes(prev => {
-                    if (isSelected) {
-                        return prev;
-                    }
-
-                    return [
-                        {
-                            node: file as FileNodeDecrypted,
-                            type: 'file',
-                        },
-                    ];
-                })
+                setSelectedNodes(prev => (isSelected ? prev : [{ node: file, type: 'file' }]))
             }>
             <td className='py-2 text-center'>
                 <label htmlFor={`checkbox-${file.id}`} className='sr-only'>

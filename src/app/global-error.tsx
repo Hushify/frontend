@@ -5,7 +5,7 @@ import { ServerCrash } from 'lucide-react';
 
 import { cn } from '@/lib/utils/cn';
 
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+export default function GlobalError({ error, reset }: { error: Error; reset: () => void }) {
     useEffect(() => {
         console.error(error);
     }, [error]);

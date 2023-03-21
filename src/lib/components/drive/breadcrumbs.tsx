@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { Folder, FolderOpen, HardDrive } from 'lucide-react';
-import { useMultiDrop } from 'react-dnd-multi-backend';
 
 import { clientRoutes } from '@/lib/data/routes';
+import { useDrop } from '@/lib/hooks/drive/use-drop';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import {
     BreadcrumbDecrypted,
@@ -67,26 +67,12 @@ function MainCrumb({
     >;
 }) {
     const masterKey = useAuthStore(state => state.masterKey);
-
-    const [[dropProps, drop]] = useMultiDrop({
-        accept: 'NODE',
-        drop: async (items: SelectedNode[]) => {
-            await onMove({
-                items: items,
-                destinationFolderId: workspaceId ?? '',
-                destinationFolderKey: masterKey ?? '',
-            });
-        },
-        canDrop: _item => totalItems > 0,
-        collect: monitor => ({
-            canDrop: monitor.canDrop(),
-            isOver: monitor.isOver(),
-        }),
-    });
-
-    if (!masterKey || !workspaceId) {
-        return null;
-    }
+    const { drop, dropProps } = useDrop(
+        workspaceId ?? '',
+        masterKey ?? '',
+        () => totalItems > 0,
+        onMove
+    );
 
     return (
         <li
@@ -126,21 +112,7 @@ function Crumb({
         unknown
     >;
 }) {
-    const [[dropProps, drop]] = useMultiDrop({
-        accept: 'NODE',
-        drop: async (items: SelectedNode[]) => {
-            await onMove({
-                items: items,
-                destinationFolderId: item.id,
-                destinationFolderKey: item.key,
-            });
-        },
-        canDrop: _item => idx !== totalItems - 1,
-        collect: monitor => ({
-            canDrop: monitor.canDrop(),
-            isOver: monitor.isOver(),
-        }),
-    });
+    const { drop, dropProps } = useDrop(item.id, item.key, () => idx !== totalItems - 1, onMove);
 
     return (
         <>

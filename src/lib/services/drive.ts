@@ -167,6 +167,7 @@ export async function moveNodes<T>(
         id: string;
         metadataBundle: MetadataBundle;
         keyBundle: SecretKeyBundle;
+        previousVersionId?: string;
     }[]
 ): Promise<ResponseMessage<T, undefined>> {
     const response = await fetch(apiRoutes.drive.moveNodes, {

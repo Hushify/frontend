@@ -2,7 +2,6 @@ import PQueue from 'p-queue';
 import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
-import CryptoWorker from '@/lib/services/comlink-crypto';
 import UploadWorker from '@/lib/services/comlink-uploader';
 import { UploadService } from '@/lib/services/upload';
 
@@ -48,7 +47,6 @@ export type UploadState = {
 
 export type UploadActions = {
     queueForUpload: (
-        // folderMap: Map<string, string | null>,
         files: FileWithVersion[],
         parentFolderId: string,
         currentFolderKey: string,
@@ -79,7 +77,6 @@ export const useUploadStore = create<UploadState & UploadActions>((set, get) => 
     ...initialState,
 
     queueForUpload: async (
-        // folderMap: Map<string, string | null>,
         files: FileWithVersion[],
         parentFolderId: string,
         currentFolderKey: string,
@@ -87,7 +84,6 @@ export const useUploadStore = create<UploadState & UploadActions>((set, get) => 
         onUploadCb: () => void
     ) => {
         const Uploader = await UploaderInstance;
-        const worker = CryptoWorker.instance;
 
         const filesToAdd: FileWithState[] = files.map(
             file =>

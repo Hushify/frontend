@@ -5,7 +5,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { useUploadStore } from '@/lib/stores/upload-store';
 import { cn } from '@/lib/utils/cn';
 
-export function UploadProgressBox() {
+export function UploadProgress() {
     const accessToken = useAuthStore(state => state.accessToken)!;
     const files = useUploadStore(state => state.files);
     const removeFile = useUploadStore(state => state.removeFile);

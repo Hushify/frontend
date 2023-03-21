@@ -1,15 +1,15 @@
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
 import { intlFormat, isToday } from 'date-fns';
 import { Folder } from 'lucide-react';
-import { useMultiDrag, useMultiDrop } from 'react-dnd-multi-backend';
 
 import { clientRoutes } from '@/lib/data/routes';
+import { useDrag } from '@/lib/hooks/drive/use-drag';
+import { useDrop } from '@/lib/hooks/drive/use-drop';
 import { FolderNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { cn } from '@/lib/utils/cn';
-import { getEmptyImage } from '@/lib/utils/get-empty-image';
 
 export function FolderRow({
     folder,
@@ -34,39 +34,14 @@ export function FolderRow({
     >;
 }) {
     const router = useRouter();
-    const isSelected = selectedNodes.findIndex(n => n.node.id === folder.id) >= 0;
 
-    const [[_, drag, preview]] = useMultiDrag({
-        type: 'NODE',
-        item:
-            selectedNodes.length > 0 ? selectedNodes : [{ node: folder, type: 'folder' as const }],
-        collect: monitor => ({
-            isDragging: monitor.isDragging(),
-        }),
-        canDrag: isSelected || selectedNodes.length === 0,
-    });
-
-    const [[dropProps, drop]] = useMultiDrop({
-        accept: 'NODE',
-        drop: async (items: SelectedNode[]) => {
-            await onMove({
-                items,
-                destinationFolderId: folder.id,
-                destinationFolderKey: folder.key,
-            });
-        },
-        canDrop: (items: SelectedNode[]) => !isSelected && items.some(i => i.node.id !== folder.id),
-        collect: monitor => ({
-            canDrop: monitor.canDrop(),
-            isOver: monitor.isOver(),
-        }),
-    });
-
-    useEffect(() => {
-        preview(getEmptyImage(), {
-            captureDraggingState: true,
-        });
-    }, [preview]);
+    const { drag, isSelected } = useDrag({ node: folder, type: 'folder' }, selectedNodes);
+    const { drop, dropProps } = useDrop(
+        folder.id,
+        folder.key,
+        (items: SelectedNode[]) => !isSelected && items.some(i => i.node.id !== folder.id),
+        onMove
+    );
 
     return (
         <tr
@@ -77,33 +52,16 @@ export function FolderRow({
                 'bg-gray-200': dropProps.isOver && dropProps.canDrop,
             })}
             onClick={() =>
-                setSelectedNodes(prev => {
-                    if (isSelected) {
-                        return prev.filter(n => n.node.id !== folder.id);
-                    }
-
-                    return [
-                        ...prev,
-                        {
-                            node: folder as FolderNodeDecrypted,
-                            type: 'folder',
-                        },
-                    ];
-                })
+                setSelectedNodes(prev =>
+                    isSelected
+                        ? prev.filter(n => n.node.id !== folder.id)
+                        : [...prev, { node: folder, type: 'folder' }]
+                )
             }
             onContextMenu={() =>
-                setSelectedNodes(prev => {
-                    if (isSelected) {
-                        return prev;
-                    }
-
-                    return [
-                        {
-                            node: folder as FolderNodeDecrypted,
-                            type: 'folder',
-                        },
-                    ];
-                })
+                setSelectedNodes(prev =>
+                    isSelected ? prev : [{ node: folder as FolderNodeDecrypted, type: 'folder' }]
+                )
             }>
             <td className='py-2 text-center'>
                 <label htmlFor={`checkbox-${folder.id}`} className='sr-only'>

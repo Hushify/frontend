@@ -167,11 +167,13 @@ export function Rename({
     );
 
     const mutation = useMutation(async (data: RenameInputs) => {
-        await toast.promise(onSubmit(data), {
-            loading: 'Renaming...',
-            success: `${type === 'file' ? 'File' : 'Folder'} renamed!`,
-            error: 'Rename failed!',
-        });
+        try {
+            await toast.promise(onSubmit(data), {
+                loading: 'Renaming...',
+                success: `${type === 'file' ? 'File' : 'Folder'} renamed!`,
+                error: error => (error as unknown as Error).message,
+            });
+        } catch {}
     });
 
     return (

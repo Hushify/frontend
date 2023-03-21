@@ -25,7 +25,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <ReactQueryDevtools initialIsOpen={false} />
             <Tooltip.Provider>{children}</Tooltip.Provider>
             <Toaster />
-            {!process.env.NEXT_PUBLIC_ANALYTICS_ENABLED && (
+            {process.env.NEXT_PUBLIC_ANALYTICS_ENABLED && (
                 <Script
                     strategy='afterInteractive'
                     data-domain='hushify.io'

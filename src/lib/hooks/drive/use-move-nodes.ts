@@ -4,7 +4,8 @@ import { toast } from 'react-hot-toast';
 
 import { apiRoutes } from '@/lib/data/routes';
 import CryptoWorker from '@/lib/services/comlink-crypto';
-import { moveNodes } from '@/lib/services/drive';
+import { list, moveNodes } from '@/lib/services/drive';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { DriveList, SelectedNode } from '@/lib/types/drive';
 
 export function useMoveNodes(
@@ -12,6 +13,7 @@ export function useMoveNodes(
     accessToken: string,
     onSuccess: () => void
 ) {
+    const masterKey = useAuthStore(state => state.masterKey);
     const queryClient = useQueryClient();
 
     const queryKey = currentFolderId
@@ -24,7 +26,34 @@ export function useMoveNodes(
             destinationFolderId: string;
             destinationFolderKey: string;
         }) => {
+            if (!masterKey) {
+                throw new Error('Master key not found!');
+            }
+
             const crypto = CryptoWorker.instance;
+
+            const destinationData = await queryClient.fetchQuery<DriveList>(
+                [`${apiRoutes.drive.list}?folderId=${data.destinationFolderId}`],
+                () =>
+                    list(
+                        `${apiRoutes.drive.list}?folderId=${data.destinationFolderId}`,
+                        accessToken,
+                        masterKey,
+                        CryptoWorker.instance
+                    )
+            );
+
+            if (destinationData) {
+                for (const folder of data.items.filter(n => n.type === 'folder')) {
+                    if (
+                        destinationData.folders.find(
+                            f => f.metadata.name === folder.node.metadata.name
+                        )
+                    ) {
+                        throw new Error('Folder/s with that name already exist!');
+                    }
+                }
+            }
 
             const currentDate = new Date().toISOString();
 
@@ -37,7 +66,7 @@ export function useMoveNodes(
                         node.key
                     );
                     const metadataBundle = await crypto.encryptMetadata(key, node.metadata);
-                    return {
+                    const nodeToMove = {
                         id: item.node.id,
                         type: item.type,
                         metadataBundle,
@@ -46,6 +75,21 @@ export function useMoveNodes(
                             nonce,
                         },
                     };
+
+                    if (item.type === 'file') {
+                        const previousVersion = destinationData.files.find(
+                            f => f.metadata.name === item.node.metadata.name
+                        );
+
+                        return previousVersion
+                            ? {
+                                  ...nodeToMove,
+                                  previousVersionId: previousVersion.id,
+                              }
+                            : nodeToMove;
+                    }
+
+                    return nodeToMove;
                 })
             );
 
@@ -77,7 +121,7 @@ export function useMoveNodes(
 
             throw new Error('Error!');
         },
-        [accessToken, onSuccess, queryClient, queryKey]
+        [accessToken, masterKey, onSuccess, queryClient, queryKey]
     );
 
     return useMutation({
@@ -86,16 +130,15 @@ export function useMoveNodes(
             destinationFolderId: string;
             destinationFolderKey: string;
         }) => {
-            await toast.promise(move(data), {
-                loading: 'Moving...',
-                success: `Successfully moved ${data.items.length} ${
-                    data.items.length > 1 ? 'items' : 'item'
-                }!`,
-                error: 'Error!',
-            });
-        },
-        onError(_error, _variables, _context) {
-            toast.error('Rename failed!');
+            try {
+                await toast.promise(move(data), {
+                    loading: 'Moving...',
+                    success: `Successfully moved ${data.items.length} ${
+                        data.items.length > 1 ? 'items' : 'item'
+                    }!`,
+                    error: error => (error as unknown as Error).message,
+                });
+            } catch {}
         },
     });
 }
