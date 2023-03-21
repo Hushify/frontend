@@ -180,19 +180,10 @@ export function FolderRow({
                 </div>
             </td>
             <td className='py-2 text-left text-sm'>
-                {isToday(
-                    new Date(new Date(folder.metadata.modified).toISOString())
-                )
-                    ? format(
-                          new Date(
-                              new Date(folder.metadata.modified).toISOString()
-                          ),
-                          'h:mm:ss b'
-                      )
+                {isToday(new Date(folder.metadata.modified))
+                    ? format(new Date(folder.metadata.modified), 'h:mm:ss b')
                     : format(
-                          new Date(
-                              new Date(folder.metadata.modified).toISOString()
-                          ),
+                          new Date(folder.metadata.modified),
                           'MMM d, y, h:mm b'
                       )}
             </td>
