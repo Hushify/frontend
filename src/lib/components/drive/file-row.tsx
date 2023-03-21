@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from 'react';
-import { format, isToday } from 'date-fns';
+import { intlFormat, isToday } from 'date-fns';
 import { File } from 'lucide-react';
 import { useMultiDrag } from 'react-dnd-multi-backend';
 
@@ -129,11 +129,17 @@ export function FileRow({
             </td>
             <td className='py-2 text-left text-sm'>
                 {isToday(new Date(file.metadata.modified))
-                    ? format(new Date(file.metadata.modified), 'h:mm:ss b')
-                    : format(
-                          new Date(file.metadata.modified),
-                          'MMM d, y, h:mm b'
-                      )}
+                    ? intlFormat(new Date(file.metadata.modified), {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                      })
+                    : intlFormat(new Date(file.metadata.modified), {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                      })}
             </td>
             <td className='hidden py-2 text-sm md:table-cell'>
                 {humanFileSize(file.metadata.size, true)}
