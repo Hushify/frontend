@@ -7,6 +7,7 @@ export const config = {
 
 export async function GET(request: NextRequest) {
     const title = request.nextUrl.searchParams.get('title');
+    const subtitle = request.nextUrl.searchParams.get('subtitle');
     if (!title) {
         throw new Error('Title is required');
     }
@@ -49,12 +50,22 @@ export async function GET(request: NextRequest) {
                         fontSize: 40,
                         fontStyle: 'bold',
                         color: 'black',
-                        marginTop: 30,
-                        lineHeight: 1.8,
+                        marginTop: 16,
                         whiteSpace: 'pre-wrap',
                     }}>
                     {title}
                 </div>
+                {subtitle && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            fontSize: 24,
+                            color: 'black',
+                            whiteSpace: 'pre-wrap',
+                        }}>
+                        {subtitle}
+                    </div>
+                )}
             </div>
         ),
         {
