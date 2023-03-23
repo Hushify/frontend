@@ -1,3 +1,3 @@
 # Hushify
 
-Privacy built on open source.
+Privacy, built on open source.

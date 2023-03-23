@@ -10,14 +10,14 @@ export const metadata = {
         template: '%s',
     },
     keywords: 'Hushify',
-    description: 'Privacy built on open source.',
+    description: 'Privacy, built on open source.',
     robots: {
         index: true,
         follow: true,
     },
     themeColor: '#4f46e5',
     openGraph: {
-        description: 'Privacy built on open source.',
+        description: 'Privacy, built on open source.',
         type: 'website',
         title: {
             default: 'Hushify',
@@ -26,7 +26,7 @@ export const metadata = {
         images: '/icon.png',
     },
     twitter: {
-        description: 'Privacy built on open source.',
+        description: 'Privacy, built on open source.',
         title: {
             default: 'Hushify',
             template: '%s',
