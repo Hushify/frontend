@@ -1,7 +1,7 @@
 import '@/styles/tw.css';
 import { ReactNode } from 'react';
 
-import { AppProvider } from '@/lib/components/app-provider';
+import { Analytics } from '@/lib/components/analytics';
 import { cn } from '@/lib/utils/cn';
 
 export const metadata = {
@@ -54,7 +54,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 className={cn({
                     'debug-screens': process.env.NODE_ENV === 'development',
                 })}>
-                <AppProvider>{children}</AppProvider>
+                {children}
+                <Analytics />
             </body>
         </html>
     );

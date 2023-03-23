@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 
+import { AppProvider } from '@/lib/components/app-provider';
 import { AppShell } from '@/lib/components/app-shell';
 import { AuthStateProvider } from '@/lib/components/auth-state-provider';
 
@@ -9,8 +10,10 @@ export const metadata = {
 
 export default function Layout({ children }: { children: ReactNode }) {
     return (
-        <AuthStateProvider>
-            <AppShell>{children}</AppShell>
-        </AuthStateProvider>
+        <AppProvider>
+            <AuthStateProvider>
+                <AppShell>{children}</AppShell>
+            </AuthStateProvider>
+        </AppProvider>
     );
 }
