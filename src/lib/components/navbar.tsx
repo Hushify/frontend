@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { Logo } from '@/lib/components/logo';
 import { clientRoutes } from '@/lib/data/routes';
+import { cn } from '@/lib/utils/cn';
 
 export function Navbar() {
     return (
@@ -13,14 +14,19 @@ export function Navbar() {
                 </Link>
                 <ul className='flex items-center justify-center gap-4 md:gap-6'>
                     <li>
-                        <Link href={clientRoutes.blog.index} className='text-lg hover:underline'>
+                        <Link
+                            href={clientRoutes.blog.index}
+                            className='text-lg duration-200 ease-out hover:text-brand-600'>
                             Blog
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={clientRoutes.identity.register}
-                            className='rounded bg-brand-600 py-1.5 px-2 font-medium text-white'>
+                            className={cn(
+                                'flex items-center justify-center gap-2 rounded-lg px-4 py-1.5 font-medium',
+                                'bg-brand-600 text-white focus-visible:ring-brand-600/75'
+                            )}>
                             Get Started
                         </Link>
                     </li>

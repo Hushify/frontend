@@ -4,7 +4,7 @@ module.exports = {
     plugins: ['unused-imports', 'tailwindcss'],
     settings: {
         tailwindcss: {
-            callees: ['cn', 'clsx'],
+            callees: ['cn', 'clsx', 'tw'],
         },
     },
     rules: {

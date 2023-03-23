@@ -1,6 +1,6 @@
 import { StateAddress } from 'libsodium-wrappers-sumo';
 
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
 
 export class StreamDecrypter {
     protected chunkIndex: number = 0;
@@ -15,7 +15,7 @@ export class StreamDecrypter {
         chunk: Uint8Array,
         controller: TransformStreamDefaultController<Uint8Array>
     ) {
-        const worker = CryptoWorker.instance;
+        const worker = CryptoWorkerInstance;
 
         if (this.chunkIndex === 0) {
             this.state = await worker.streamingDecryptionInit(new Uint8Array(chunk), this.key);

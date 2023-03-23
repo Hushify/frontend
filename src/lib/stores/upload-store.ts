@@ -2,12 +2,12 @@ import PQueue from 'p-queue';
 import { FileWithPath } from 'react-dropzone';
 import { create } from 'zustand';
 
-import UploadWorker from '@/lib/services/comlink-uploader';
+import { UploadWorkerInstance } from '@/lib/services/comlink-uploader';
 import { UploadService } from '@/lib/services/upload';
 
-const UploaderInstance = UploadWorker.instance.checkCompat().then(isCompat => {
+const UploaderInstance = UploadWorkerInstance.checkCompat().then(isCompat => {
     if (isCompat) {
-        return UploadWorker.instance;
+        return UploadWorkerInstance;
     } else {
         return UploadService;
     }

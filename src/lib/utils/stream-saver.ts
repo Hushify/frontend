@@ -1,6 +1,8 @@
-import saver from 'streamsaver';
 import { WritableStream } from 'web-streams-polyfill/ponyfill';
 
-saver.mitm = '/mitm.html';
-saver.WritableStream = saver.WritableStream || WritableStream;
-export const streamSaver = saver;
+export async function getStreamSaver() {
+    const saver = await import('streamsaver');
+    saver.mitm = '/mitm.html';
+    saver.WritableStream = saver.WritableStream || WritableStream;
+    return saver;
+}

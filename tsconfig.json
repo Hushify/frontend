@@ -35,11 +35,11 @@
         ]
     },
     "include": [
-        "src",
         "next-env.d.ts",
         "custom.d.ts",
         "**/*.ts",
         "**/*.tsx",
+        "**/*.mdx",
         ".next/types/**/*.ts"
     ],
     "exclude": ["node_modules"]

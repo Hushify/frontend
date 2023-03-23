@@ -5,15 +5,13 @@ import {
     HEADER_SIZE,
 } from '@/lib/constants/encryption';
 import { apiRoutes } from '@/lib/data/routes';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
+import { expose } from '@/lib/utils/comlink';
 
-export function getEncryptedSize(fileSize: number) {
+function getEncryptedSize(fileSize: number) {
     const numberOfChunks = fileSize / DEFAULT_CHUNK_SIZE;
-
     const encryptedChunkSize = DEFAULT_CHUNK_SIZE + AUTH_SIZE;
-
     const encryptedSize = numberOfChunks * encryptedChunkSize + HEADER_SIZE;
-
     return Math.ceil(encryptedSize);
 }
 
@@ -32,7 +30,7 @@ export const UploadService = {
 
         const numberOfEncryptedChunks = Math.ceil(encryptedSize / AMZ_MIN_CHUNK_SIZE);
 
-        const cryptoWorker = CryptoWorker.instance;
+        const cryptoWorker = CryptoWorkerInstance;
         const { fileKey, fileKeyB64, encryptedFileKey, nonce } = await cryptoWorker.generateFileKey(
             currentFolderKey
         );
@@ -90,7 +88,7 @@ export const UploadService = {
         parts: { partNumber: number; preSignedUrl: string }[],
         onProgress: (uploaded: number) => void
     ) => {
-        const cryptoWorker = CryptoWorker.instance;
+        const cryptoWorker = CryptoWorkerInstance;
         const { state, header } = await cryptoWorker.streamingEncryptionInit(fileKey);
 
         const eTags: { eTag: string; partNumber: number }[] = [];
@@ -191,7 +189,7 @@ export const UploadService = {
 
     checkCompat: async () => {
         try {
-            const key = CryptoWorker.instance.generateRandomKeyForCompat();
+            const key = CryptoWorkerInstance.generateRandomKeyForCompat();
             if (!key) {
                 return false;
             }
@@ -202,3 +200,5 @@ export const UploadService = {
         }
     },
 };
+
+expose(UploadService);

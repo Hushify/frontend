@@ -1,7 +1,7 @@
 import '@/styles/tw.css';
 import { ReactNode } from 'react';
 
-import { Providers } from '@/lib/components/provider';
+import { AppProvider } from '@/lib/components/app-provider';
 import { cn } from '@/lib/utils/cn';
 
 export const metadata = {
@@ -23,7 +23,7 @@ export const metadata = {
             default: 'Hushify',
             template: '%s',
         },
-        images: `https://${process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io'}/icon.png`,
+        images: '/icon.png',
     },
     twitter: {
         description: 'Privacy built on open source.',
@@ -33,9 +33,7 @@ export const metadata = {
         },
         card: 'summary',
         creator: '@HushifyIO',
-        images: `https://${
-            process.env.NEXT_PUBLIC_DOMAIN ?? 'hushify.io'
-        }/android-icon-192x192.png`,
+        images: '/android-icon-192x192.png',
     },
     icons: {
         icon: '/icon.png',
@@ -50,13 +48,13 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang='en' dir='ltr'>
+        <html lang='en' dir='ltr' data-mode='dark'>
             <head />
             <body
                 className={cn({
                     'debug-screens': process.env.NODE_ENV === 'development',
                 })}>
-                <Providers>{children}</Providers>
+                <AppProvider>{children}</AppProvider>
             </body>
         </html>
     );

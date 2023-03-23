@@ -216,7 +216,7 @@ export function Explorer({
                                 )}
                             {status === 'success' &&
                                 data &&
-                                (data.folders.length || data.files.length > 0) > 0 && (
+                                (data.folders.length > 0 || data.files.length > 0) && (
                                     <tbody className='divide-y divide-gray-200'>
                                         {folders.map(folder => (
                                             <FolderRow

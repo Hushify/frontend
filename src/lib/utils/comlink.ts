@@ -1,7 +1,5 @@
 import * as Comlink from 'comlink';
 
-export * from 'comlink';
-
 const signalFinalizers =
     'FinalizationRegistry' in globalThis
         ? new FinalizationRegistry(async (port: MessagePort) => {
@@ -45,3 +43,5 @@ Comlink.transferHandlers.set('abortsignal', {
         return ctrl.signal;
     },
 } as Comlink.TransferHandler<AbortSignal, { aborted: boolean; port?: MessagePort }>);
+
+export * from 'comlink';

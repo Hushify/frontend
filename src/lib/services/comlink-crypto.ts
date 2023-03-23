@@ -13,7 +13,7 @@ class CryptoWorker {
             return;
         }
 
-        const worker = new Worker(new URL('@/lib/services/crypto.worker', import.meta.url), {
+        const worker = new Worker(new URL('@/lib/services/crypto', import.meta.url), {
             type: 'module',
             name: 'hushify-crypto-worker',
         });
@@ -22,5 +22,4 @@ class CryptoWorker {
     }
 }
 
-// eslint-disable-next-line import/no-anonymous-default-export
-export default new CryptoWorker();
+export const CryptoWorkerInstance = new CryptoWorker().instance;

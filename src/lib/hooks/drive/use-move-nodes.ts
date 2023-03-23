@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
 import { apiRoutes } from '@/lib/data/routes';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
 import { list, moveNodes } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { DriveList, SelectedNode } from '@/lib/types/drive';
@@ -30,7 +30,7 @@ export function useMoveNodes(
                 throw new Error('Master key not found!');
             }
 
-            const crypto = CryptoWorker.instance;
+            const crypto = CryptoWorkerInstance;
 
             const destinationData = await queryClient.fetchQuery<DriveList>(
                 [`${apiRoutes.drive.list}?folderId=${data.destinationFolderId}`],
@@ -39,7 +39,7 @@ export function useMoveNodes(
                         `${apiRoutes.drive.list}?folderId=${data.destinationFolderId}`,
                         accessToken,
                         masterKey,
-                        CryptoWorker.instance
+                        crypto
                     )
             );
 

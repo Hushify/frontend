@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { shallow } from 'zustand/shallow';
 
 import { refreshToken } from '@/lib/services/auth';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 export function useAuth() {
@@ -40,7 +40,7 @@ export function useAuth() {
                 return authState.status;
             }
 
-            const crypto = CryptoWorker.instance;
+            const crypto = CryptoWorkerInstance;
 
             const decryptedAccessToken = await crypto.asymmetricDecrypt(
                 result.data.encryptedAccessToken,

@@ -1,4 +1,4 @@
-import { UploadService } from '@/lib/services/upload.worker';
+import { UploadService } from '@/lib/services/upload';
 import { Remote, wrap } from '@/lib/utils/comlink';
 
 class UploadWorker {
@@ -13,7 +13,7 @@ class UploadWorker {
             return;
         }
 
-        const worker = new Worker(new URL('@/lib/services/upload.worker', import.meta.url), {
+        const worker = new Worker(new URL('@/lib/services/upload', import.meta.url), {
             type: 'module',
             name: 'hushify-upload-worker',
         });
@@ -22,5 +22,4 @@ class UploadWorker {
     }
 }
 
-// eslint-disable-next-line import/no-anonymous-default-export
-export default new UploadWorker();
+export const UploadWorkerInstance = new UploadWorker().instance;

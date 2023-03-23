@@ -15,7 +15,6 @@ export function useMenuItems(
         folderIds: string[];
         fileIds: string[];
     }) => Promise<void>,
-    setFileForPreview: Dispatch<SetStateAction<FileNodeDecrypted | undefined>>,
     setIsNewFolderOpen: Dispatch<SetStateAction<boolean>>,
     setIsPreviewOpen: Dispatch<SetStateAction<boolean>>,
     setIsRenameOpen: Dispatch<SetStateAction<boolean>>,
@@ -92,7 +91,7 @@ export function useMenuItems(
                 },
                 icon: Download,
                 textOnly: false,
-                variant: 'primary',
+                variant: 'secondary',
                 disabled: false,
             },
         ];
@@ -121,10 +120,7 @@ export function useMenuItems(
             items.push({
                 type: 'item' as const,
                 name: 'Preview',
-                action: () => {
-                    setFileForPreview(selectedNodes[0].node as FileNodeDecrypted);
-                    setIsPreviewOpen(true);
-                },
+                action: () => setIsPreviewOpen(true),
                 icon: Eye,
                 textOnly: false,
                 variant: 'secondary',
@@ -166,7 +162,6 @@ export function useMenuItems(
         fileRef,
         folderRef,
         selectedNodes,
-        setFileForPreview,
         setIsNewFolderOpen,
         setIsPreviewOpen,
         setIsRenameOpen,

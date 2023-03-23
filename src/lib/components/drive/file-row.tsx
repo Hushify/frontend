@@ -60,10 +60,10 @@ export function FileRow({
             </td>
             <td className='py-2 text-left text-sm'>
                 {isToday(new Date(file.metadata.modified))
-                    ? intlFormat(new Date(file.metadata.modified), {
+                    ? `Today, ${intlFormat(new Date(file.metadata.modified), {
                           hour: '2-digit',
                           minute: '2-digit',
-                      })
+                      })}`
                     : intlFormat(new Date(file.metadata.modified), {
                           month: 'short',
                           day: 'numeric',

@@ -3,6 +3,7 @@ import { wordlist } from '@scure/bip39/wordlists/english';
 import sodium from 'libsodium-wrappers-sumo';
 
 import { MetadataBundle, UserCryptoProperties } from '@/lib/types/crypto';
+import { expose } from '@/lib/utils/comlink';
 
 export const CryptoService = {
     generateRequiredKeys: async (
@@ -342,3 +343,5 @@ export const CryptoService = {
         return sodium.crypto_secretstream_xchacha20poly1305_keygen();
     },
 };
+
+expose(CryptoService);

@@ -95,10 +95,10 @@ export function FolderRow({
             </td>
             <td className='py-2 text-left text-sm'>
                 {isToday(new Date(folder.metadata.modified))
-                    ? intlFormat(new Date(folder.metadata.modified), {
+                    ? `Today, ${intlFormat(new Date(folder.metadata.modified), {
                           hour: '2-digit',
                           minute: '2-digit',
-                      })
+                      })}`
                     : intlFormat(new Date(folder.metadata.modified), {
                           month: 'short',
                           day: 'numeric',

@@ -4,8 +4,9 @@ import { Download, Loader, X } from 'lucide-react';
 
 import { FileNodeDecrypted } from '@/lib/types/drive';
 import { StreamDecrypter } from '@/lib/utils/stream-decryptor';
-import { streamSaver } from '@/lib/utils/stream-saver';
+import { getStreamSaver } from '@/lib/utils/stream-saver';
 import { StreamSlicer } from '@/lib/utils/stream-slicer';
+import { StreamToBlob } from '@/lib/utils/stream-to-blob';
 
 export function Preivew({
     file,
@@ -36,31 +37,16 @@ export function Preivew({
                         .pipeThrough(new TransformStream(new StreamSlicer()))
                         .pipeThrough(new TransformStream(new StreamDecrypter(file.key)));
                 })
-                .then(response => {
-                    if (!response) {
-                        return null;
+                .then(async response => {
+                    const content = await StreamToBlob(response);
+                    if (!content) {
+                        return;
                     }
 
-                    let content = new Uint8Array();
-                    const reader = response.getReader();
+                    const blob = new Blob([content], { type: file.metadata.mimeType });
 
-                    function saveChunk({ done, value }: ReadableStreamReadResult<Uint8Array>) {
-                        if (done) {
-                            url = URL.createObjectURL(
-                                new Blob([content], {
-                                    type: file!.metadata.mimeType,
-                                })
-                            );
-                            setFileToPreview(url);
-                            return;
-                        }
-
-                        content = new Uint8Array([...content, ...value]);
-
-                        reader.read().then(saveChunk);
-                    }
-
-                    reader.read().then(saveChunk);
+                    url = URL.createObjectURL(blob);
+                    setFileToPreview(url);
                 });
         } catch (error) {
             setError('Can not preview this file.');
@@ -77,6 +63,7 @@ export function Preivew({
         if (!file || !fileToPreview) {
             return;
         }
+        const streamSaver = await getStreamSaver();
         const writer = streamSaver.createWriteStream(file.metadata.name, {
             size: file.metadata.size,
         });

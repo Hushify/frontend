@@ -10,7 +10,7 @@ import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes } from '@/lib/data/routes';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
 import { updateMetadata } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { DriveList, FileNodeDecrypted, FolderNodeDecrypted, SelectedNode } from '@/lib/types/drive';
@@ -99,7 +99,7 @@ export function Rename({
                 throw new Error('Rename failed!');
             }
 
-            const crypto = CryptoWorker.instance;
+            const crypto = CryptoWorkerInstance;
 
             node.metadata.name = data.name;
             node.metadata.modified = new Date().toISOString();

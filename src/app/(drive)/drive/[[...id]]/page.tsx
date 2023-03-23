@@ -26,9 +26,9 @@ import { BreadcrumbDecrypted, FileNodeDecrypted, SelectedNode } from '@/lib/type
 export default function Drive({ params: { id } }: { params: { id?: string[] } }) {
     const accessToken = useAuthStore(state => state.accessToken)!;
     const masterKey = useAuthStore(state => state.masterKey)!;
+
     const currentFolderId = id?.at(0) ?? null;
     const { data, status, refetch } = useDriveList(currentFolderId, accessToken, masterKey);
-
     const currentFolderKey = useMemo(
         () =>
             data && data.breadcrumbs.length > 0
@@ -40,6 +40,18 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
     const [selectedNodes, setSelectedNodes] = useState<SelectedNode[]>([]);
     const clearSelection = useCallback(() => setSelectedNodes([]), []);
     useEffect(clearSelection, [clearSelection, currentFolderId]);
+
+    const moveMutation = useMoveNodes(currentFolderId, accessToken, clearSelection);
+
+    const { fileRef, folderRef, getFolderInputProps, rootProps, inputProps, isDragActive } =
+        useCustomDropzone(accessToken, currentFolderKey, data, refetch);
+
+    const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
+    const [isRenameOpen, setIsRenameOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    const [ref, bounds] = useMeasure();
+    const [refRest, boundsRest] = useMeasure();
 
     const deleteCb = useCallback(
         async ({ folderIds, fileIds }: { folderIds: string[]; fileIds: string[] }) => {
@@ -54,24 +66,9 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
         [accessToken, clearSelection, refetch]
     );
 
-    const moveMutation = useMoveNodes(currentFolderId, accessToken, clearSelection);
-
-    const { fileRef, folderRef, getFolderInputProps, rootProps, inputProps, isDragActive } =
-        useCustomDropzone(accessToken, currentFolderKey, data, refetch);
-
-    const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
-    const [isRenameOpen, setIsRenameOpen] = useState(false);
-
-    const [fileForPreview, setFileForPreview] = useState<FileNodeDecrypted>();
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
-    const [ref, bounds] = useMeasure();
-    const [refRest, boundsRest] = useMeasure();
-
     const menuItems = useMenuItems(
         selectedNodes,
         deleteCb,
-        setFileForPreview,
         setIsNewFolderOpen,
         setIsPreviewOpen,
         setIsRenameOpen,
@@ -114,7 +111,11 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
                     <div ref={refRest}>
                         <div className='relative z-10'>
                             <Preivew
-                                file={fileForPreview}
+                                file={
+                                    selectedNodes.at(0)?.type === 'file'
+                                        ? (selectedNodes.at(0)?.node as FileNodeDecrypted)
+                                        : undefined
+                                }
                                 isPreviewOpen={isPreviewOpen}
                                 setIsPreviewOpen={setIsPreviewOpen}
                             />

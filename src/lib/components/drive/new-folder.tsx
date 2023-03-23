@@ -10,7 +10,7 @@ import zod from 'zod';
 
 import { InputWithLabel } from '@/lib/components/input-with-label';
 import { apiRoutes } from '@/lib/data/routes';
-import CryptoWorker from '@/lib/services/comlink-crypto';
+import { CryptoWorkerInstance } from '@/lib/services/comlink-crypto';
 import { createFolder } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { DriveList, FolderNodeDecrypted } from '@/lib/types/drive';
@@ -83,7 +83,7 @@ export function NewFolder({
                 return null;
             }
 
-            const crypto = CryptoWorker.instance;
+            const crypto = CryptoWorkerInstance;
 
             const keyBundle = await crypto.generateFolderKey(currentFolderKey);
 

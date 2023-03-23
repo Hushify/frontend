@@ -1,0 +1,47 @@
+export const meta = {
+    title: 'What is Cryptography?',
+    author: 'Heet Mehta',
+    publishedAt: '2023-02-08',
+    excerpt:
+        'Cryptography is the practice of securing communication from third-party access or modification.',
+    category: 'Cryptography',
+    tags: ['Cryptography', 'Encryption', 'Security'],
+};
+
+Cryptography is the practice of securing communication from third-party access or modification. It has been used for centuries, dating back to ancient times when people used simple encryption techniques to protect their messages. Today, cryptography plays a crucial role in the security of digital communication, including internet banking, e-commerce, and electronic voting systems.
+
+## Basics of Cryptography
+
+Cryptography involves converting plain text into an unreadable format, called ciphertext, using mathematical algorithms and secret keys. The goal of cryptography is to ensure the confidentiality, integrity, and authenticity of data.
+
+-   Confidentiality ensures that only the intended recipient can read the message.
+-   Integrity ensures that the message has not been modified during transmission.
+-   Authenticity ensures that the message comes from a trusted source.
+
+## Types of Cryptography
+
+There are two main types of cryptography: symmetric and asymmetric.
+
+### Symmetric Cryptography
+
+In symmetric cryptography, the same secret key is used for both encryption and decryption. The most common symmetric encryption algorithm is the Advanced Encryption Standard (AES). AES uses a block cipher with a key size of 128, 192, or 256 bits. Symmetric cryptography is faster and more efficient than asymmetric cryptography, but it requires that both the sender and the recipient know the same secret key.
+
+### Asymmetric Cryptography
+
+In asymmetric cryptography, a public key is used for encryption and a private key is used for decryption. The most common asymmetric encryption algorithm is the RSA algorithm. RSA uses a public key size of 2048 or 4096 bits. Asymmetric cryptography is slower and less efficient than symmetric cryptography, but it provides better security because the private key is never shared.
+
+## A Practical Example
+
+Suppose that Bob wants to send a confidential message to Alice. Bob starts by encrypting his message using a secret key. He then sends the encrypted message to Alice.
+
+If Bob and Alice are using symmetric cryptography, both Bob and Alice will need to have the same secret key. Bob will use this secret key to encrypt his message, and Alice will use the same secret key to decrypt the message when she receives it.
+
+If Bob and Alice are using asymmetric cryptography, Alice will have a public key and a private key. Bob will use Alice's public key to encrypt his message, and Alice will use her private key to decrypt the message when she receives it. This way, Bob does not need to have access to Alice's private key, and Alice can keep her private key secure.
+
+In either case, the message is secure because it is encrypted and can only be read by the intended recipient, Alice. If someone intercepts the message, they will not be able to read it because they do not have the secret key or private key needed to decrypt the message.
+
+In summary, cryptography provides a way to secure digital communication and protect sensitive information from third-party access or modification. It is a fundamental technology that underpins modern communication and enables us to conduct transactions securely over the internet.
+
+## Conclusion
+
+Cryptography is an essential aspect of modern communication, and its importance will only continue to grow as technology advances. The two main types of cryptography, symmetric and asymmetric, have their strengths and weaknesses and are used in different scenarios. Symmetric cryptography is faster and more efficient but requires that both the sender and the recipient know the same secret key. Asymmetric cryptography is slower and less efficient but provides better security because the private key is never shared.

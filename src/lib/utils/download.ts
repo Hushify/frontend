@@ -2,7 +2,7 @@ import { downloadZip } from 'client-zip';
 
 import { FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
 import { StreamDecrypter } from '@/lib/utils/stream-decryptor';
-import { streamSaver } from '@/lib/utils/stream-saver';
+import { getStreamSaver } from '@/lib/utils/stream-saver';
 import { StreamSlicer } from '@/lib/utils/stream-slicer';
 
 export async function downloadFile(node: FileNodeDecrypted) {
@@ -11,6 +11,7 @@ export async function downloadFile(node: FileNodeDecrypted) {
         return;
     }
 
+    const streamSaver = await getStreamSaver();
     const stream = streamSaver.createWriteStream(node.metadata.name, {
         size: node.metadata.size,
     });
@@ -61,6 +62,7 @@ export async function downloadMultiple(selectedNodes: SelectedNode[]) {
         )
     );
 
+    const streamSaver = await getStreamSaver();
     const stream = streamSaver.createWriteStream('download.zip');
 
     window.onunload = () => {
