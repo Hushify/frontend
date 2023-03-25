@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { RegisterForm } from '@/app/(shared)/(identity)/register/register-form';
+import { RegisterForm } from '@/app/(guest)/(identity)/register/register-form';
 import { clientRoutes } from '@/lib/data/routes';
 
 export const metadata = {

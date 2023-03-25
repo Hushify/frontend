@@ -1,3 +1,5 @@
 import { Loader } from '@/lib/components/loader';
 
-export default Loader;
+export default function SuspenseLoader() {
+    return <Loader />;
+}

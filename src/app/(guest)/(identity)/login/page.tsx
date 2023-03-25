@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { LoginForm } from '@/app/(shared)/(identity)/login/login-form';
+import { LoginForm } from '@/app/(guest)/(identity)/login/login-form';
 import { clientRoutes } from '@/lib/data/routes';
 import { cn } from '@/lib/utils/cn';
 

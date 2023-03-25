@@ -135,7 +135,7 @@ export function RegisterConfirmForm() {
                     signingPrivateKey: keys.signingPrivateKey,
                     recoveryKeyMnemonic: keys.recoveryMnemonic,
                 });
-                plausible('Signup');
+                plausible?.('Signup');
                 push(clientRoutes.identity.recoveryKey);
                 return null;
             }

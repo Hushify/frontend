@@ -1,12 +1,12 @@
-import { RegisterConfirmForm } from '@/app/(shared)/(identity)/register/confirm/register-confirm-form';
+import { LoginConfirmForm } from '@/app/(guest)/(identity)/login/confirm/login-confirm-form';
 
 export const metadata = {
-    title: 'Register Confirmation',
+    title: 'Login Confirmation',
     openGraph: {
-        title: 'Register Confirmation',
+        title: 'Login Confirmation',
     },
     twitter: {
-        title: 'Register Confirmation',
+        title: 'Login Confirmation',
     },
 };
 
@@ -14,12 +14,13 @@ export default function Confirm() {
     return (
         <div className='w-full sm:max-w-[300px]'>
             <div className='space-y-1 text-center print:hidden'>
-                <h1 className='text-2xl font-bold'>One last step</h1>
+                <h1 className='text-2xl font-bold'>Enter Your Credentials</h1>
                 <div className='text-sm text-slate-600'>
                     We just sent you a one time code on your email.
                 </div>
             </div>
-            <RegisterConfirmForm />
+
+            <LoginConfirmForm />
         </div>
     );
 }

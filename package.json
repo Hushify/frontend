@@ -1,7 +1,7 @@
 {
     "private": true,
     "license": "AGPL-3.0",
-    "packageManager": "pnpm@7.30.0",
+    "packageManager": "pnpm@7.30.3",
     "scripts": {
         "dev": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && next dev",
         "build": "next build",
@@ -63,7 +63,7 @@
         "@types/libsodium-wrappers-sumo": "^0.7.5",
         "@types/lodash": "^4.14.191",
         "@types/mdx": "^2.0.3",
-        "@types/node": "^18.15.5",
+        "@types/node": "^18.15.7",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.11",
         "@types/streamsaver": "^2.0.1",
@@ -75,7 +75,7 @@
         "eslint-plugin-tailwindcss": "^3.10.1",
         "eslint-plugin-unused-imports": "^2.0.0",
         "postcss": "^8.4.21",
-        "prettier": "^2.8.6",
+        "prettier": "^2.8.7",
         "prettier-plugin-tailwindcss": "^0.2.5",
         "tailwindcss": "^3.2.7",
         "tailwindcss-animate": "^1.0.5",

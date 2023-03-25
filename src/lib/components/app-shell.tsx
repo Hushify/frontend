@@ -28,13 +28,12 @@ import {
 import { clientRoutes } from '@/lib/data/routes';
 import { getClaim } from '@/lib/services/auth';
 import { stats } from '@/lib/services/drive';
-// import { stats } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePrefStore } from '@/lib/stores/pref-store';
 import { cn } from '@/lib/utils/cn';
 import { humanFileSize } from '@/lib/utils/humanized-file-size';
 
-export type Navigation = {
+type Navigation = {
     href: string;
     name: string;
     icon: LucideIcon;
