@@ -16,6 +16,7 @@ export const metadata = {
         follow: true,
     },
     themeColor: '#4f46e5',
+    manifest: '/manifest.json',
     openGraph: {
         description: 'Privacy, built on open source.',
         type: 'website',

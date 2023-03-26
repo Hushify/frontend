@@ -34,3 +34,10 @@ yarn-error.log*
 
 **/public/robots.txt
 **/public/sitemap*.xml
+
+**/public/workbox-*.js
+**/public/workbox-*.js.map
+**/public/pwa-sw.js
+**/public/pwa-sw.js.map
+**/public/worker-*.js
+**/public/worker-*.js.map

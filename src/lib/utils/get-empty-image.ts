@@ -2,7 +2,7 @@ let emptyImage: HTMLImageElement | undefined;
 
 // Helper from https://github.com/react-dnd/react-dnd/blob/main/packages/backend-html5/src/getEmptyImage.ts
 // Image data url from https://png-pixel.com/
-export function getEmptyImage(): HTMLImageElement {
+export function getEmptyImage() {
     if (!emptyImage) {
         emptyImage = new Image();
         emptyImage.src =

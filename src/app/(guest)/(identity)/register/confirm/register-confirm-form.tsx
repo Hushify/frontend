@@ -106,7 +106,7 @@ export function RegisterConfirmForm() {
 
     const confirmMutation = useMutation(
         async (data: ConfirmFormInputs) => {
-            const pwStrengthResult = checkPasswordStrength(data.password, data.email);
+            const pwStrengthResult = await checkPasswordStrength(data.password, data.email);
 
             if (!pwStrengthResult.success) {
                 setError('password', {

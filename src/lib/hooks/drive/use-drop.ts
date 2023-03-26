@@ -1,4 +1,5 @@
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
+import { ConnectDropTarget } from 'react-dnd';
 import { useMultiDrop } from 'react-dnd-multi-backend';
 
 import { SelectedNode } from '@/lib/types/drive';
@@ -17,7 +18,13 @@ export function useDrop(
         },
         unknown
     >
-) {
+): {
+    dropProps: {
+        canDrop: boolean;
+        isOver: boolean;
+    };
+    drop: ConnectDropTarget;
+} {
     const [[dropProps, drop]] = useMultiDrop({
         accept: 'NODE',
         drop: async (items: SelectedNode[]) => {

@@ -1,10 +1,8 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import { apiRoutes } from '@/lib/data/routes';
 import { getErrors } from '@/lib/services/common';
 import { UserCryptoProperties } from '@/lib/types/crypto';
 import { ResponseMessage, SuccessResponse } from '@/lib/types/http';
-import { zxcvbn } from '@/lib/utils/zxcvbn';
+import { zxcvbnAsync } from '@/lib/utils/zxcvbn';
 
 export async function register<T>(email: string): Promise<ResponseMessage<T, null>> {
     const response = await fetch(apiRoutes.identity.register, {
@@ -186,11 +184,19 @@ export function logout(): Promise<Response> {
     });
 }
 
-export function checkPasswordStrength(
+export async function checkPasswordStrength(
     password: string,
     ...userInputs: (string | number)[]
-): SuccessResponse<undefined> | { success: false; error: string } {
-    const zxcvbnResult = zxcvbn(password, userInputs);
+): Promise<SuccessResponse<undefined> | { success: false; error: string }> {
+    const zxcvbnResult = await zxcvbnAsync(password, userInputs);
+
+    if (zxcvbnResult.feedback.suggestions.includes('pwned')) {
+        return {
+            success: false,
+            error: 'This password has been previously compromised. Please choose a different password.',
+        };
+    }
+
     if (zxcvbnResult.score <= 2) {
         let message = 'Your password is not strong enough.';
         zxcvbnResult.feedback.suggestions.forEach(s => {
