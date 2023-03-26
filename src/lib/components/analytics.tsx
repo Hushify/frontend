@@ -10,6 +10,7 @@ export function Analytics() {
     if (!process.env.NEXT_PUBLIC_ANALYTICS_ENABLED) {
         return null;
     }
+
     return (
         <Script
             strategy='afterInteractive'
