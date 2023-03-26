@@ -6,7 +6,6 @@ export default function Robots(): RobotsType {
         sitemap: `https://${process.env.NEXT_PUBLIC_DOMAIN}/sitemap.xml`,
         rules: {
             userAgent: '*',
-            allow: '/',
         },
     };
 }
