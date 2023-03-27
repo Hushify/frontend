@@ -146,13 +146,13 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
                             )}
                         </div>
 
-                        <Toolbar items={menuItems} />
-
                         <Breadcrumbs
                             items={data?.breadcrumbs ?? ([] as BreadcrumbDecrypted[])}
                             workspaceId={data?.workspaceFolderId}
                             onMove={moveMutation.mutateAsync}
                         />
+
+                        <Toolbar items={menuItems} />
                     </div>
 
                     <Explorer

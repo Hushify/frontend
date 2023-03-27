@@ -20,7 +20,7 @@ specifiers:
   '@types/libsodium-wrappers-sumo': ^0.7.5
   '@types/lodash': ^4.14.191
   '@types/mdx': ^2.0.3
-  '@types/node': ^18.15.9
+  '@types/node': ^18.15.10
   '@types/react': ^18.0.29
   '@types/react-dom': ^18.0.11
   '@types/streamsaver': ^2.0.1
@@ -97,7 +97,7 @@ dependencies:
   p-queue: 7.3.4
   rdndmb-html5-to-touch: 8.0.0
   react: 18.2.0
-  react-dnd: 16.0.1_gw5uywi6bwwjbkwqbtnidipm3q
+  react-dnd: 16.0.1_s6mwjkosqrl3udcunt37l2wwum
   react-dnd-multi-backend: 8.0.0_b57ckgxx77373rey5kttpzfpiu
   react-dom: 18.2.0_react@18.2.0
   react-dropzone: 14.2.3_react@18.2.0
@@ -121,7 +121,7 @@ devDependencies:
   '@types/libsodium-wrappers-sumo': 0.7.5
   '@types/lodash': 4.14.191
   '@types/mdx': 2.0.3
-  '@types/node': 18.15.9
+  '@types/node': 18.15.10
   '@types/react': 18.0.29
   '@types/react-dom': 18.0.11
   '@types/streamsaver': 2.0.1
@@ -1342,8 +1342,8 @@ packages:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: false
 
-  /@types/node/18.15.9:
-    resolution: {integrity: sha512-dUxhiNzBLr6IqlZXz6e/rN2YQXlFgOei/Dxy+e3cyXTJ4txSUbGT2/fmnD6zd/75jDMeW5bDee+YXxlFKHoV0A==}
+  /@types/node/18.15.10:
+    resolution: {integrity: sha512-9avDaQJczATcXgfmMAW3MIWArOO7A+m90vuCFLr8AotWf8igO/mRoYukrk2cqZVtv38tHs33retzHEilM7FpeQ==}
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
@@ -4452,7 +4452,7 @@ packages:
       react-dnd: ^16.0.1
     dependencies:
       react: 18.2.0
-      react-dnd: 16.0.1_gw5uywi6bwwjbkwqbtnidipm3q
+      react-dnd: 16.0.1_s6mwjkosqrl3udcunt37l2wwum
     dev: false
 
   /react-dnd-touch-backend/16.0.1:
@@ -4462,7 +4462,7 @@ packages:
       dnd-core: 16.0.1
     dev: false
 
-  /react-dnd/16.0.1_gw5uywi6bwwjbkwqbtnidipm3q:
+  /react-dnd/16.0.1_s6mwjkosqrl3udcunt37l2wwum:
     resolution: {integrity: sha512-QeoM/i73HHu2XF9aKksIUuamHPDvRglEwdHL4jsp784BgUuWcg6mzfxT0QDdQz8Wj0qyRKx2eMg8iZtWvU4E2Q==}
     peerDependencies:
       '@types/hoist-non-react-statics': '>= 3.3.1'
@@ -4479,7 +4479,7 @@ packages:
     dependencies:
       '@react-dnd/invariant': 4.0.2
       '@react-dnd/shallowequal': 4.0.2
-      '@types/node': 18.15.9
+      '@types/node': 18.15.10
       '@types/react': 18.0.29
       dnd-core: 16.0.1
       fast-deep-equal: 3.1.3

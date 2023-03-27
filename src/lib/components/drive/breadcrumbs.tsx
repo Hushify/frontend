@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { UseMutateAsyncFunction } from '@tanstack/react-query';
-import { Folder, FolderOpen, HardDrive } from 'lucide-react';
 
 import { clientRoutes } from '@/lib/data/routes';
 import { useDrop } from '@/lib/hooks/drive/use-drop';
@@ -82,11 +81,10 @@ function MainCrumb({
             ref={drop}>
             <Link
                 href={clientRoutes.drive}
-                className={cn('flex items-center gap-1', {
+                className={cn({
                     'text-brand-700': totalItems === 0,
                 })}>
-                <HardDrive className='hidden h-4 w-4' />
-                <span>Home</span>
+                Home
             </Link>
         </li>
     );
@@ -124,15 +122,10 @@ function Crumb({
                 })}>
                 <Link
                     href={`${clientRoutes.drive}/${item.id}`}
-                    className={cn('flex items-center gap-1', {
+                    className={cn({
                         'text-brand-700': idx === totalItems - 1,
                     })}>
-                    {idx === totalItems - 1 ? (
-                        <FolderOpen className='hidden h-4 w-4' />
-                    ) : (
-                        <Folder className='hidden h-4 w-4' />
-                    )}
-                    <span>{item.metadata.name}</span>
+                    {item.metadata.name}
                 </Link>
             </li>
         </>

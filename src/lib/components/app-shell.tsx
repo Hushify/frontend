@@ -204,8 +204,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
             </div>
 
-            <div className='flex h-full flex-auto'>
-                <div className='hidden shrink-0 flex-col overflow-y-auto border-r bg-white md:flex'>
+            <div className='flex h-full flex-auto bg-white'>
+                <div className='hidden shrink-0 flex-col overflow-y-auto border-r md:flex'>
                     <nav
                         className={cn('flex flex-1 flex-col items-center gap-1', {
                             'min-w-[16rem]': sidebarOpen,
@@ -292,7 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </nav>
                 </div>
 
-                <main className='flex-auto bg-white'>{children}</main>
+                <main className='flex-auto'>{children}</main>
             </div>
         </div>
     );
