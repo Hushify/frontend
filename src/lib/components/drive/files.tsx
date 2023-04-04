@@ -62,13 +62,9 @@ export function File({
                                 {...getFileTypeIconProps({
                                     extension: file.metadata.name.split('.').pop() || '',
                                 })}
-                                className={cn(
-                                    'absolute inset-0 h-5 w-5 text-brand-600',
-                                    'group-hover:hidden',
-                                    {
-                                        [`hidden`]: isSelected,
-                                    }
-                                )}
+                                className={cn('absolute inset-0 h-5 w-5', 'group-hover:hidden', {
+                                    [`hidden`]: isSelected,
+                                })}
                             />
 
                             <div

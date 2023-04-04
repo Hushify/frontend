@@ -1,5 +1,7 @@
+import { Icon } from '@fluentui/react';
+import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 import * as Accordion from '@radix-ui/react-accordion';
-import { ChevronDown, File, RefreshCw, X } from 'lucide-react';
+import { ChevronDown, RefreshCw, X } from 'lucide-react';
 
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useUploadStore } from '@/lib/stores/upload-store';
@@ -53,7 +55,15 @@ export function UploadProgress() {
                                 <li className='space-y-2' key={fileWithState.trackingId}>
                                     <div className='flex items-center justify-between gap-4'>
                                         <div className='flex w-[180px] items-center gap-1 sm:w-[292px]'>
-                                            <File className='h-4 w-4 shrink-0' />
+                                            <Icon
+                                                {...getFileTypeIconProps({
+                                                    extension:
+                                                        fileWithState.fileWithVersion.file.name
+                                                            .split('.')
+                                                            .pop() || '',
+                                                })}
+                                                className='h-4 w-4 shrink-0'
+                                            />
                                             <div
                                                 className='w-[160px] truncate text-sm'
                                                 title={fileWithState.fileWithVersion.file.name}>
