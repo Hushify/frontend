@@ -61,9 +61,9 @@ export function useAuth() {
 
     const { isLoading } = useQuery(['refreshToken'], getSession, {
         retry: false,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
         refetchInterval: 1000 * 60 * 10,
-        refetchIntervalInBackground: true,
+        refetchIntervalInBackground: false,
     });
 
     return isLoading ? ('loading' as const) : authState.status;
