@@ -173,7 +173,7 @@ export function Files({
                 </div>
             </header>
             <ul
-                className='grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+                className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
                 ref={fileListRef}>
                 {files.map(file => (
                     <File
