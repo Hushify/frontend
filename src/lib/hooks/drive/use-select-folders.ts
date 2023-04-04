@@ -37,7 +37,7 @@ export function useSelectFolders(
         setSelectedNodes(prev =>
             selectAllFoldersRef.current?.checked
                 ? [...prev, ...folders.map(node => ({ node, type: 'folder' as const }))]
-                : []
+                : [...prev.filter(s => s.type === 'file')]
         );
     }, [folders, setSelectedNodes]);
 
