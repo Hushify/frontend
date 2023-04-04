@@ -1,8 +1,7 @@
-const path = require('path');
-const colors = require('tailwindcss/colors');
+import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
     darkMode: ['class', '[data-theme="dark"]'],
     content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     theme: {
@@ -13,41 +12,41 @@ module.exports = {
             },
             keyframes: {
                 slideDownAndFade: {
-                    from: { opacity: 0, transform: 'translateY(-2px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' },
+                    from: { opacity: '0', transform: 'translateY(-2px)' },
+                    to: { opacity: '1', transform: 'translateY(0)' },
                 },
                 slideLeftAndFade: {
-                    from: { opacity: 0, transform: 'translateX(2px)' },
-                    to: { opacity: 1, transform: 'translateX(0)' },
+                    from: { opacity: '0', transform: 'translateX(2px)' },
+                    to: { opacity: '1', transform: 'translateX(0)' },
                 },
                 slideUpAndFade: {
-                    from: { opacity: 0, transform: 'translateY(2px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' },
+                    from: { opacity: '0', transform: 'translateY(2px)' },
+                    to: { opacity: '1', transform: 'translateY(0)' },
                 },
                 slideRightAndFade: {
-                    from: { opacity: 0, transform: 'translateX(2px)' },
-                    to: { opacity: 1, transform: 'translateX(0)' },
+                    from: { opacity: '0', transform: 'translateX(2px)' },
+                    to: { opacity: '1', transform: 'translateX(0)' },
                 },
                 overlayShow: {
-                    from: { opacity: 0 },
-                    to: { opacity: 1 },
+                    from: { opacity: '0' },
+                    to: { opacity: '1' },
                 },
                 contentShow: {
                     from: {
-                        opacity: 0,
+                        opacity: '0',
                         transform: 'translate(-50%, -48%) scale(0.96)',
                     },
                     to: {
-                        opacity: 1,
+                        opacity: '1',
                         transform: 'translate(-50%, -50%) scale(1)',
                     },
                 },
                 previewShow: {
                     from: {
-                        opacity: 0,
+                        opacity: '0',
                     },
                     to: {
-                        opacity: 1,
+                        opacity: '1',
                     },
                 },
                 sidebarContentShow: {
@@ -59,12 +58,12 @@ module.exports = {
                     },
                 },
                 slideDown: {
-                    from: { height: 0 },
+                    from: { height: '0' },
                     to: { height: 'var(--radix-accordion-content-height)' },
                 },
                 slideUp: {
                     from: { height: 'var(--radix-accordion-content-height)' },
-                    to: { height: 0 },
+                    to: { height: '0' },
                 },
             },
             animation: {
@@ -85,7 +84,6 @@ module.exports = {
         require('tailwindcss-animate'),
         require('@tailwindcss/typography'),
         require('@tailwindcss/forms'),
-        require('@tailwindcss/line-clamp'),
         require('tailwindcss-debug-screens'),
     ],
-};
+} satisfies Config;

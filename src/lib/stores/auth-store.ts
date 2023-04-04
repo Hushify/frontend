@@ -70,6 +70,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 privateKey: state.privateKey,
                 signingPrivateKey: state.signingPrivateKey,
                 status: state.status,
+                email: state.email,
             }),
         }
     )

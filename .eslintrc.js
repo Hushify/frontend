@@ -1,7 +1,7 @@
 module.exports = {
     root: true,
-    extends: ['next/core-web-vitals', 'prettier', 'plugin:tailwindcss/recommended'],
-    plugins: ['unused-imports', 'tailwindcss'],
+    extends: ['next/core-web-vitals', 'prettier'],
+    plugins: ['unused-imports'],
     settings: {
         tailwindcss: {
             callees: ['cn', 'clsx', 'tw'],
@@ -20,8 +20,6 @@ module.exports = {
                 depth: 3,
             },
         ],
-        'tailwindcss/no-custom-classname': 'off',
-        'tailwindcss/classnames-order': 'error',
     },
     ignorePatterns: [
         '**/*.js',

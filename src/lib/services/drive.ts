@@ -124,7 +124,7 @@ export async function createFolder<T>(
     });
 
     if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { id: string };
         return { success: true, data };
     }
 
@@ -147,7 +147,7 @@ export async function deleteNodes<T>(
     });
 
     if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { folderIds: string[]; fileIds: string[] };
         return { success: true, data };
     }
 
@@ -198,7 +198,7 @@ export async function stats<T>(
     });
 
     if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { total: number; used: number };
         return { success: true, data };
     }
 
@@ -226,7 +226,7 @@ export async function updateMetadata<T>(
     });
 
     if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as { id: string };
         return { success: true, data };
     }
 

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils/cn';
 
 export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
     return (
-        <div className='flex w-full gap-2 overflow-x-auto border-b border-b-gray-300 py-2 px-5'>
+        <div className='flex w-full gap-2 overflow-x-auto border-b border-b-gray-300 px-5 py-2'>
             <RadixToolbar.Root className='hidden gap-2 md:flex' aria-label='Toolbar'>
                 {items.map(item => {
                     if (item.type === 'separator') {
@@ -55,7 +55,7 @@ export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
                     <DropdownMenu.Portal>
                         <DropdownMenu.Content
                             align='start'
-                            className='min-w-[220px] rounded-md border border-gray-300 bg-white p-1 shadow-xl data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade'
+                            className='min-w-[220px] rounded-md border border-gray-300 bg-white p-1 shadow-xl data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade'
                             sideOffset={5}>
                             {items.map(item => {
                                 if (item.type === 'separator') {
@@ -73,7 +73,7 @@ export function Toolbar({ items }: { items: (MenuItem | MenuSeparator)[] }) {
                                         onSelect={item.action}
                                         disabled={item.disabled}
                                         className={cn(
-                                            'relative flex select-none items-center gap-1 rounded-sm py-2 pr-1 pl-6 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
+                                            'relative flex select-none items-center gap-1 rounded-sm py-2 pl-6 pr-1 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
                                             {
                                                 'text-red-700 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-700':
                                                     item.variant === 'danger',

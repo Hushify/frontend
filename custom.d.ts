@@ -9,3 +9,5 @@ declare type MDXMeta = {
     category: string;
     tags: string[];
 };
+
+declare module 'xlsx-viewer';

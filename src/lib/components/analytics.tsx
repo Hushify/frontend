@@ -21,7 +21,8 @@ export function Analytics() {
                 window.plausible =
                     window.plausible ||
                     function () {
-                        (window.plausible.q = window.plausible.q || []).push(
+                        window.plausible = () => {};
+                        (window.plausible.q = window.plausible?.q || []).push(
                             arguments as unknown as PlausibleArgs
                         );
                     };

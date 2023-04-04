@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
@@ -135,7 +135,7 @@ export function RegisterConfirmForm() {
                     signingPrivateKey: keys.signingPrivateKey,
                     recoveryKeyMnemonic: keys.recoveryMnemonic,
                 });
-                plausible?.('Signup');
+                window.plausible && window.plausible('Signup');
                 push(clientRoutes.identity.recoveryKey);
                 return null;
             }
@@ -153,6 +153,10 @@ export function RegisterConfirmForm() {
             },
         }
     );
+
+    if (!email) {
+        return redirect(clientRoutes.identity.register);
+    }
 
     return (
         <form

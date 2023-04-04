@@ -10,21 +10,20 @@ import { StreamToBlob } from '@/lib/utils/stream-to-blob';
 
 export function Preivew({
     file,
-    isPreviewOpen,
     setIsPreviewOpen,
 }: {
     file: FileNodeDecrypted | undefined;
-    isPreviewOpen: boolean;
     setIsPreviewOpen: Dispatch<SetStateAction<boolean>>;
 }) {
     const [fileToPreview, setFileToPreview] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let url: string | null = null;
         if (!file) {
             return;
         }
+
+        let url: string | null = null;
 
         try {
             fetch(file.url)
@@ -80,11 +79,11 @@ export function Preivew({
     }
 
     return (
-        <Dialog.Root open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <Dialog.Root open={true} onOpenChange={setIsPreviewOpen}>
             <Dialog.Portal>
                 <Dialog.Content className='fixed inset-0 z-30 flex h-full w-full flex-col gap-1 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-previewShow'>
                     <div className='flex shrink-0 items-start justify-between gap-2'>
-                        <Dialog.Title className='m-0 font-medium text-gray-900'>
+                        <Dialog.Title className='m-0 font-medium text-gray-950'>
                             <span>Preview: </span>
                             <span className='break-all font-normal'>{file.metadata.name}</span>
                         </Dialog.Title>

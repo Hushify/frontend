@@ -46,7 +46,7 @@ export function UploadProgress() {
                     </Accordion.Header>
                     <Accordion.Content
                         className={cn(
-                            'max-h-40 overflow-hidden overflow-y-auto bg-gray-100 text-[15px] text-gray-600 data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp'
+                            'max-h-40 overflow-hidden overflow-y-auto bg-gray-100 text-[15px] text-gray-600 data-[state=closed]:animate-slideUp data-[state=open]:animate-slideDown'
                         )}>
                         <ul className='flex flex-col gap-4 p-4'>
                             {files.map(fileWithState => (

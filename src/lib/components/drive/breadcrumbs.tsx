@@ -32,7 +32,7 @@ type BreadcrumbsProps = {
 
 export function Breadcrumbs({ items, onMove, workspaceId }: BreadcrumbsProps) {
     return (
-        <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 py-2 px-4 text-gray-700'>
+        <ul className='flex flex-wrap items-center gap-2 border-b border-b-gray-300 px-4 py-2 text-gray-700'>
             <MainCrumb workspaceId={workspaceId} totalItems={items.length} onMove={onMove} />
             {items.map((item, idx) => (
                 <Crumb

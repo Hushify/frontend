@@ -10,6 +10,7 @@ import {
 } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { initializeFileTypeIcons } from '@fluentui/react-file-type-icons';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,6 +33,8 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePrefStore } from '@/lib/stores/pref-store';
 import { cn } from '@/lib/utils/cn';
 import { humanFileSize } from '@/lib/utils/humanized-file-size';
+
+initializeFileTypeIcons();
 
 type Navigation = {
     href: string;
@@ -196,7 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className='flex flex-1 items-center justify-between pr-4'>
                     <h1 className='flex items-center gap-1 text-lg font-semibold text-gray-800 md:text-2xl'>
                         <span>Hushify Drive</span>
-                        <span className='rounded bg-brand-600 py-px px-1 text-xs text-white md:text-sm'>
+                        <span className='rounded bg-brand-600 px-1 py-px text-xs text-white md:text-sm'>
                             Beta
                         </span>
                     </h1>
@@ -240,7 +243,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                     <Tooltip.Portal>
                                         <Tooltip.Content
                                             side='right'
-                                            className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade'
+                                            className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade'
                                             sideOffset={5}>
                                             {item.name}
                                             <Tooltip.Arrow className='fill-brand-600' />
@@ -272,7 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                                 <Tooltip.Portal>
                                     <Tooltip.Content
                                         side='right'
-                                        className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade'
+                                        className='select-none rounded-[4px] bg-brand-600 px-[15px] py-[10px] text-[15px] leading-none text-white shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade'
                                         sideOffset={5}>
                                         Logout
                                         <Tooltip.Arrow className='fill-brand-600' />

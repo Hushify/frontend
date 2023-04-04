@@ -144,7 +144,12 @@ export async function login<T>(
     });
 
     if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as {
+            encryptedAccessToken: string;
+            accessTokenNonce: string;
+            serverPublicKey: string;
+            cryptoProperties: UserCryptoProperties;
+        };
         return { success: true, data };
     }
 
@@ -169,7 +174,14 @@ export async function refreshToken<T>(): Promise<
     });
 
     if (response.ok) {
-        return { success: true, data: await response.json() };
+        return {
+            success: true,
+            data: (await response.json()) as {
+                encryptedAccessToken: string;
+                accessTokenNonce: string;
+                serverPublicKey: string;
+            },
+        };
     }
 
     const errors = await getErrors<T>(response);
@@ -214,10 +226,12 @@ export async function checkPasswordStrength(
 
 export function isTokenExpired(token: string) {
     const data = token.split('.')?.[1];
-    return data ? Date.now() >= JSON.parse(atob(data)).exp * 1000 : true;
+    return data ? Date.now() >= (JSON.parse(atob(data)) as { exp: number }).exp * 1000 : true;
 }
 
 export function getClaim(token: string, claimType: string): string | undefined {
     const data = token.split('.')?.at(1);
-    return data ? JSON.parse(atob(data))[claimType] : undefined;
+    return data
+        ? (JSON.parse(atob(data)) as Record<string, string | undefined>)[claimType]
+        : undefined;
 }

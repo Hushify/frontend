@@ -32,7 +32,7 @@ export const FullscreenUpload = forwardRef(function FullscreenUpload(
                     className='fixed inset-0 z-50 grid place-items-center bg-gray-400/75'>
                     <div className='flex min-w-[24rem] flex-col items-center justify-center gap-4 rounded-xl bg-white p-12 text-slate-100 shadow-xl'>
                         <Droplet size={196} className='text-brand-600' />
-                        <div className='text-xl font-bold text-gray-900'>Drop to upload</div>
+                        <div className='text-xl font-bold text-gray-950'>Drop to upload</div>
                     </div>
                 </motion.div>
             )}

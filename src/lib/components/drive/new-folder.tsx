@@ -152,9 +152,9 @@ export function NewFolder({
             }}>
             <Dialog.Portal>
                 <Dialog.Overlay className='fixed inset-0 bg-gray-700/50 data-[state=open]:animate-overlayShow' />
-                <Dialog.Content className='fixed top-1/2 left-1/2 max-h-[85vh] w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-contentShow'>
+                <Dialog.Content className='fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-6 shadow focus:outline-none data-[state=open]:animate-contentShow'>
                     <div className='flex items-center justify-between'>
-                        <Dialog.Title className='m-0 text-[17px] font-medium text-gray-900'>
+                        <Dialog.Title className='m-0 text-[17px] font-medium text-gray-950'>
                             Create New Folder
                         </Dialog.Title>
                         <Dialog.Close asChild>
@@ -176,7 +176,8 @@ export function NewFolder({
                             type='text'
                             id='folderName'
                             autoComplete='folderName'
-                            {...register('folderName')}>
+                            {...register('folderName')}
+                            autoFocus>
                             Folder Name
                         </InputWithLabel>
 

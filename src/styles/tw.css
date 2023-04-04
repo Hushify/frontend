@@ -21,8 +21,8 @@
         height: 100vh;
         height: -webkit-fill-available;
         height: 100dvh;
-        color: theme('colors.gray.900');
-        @apply bg-offwhite;
+        color: theme('colors.gray.950');
+        @apply bg-white;
     }
 
     [type='text'],

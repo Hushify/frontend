@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn';
 
 export function Navbar() {
     return (
-        <nav className='fixed z-10 h-16 w-full shrink-0 bg-offwhite/75 shadow backdrop-blur'>
+        <nav className='fixed z-10 h-16 w-full shrink-0 bg-white/75 shadow backdrop-blur'>
             <div className='container mx-auto flex h-full items-center justify-between p-4'>
                 <Link href='/' className='flex items-center gap-1.5 lg:gap-2'>
                     <Logo className='w-6' />

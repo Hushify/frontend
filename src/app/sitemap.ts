@@ -1,8 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Sitemap as SitemapType } from 'next/dist/lib/metadata/types/metadata-interface';
 
-export default async function Sitemap(): Promise<SitemapType> {
+export default async function Sitemap() {
     const posts: { url: string; lastModified: string }[] = [];
 
     const dir = await fs.opendir(path.join(process.cwd(), 'src', 'content', 'posts'));

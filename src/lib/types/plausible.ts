@@ -7,10 +7,10 @@ export type PlausibleArgs = [TrackEvent, () => void] | [TrackEvent];
 declare global {
     const plausible: {
         (...args: PlausibleArgs): void;
-        q: PlausibleArgs[];
+        q?: PlausibleArgs[];
     };
 
     interface Window {
-        plausible: typeof plausible;
+        plausible?: typeof plausible;
     }
 }

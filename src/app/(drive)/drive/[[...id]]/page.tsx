@@ -19,6 +19,7 @@ import { useCustomDropzone } from '@/lib/hooks/drive/use-custom-dropzone';
 import { useDriveList } from '@/lib/hooks/drive/use-drive-list';
 import { useMenuItems } from '@/lib/hooks/drive/use-menu-items';
 import { useMoveNodes } from '@/lib/hooks/drive/use-move-nodes';
+import { useSortedNodes } from '@/lib/hooks/drive/use-sorted-nodes';
 import { deleteNodes } from '@/lib/services/drive';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { BreadcrumbDecrypted, FileNodeDecrypted, SelectedNode } from '@/lib/types/drive';
@@ -66,6 +67,8 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
         [accessToken, clearSelection, refetch]
     );
 
+    const { sortKey, setSortKey, sortOrder, setSortOrder, files, folders } = useSortedNodes(data);
+
     const menuItems = useMenuItems(
         selectedNodes,
         deleteCb,
@@ -110,15 +113,16 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
 
                     <div ref={refRest}>
                         <div className='relative z-10'>
-                            <Preivew
-                                file={
-                                    selectedNodes.at(0)?.type === 'file'
-                                        ? (selectedNodes.at(0)?.node as FileNodeDecrypted)
-                                        : undefined
-                                }
-                                isPreviewOpen={isPreviewOpen}
-                                setIsPreviewOpen={setIsPreviewOpen}
-                            />
+                            {isPreviewOpen && (
+                                <Preivew
+                                    file={
+                                        selectedNodes.at(0)?.type === 'file'
+                                            ? (selectedNodes.at(0)?.node as FileNodeDecrypted)
+                                            : undefined
+                                    }
+                                    setIsPreviewOpen={setIsPreviewOpen}
+                                />
+                            )}
 
                             {/* <Share /> */}
 
@@ -156,7 +160,8 @@ export default function Drive({ params: { id } }: { params: { id?: string[] } })
                     </div>
 
                     <Explorer
-                        data={data}
+                        files={files}
+                        folders={folders}
                         status={status}
                         menuItems={menuItems}
                         bounds={bounds}

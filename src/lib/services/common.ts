@@ -7,7 +7,7 @@ export async function getErrors<T>(
     const isJsonProblem = response?.headers
         .get('Content-Type')
         ?.includes('application/problem+json');
-    const data = isJsonProblem ? await response?.json() : null;
+    const data = isJsonProblem ? ((await response?.json()) as { errors: Errors<T> }) : null;
     const responseErrors = data?.errors ?? {
         errors: [defaultError],
     };

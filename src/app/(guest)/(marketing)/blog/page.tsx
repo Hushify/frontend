@@ -27,7 +27,7 @@ export default async function Blog() {
     }
 
     return (
-        <div className='my-8 mx-auto flex max-w-prose flex-col gap-8'>
+        <div className='mx-auto my-8 flex max-w-prose flex-col gap-8'>
             <h1 className='text-4xl font-bold'>Blog</h1>
             <ul className='flex flex-col gap-4'>
                 {posts
@@ -39,7 +39,7 @@ export default async function Blog() {
                         <li key={post.slug} className='h-full'>
                             <Link
                                 href={`/blog/${post.slug}`}
-                                className='flex h-full flex-col gap-4 rounded-lg bg-white p-4 shadow transition-shadow hover:shadow-md'>
+                                className='flex h-full flex-col gap-4 rounded-lg bg-gradient-to-r from-brand-50 via-brand-100 to-brand-200 p-4 shadow-md transition-shadow hover:shadow-lg'>
                                 <h2 className='text-2xl font-medium'>{post.title}</h2>
                                 <p>{post.excerpt}</p>
                                 <div className='text-sm'>

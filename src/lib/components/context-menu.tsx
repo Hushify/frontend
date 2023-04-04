@@ -23,7 +23,7 @@ export function ContextMenu({ items }: { items: (MenuItem | MenuSeparator)[] }) 
                             onSelect={item.action}
                             disabled={item.disabled}
                             className={cn(
-                                'relative flex select-none items-center gap-1 rounded-sm py-2 pr-1 pl-3 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
+                                'relative flex select-none items-center gap-1 rounded-sm py-2 pl-3 pr-1 text-sm leading-none outline-none data-[disabled]:pointer-events-none data-[disabled]:text-gray-300',
                                 {
                                     'text-red-700 data-[highlighted]:bg-red-200 data-[highlighted]:text-red-700':
                                         item.variant === 'danger',
