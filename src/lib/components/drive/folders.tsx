@@ -128,7 +128,7 @@ export function Folder({
                     </div>
                     <MoreVertical className='h-5 w-5 rounded p-1 transition-colors hover:bg-gray-300' />
                 </div>
-                <span className='text-xs'>
+                <span className='text-left text-xs'>
                     {isToday(new Date(folder.metadata.modified))
                         ? `Today, ${intlFormat(new Date(folder.metadata.modified), {
                               hour: '2-digit',
