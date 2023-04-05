@@ -100,9 +100,7 @@ export const useUploadStore = create<UploadState & UploadActions>((set, get) => 
                 } as FileWithState)
         );
 
-        set({
-            files: [...filesToAdd, ...get().files],
-        });
+        set({ files: [...filesToAdd, ...get().files] });
 
         const { setFileProperty } = get();
 
@@ -159,9 +157,7 @@ export const useUploadStore = create<UploadState & UploadActions>((set, get) => 
                     );
 
                     setFileProperty(file.trackingId, 'state', 'Uploaded');
-
                     setFileProperty(file.trackingId, 'progress', 100);
-
                     onUploadCb();
                 } catch (error) {
                     console.error(error);

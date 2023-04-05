@@ -41,7 +41,7 @@ export function Explorer({
                 <ContextMenu.Trigger asChild>
                     <ScrollArea.Viewport className='h-full w-full rounded'>
                         {status === 'success' && folders.length === 0 && files.length === 0 && (
-                            <div className='absolute inset-0 flex select-none flex-col items-center justify-center gap-4'>
+                            <div className='absolute inset-0 flex flex-col items-center justify-center gap-4'>
                                 <Soup className='h-12 w-12 fill-brand-600 text-brand-600' />
                                 <div className='flex flex-col items-center justify-center gap-1'>
                                     <div className='text-2xl'>No Files or Folders found</div>
