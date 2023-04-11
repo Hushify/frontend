@@ -3,14 +3,7 @@
     "display": "Next.js",
     "compilerOptions": {
         "baseUrl": ".",
-        "composite": false,
-        "declaration": true,
-        "declarationMap": true,
-        "inlineSources": false,
         "moduleResolution": "node",
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "preserveWatchOutput": true,
         "target": "ESNext",
         "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
         "allowJs": true,
@@ -26,7 +19,8 @@
         "jsx": "preserve",
         "paths": {
             "@/*": ["src/*"],
-            "@@/*": ["./*"]
+            "@@/*": ["./*"],
+            "contentlayer/generated": ["./.contentlayer/generated"]
         },
         "plugins": [
             {
@@ -40,7 +34,7 @@
         "reset.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        "**/*.mdx",
+        ".contentlayer/generated",
         ".next/types/**/*.ts"
     ],
     "exclude": ["node_modules"]

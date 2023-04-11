@@ -1,7 +1,7 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import Image from 'next/image';
 import Link from 'next/link';
-import { MDXContent } from 'mdx/types';
+import { allPosts } from 'contentlayer/generated';
+import { compareDesc, intlFormat } from 'date-fns';
 
 export const metadata = {
     title: 'Blog',
@@ -15,40 +15,48 @@ export const metadata = {
 };
 
 export default async function Blog() {
-    const posts: (MDXMeta & { slug: string })[] = [];
-    const dir = await fs.opendir(path.join(process.cwd(), 'src', 'content', 'posts'));
-    for await (const entry of dir) {
-        const { meta } = (await import(`@/content/posts/${entry.name}`)) as {
-            default: MDXContent;
-            meta: MDXMeta;
-        };
-
-        posts.push({ ...meta, slug: entry.name.split('.')[0] });
-    }
+    const posts = allPosts.sort((a, b) => {
+        return compareDesc(new Date(a.publishedAt), new Date(b.publishedAt));
+    });
 
     return (
-        <div className='mx-auto my-8 flex max-w-prose flex-col gap-8'>
-            <h1 className='text-4xl font-bold'>Blog</h1>
-            <ul className='flex flex-col gap-4'>
-                {posts
-                    .sort(
-                        (a, b) =>
-                            new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-                    )
-                    .map(post => (
-                        <li key={post.slug} className='h-full'>
-                            <Link
-                                href={`/blog/${post.slug}`}
-                                className='flex h-full flex-col gap-4 rounded-lg bg-gradient-to-r from-brand-50 via-brand-100 to-brand-200 p-4 shadow-md transition-shadow hover:shadow-lg'>
-                                <h2 className='text-2xl font-medium'>{post.title}</h2>
-                                <p>{post.excerpt}</p>
-                                <div className='text-sm'>
-                                    By {post.author} • {post.publishedAt}
-                                </div>
+        <div className='container mx-auto max-w-4xl py-6 lg:py-10'>
+            <div className='flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8'>
+                <h1 className='inline-block text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl'>
+                    Blog
+                </h1>
+            </div>
+            <hr className='my-8 border-gray-200' />
+            {posts?.length ? (
+                <div className='grid gap-10 sm:grid-cols-2'>
+                    {posts.map((post, index) => (
+                        <article key={post._id} className='group relative flex flex-col space-y-2'>
+                            <Image
+                                src={post.image}
+                                alt={post.title}
+                                width={800}
+                                height={450}
+                                className='aspect-video w-full rounded-md border border-gray-200 transition-colors group-hover:border-gray-900'
+                                priority={index <= 1}
+                            />
+                            <h2 className='text-2xl font-extrabold'>{post.title}</h2>
+                            {post.excerpt && <p className='text-gray-600'>{post.excerpt}</p>}
+                            <p className='text-sm text-gray-600'>
+                                {intlFormat(new Date(post.publishedAt), {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })}
+                            </p>
+                            <Link href={post.slug} className='absolute inset-0'>
+                                <span className='sr-only'>View Article</span>
                             </Link>
-                        </li>
+                        </article>
                     ))}
-            </ul>
+                </div>
+            ) : (
+                <p>No posts published.</p>
+            )}
         </div>
     );
 }

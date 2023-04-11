@@ -1,8 +1,13 @@
-import { promises as fs } from 'fs';
-import path from 'path';
 import { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { allAuthors, allPosts } from 'contentlayer/generated';
 import { intlFormat } from 'date-fns';
-import { MDXContent } from 'mdx/types';
+import { ChevronLeft } from 'lucide-react';
+
+import { Mdx } from '@/lib/components/mdx';
+import { clientRoutes } from '@/lib/data/routes';
 
 export const dynamicParams = false;
 
@@ -14,26 +19,28 @@ export async function generateMetadata({
 }: {
     params: { slug: string };
 }): Promise<Metadata> {
-    const { meta } = (await import(`@/content/posts/${slug}.mdx`)) as {
-        meta: MDXMeta;
-    };
+    const post = allPosts.find(post => post.slugAsParams === slug);
+
+    if (!post) {
+        return {};
+    }
 
     return {
-        title: meta.title,
-        description: meta.excerpt,
-        keywords: ['Hushify', ...meta.tags],
+        title: post.title,
+        description: post.excerpt,
+        keywords: ['Hushify', ...post.tags],
         openGraph: {
-            title: meta.title,
-            description: meta.excerpt,
-            images: getImageUrl(meta.title),
-            publishedTime: meta.publishedAt,
+            title: post.title,
+            description: post.excerpt,
+            images: getImageUrl(post.title),
+            publishedTime: post.publishedAt,
             type: 'article',
             url: `https://${process.env.NEXT_PUBLIC_DOMAIN}/blog/${slug}`,
         },
         twitter: {
-            title: meta.title,
-            description: meta.excerpt,
-            images: getImageUrl(meta.title),
+            title: post.title,
+            description: post.excerpt,
+            images: getImageUrl(post.title),
             card: 'summary_large_image',
         },
         robots: {
@@ -51,49 +58,85 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-    const posts: string[] = [];
-    const dir = await fs.opendir(path.join(process.cwd(), 'src', 'content', 'posts'));
-    for await (const entry of dir) {
-        posts.push(entry.name.split('.')[0]);
-    }
-
-    return posts.map(slug => ({ slug }));
+    return allPosts.map(post => ({ slug: post.slugAsParams }));
 }
 
 export default async function Post({ params: { slug } }: { params: { slug: string } }) {
-    const { default: Content, meta } = (await import(`@/content/posts/${slug}.mdx`)) as {
-        default: MDXContent;
-        meta: MDXMeta;
-    };
+    const post = allPosts.find(post => post.slugAsParams === slug);
+
+    if (!post) {
+        return notFound();
+    }
+
+    const authors = post.authors.map(author =>
+        allAuthors.find(({ slug }) => slug === `/authors/${author}`)
+    );
 
     return (
-        <div className='prose prose-base mx-auto py-8 prose-h1:my-3 prose-h2:my-3 prose-h3:my-3 prose-a:text-indigo-600 prose-li:marker:text-gray-600 prose-hr:mx-auto prose-hr:max-w-[48ch] prose-hr:border-gray-600 md:prose-h1:my-4 md:prose-h2:my-4 md:prose-h3:my-4'>
+        <article className='container relative mx-auto max-w-3xl py-6 lg:py-10'>
             <div>
-                <span className='text-sm font-medium uppercase tracking-wide text-indigo-600'>
-                    {meta.category}
-                </span>
-                <h1 className='font-medium'>{meta.title}</h1>
-                <div className='text-sm'>
-                    <div className='font-medium'>{meta.author}</div>
-                    <div>
-                        {intlFormat(new Date(meta.publishedAt), {
+                {post.publishedAt && (
+                    <time dateTime={post.publishedAt} className='block text-sm text-gray-600'>
+                        Published on{' '}
+                        {intlFormat(new Date(post.publishedAt), {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
                         })}
+                    </time>
+                )}
+                <h1 className='mt-2 inline-block text-4xl font-extrabold leading-tight text-gray-900 lg:text-5xl'>
+                    {post.title}
+                </h1>
+                {post.authors?.length ? (
+                    <div className='mt-4 flex space-x-4'>
+                        {authors.map(author =>
+                            author ? (
+                                <Link
+                                    key={author._id}
+                                    href={`https://twitter.com/${author.twitter}`}
+                                    target='_blank'
+                                    rel='noreferrer'
+                                    className='flex items-center space-x-2 text-sm'>
+                                    <Image
+                                        src={author.avatar}
+                                        alt={author.title}
+                                        width={42}
+                                        height={42}
+                                        className='rounded-full'
+                                    />
+                                    <div className='flex-1 text-left leading-tight'>
+                                        <p className='font-medium text-gray-900'>{author.title}</p>
+                                        <p className='text-[12px] text-gray-600'>
+                                            @{author.twitter}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ) : null
+                        )}
                     </div>
-                </div>
+                ) : null}
             </div>
-            <Content />
-            <div className='not-prose pt-2'>
-                <ul className='flex items-center gap-2 text-sm font-medium text-white'>
-                    {meta.tags.map(tag => (
-                        <li key={tag} className='rounded-full bg-gray-600 px-3 py-1'>
-                            {tag}
-                        </li>
-                    ))}
-                </ul>
+            {post.image && (
+                <Image
+                    src={post.image}
+                    alt={post.title}
+                    width={720}
+                    height={405}
+                    className='my-8 aspect-video w-full rounded-md border border-gray-200 transition-colors group-hover:border-gray-900'
+                    priority
+                />
+            )}
+            <Mdx code={post.body.code} />
+            <hr className='my-4 border-gray-200' />
+            <div className='flex justify-center py-6 lg:py-10'>
+                <Link
+                    href={clientRoutes.blog.index}
+                    className='inline-flex items-center justify-center text-sm font-medium text-gray-600 hover:text-gray-900'>
+                    <ChevronLeft className='mr-2 h-4 w-4' />
+                    See all posts
+                </Link>
             </div>
-        </div>
+        </article>
     );
 }
