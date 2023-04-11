@@ -36,7 +36,7 @@ export default async function Blog() {
                                 alt={post.title}
                                 width={800}
                                 height={450}
-                                className='aspect-video w-full rounded-md border border-gray-200 transition-colors group-hover:border-gray-900'
+                                className='aspect-video w-full rounded-md border border-gray-200 bg-gray-100 transition-colors group-hover:border-indigo-600'
                                 priority={index <= 1}
                             />
                             <h2 className='text-2xl font-extrabold'>{post.title}</h2>

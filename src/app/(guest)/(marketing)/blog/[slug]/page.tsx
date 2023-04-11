@@ -123,7 +123,7 @@ export default async function Post({ params: { slug } }: { params: { slug: strin
                     alt={post.title}
                     width={720}
                     height={405}
-                    className='my-8 aspect-video w-full rounded-md border border-gray-200 transition-colors group-hover:border-gray-900'
+                    className='my-8 aspect-video w-full rounded-md border border-gray-200 bg-gray-100 transition-colors group-hover:border-gray-900'
                     priority
                 />
             )}

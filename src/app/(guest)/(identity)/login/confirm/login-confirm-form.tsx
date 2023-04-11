@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
@@ -138,10 +138,6 @@ export function LoginConfirmForm() {
             },
         }
     );
-
-    if (!email) {
-        return redirect(clientRoutes.identity.login);
-    }
 
     return (
         <form
