@@ -188,7 +188,7 @@ export function RegisterConfirmForm() {
                     minLength={10}
                     maxLength={64}
                     className={cn(
-                        'h-9 bg-transparent placeholder:text-slate-400',
+                        'h-9 bg-transparent placeholder:text-gray-400',
                         !!errors.password && 'border-red-600'
                     )}
                     {...register('password')}

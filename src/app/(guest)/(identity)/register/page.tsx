@@ -18,7 +18,7 @@ export default function RegisterPage() {
         <div className='flex w-full flex-col gap-4 sm:max-w-[300px]'>
             <div className='space-y-1 text-center'>
                 <h1 className='text-2xl font-bold'>Sign Up</h1>
-                <div className='text-sm text-slate-600'>
+                <div className='text-sm text-gray-600'>
                     Already have an account?{' '}
                     <Link href={clientRoutes.identity.login} className='text-brand-600 underline'>
                         Login

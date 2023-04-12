@@ -19,7 +19,7 @@ export default function Login() {
         <div className='w-full sm:max-w-[300px]'>
             <div className='space-y-1 text-center'>
                 <h1 className='text-2xl font-bold'>Login</h1>
-                <div className='text-sm text-slate-600'>
+                <div className='text-sm text-gray-600'>
                     Forgot your password?{' '}
                     <Link
                         href={clientRoutes.identity.resetPassword}

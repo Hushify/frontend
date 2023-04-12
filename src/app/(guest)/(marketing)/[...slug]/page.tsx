@@ -75,7 +75,7 @@ export default function PagePage({ params }: Props) {
                 </h1>
                 {page.description && <p className='text-xl text-gray-600'>{page.description}</p>}
             </div>
-            <hr className='my-4 border-slate-200' />
+            <hr className='my-4 border-gray-200' />
             <Mdx code={page.body.code} />
         </article>
     );

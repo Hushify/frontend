@@ -32,7 +32,7 @@ export const InputWithLabel = forwardRef(function InputWithLabel(
                 id={id}
                 {...props}
                 className={cn(
-                    'h-9 bg-transparent placeholder:text-slate-400',
+                    'h-9 bg-transparent placeholder:text-gray-400',
                     className,
                     !!error && 'border-red-600'
                 )}
