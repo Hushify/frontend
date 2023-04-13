@@ -2,8 +2,8 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@fluentui/react':
-    specifier: ^8.107.4
-    version: 8.107.4(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^8.107.5
+    version: 8.107.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0)
   '@fluentui/react-file-type-icons':
     specifier: ^8.8.13
     version: 8.8.13(@types/react@18.0.35)(react@18.2.0)
@@ -71,8 +71,8 @@ dependencies:
     specifier: ^4.17.21
     version: 4.17.21
   lucide-react:
-    specifier: ^0.143.0
-    version: 0.143.0(react@18.2.0)
+    specifier: ^0.144.0
+    version: 0.144.0(react@18.2.0)
   next:
     specifier: 13.3.0
     version: 13.3.0(@babel/core@7.21.3)(@opentelemetry/api@1.1.0)(react-dom@18.2.0)(react@18.2.0)
@@ -995,8 +995,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@fluentui/react@8.107.4(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ERRwBAlsQHiBsVTTYq9x3A605pIdu0+9ZirP15da+gds6Tz1/wionwyG4FjCFI6NZyxW+95y7xbMhh98DwZSvQ==}
+  /@fluentui/react@8.107.5(@types/react-dom@18.0.11)(@types/react@18.0.35)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-8sa4xclbC+5gh7TBInMi4X2g8jOUVsvfMJqM+gpEgvv52zOAVgZE2FfesBCZT7r9FD5KkCy4OVPu9ygFbznnnQ==}
     peerDependencies:
       '@types/react': '>=16.8.0 <19.0.0'
       '@types/react-dom': '>=16.8.0 <19.0.0'
@@ -4618,8 +4618,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react@0.143.0(react@18.2.0):
-    resolution: {integrity: sha512-FHF7iumkYzpqnaU5j3xqUL+6BCh6r/iKDzAQGK/q+8k4RC9+LTh9HrEpFLh2EpNXKaevqoBxNkIM59LwPeiFuA==}
+  /lucide-react@0.144.0(react@18.2.0):
+    resolution: {integrity: sha512-smxwRsaHL9YZxzv4rPWDYJUKGJTCwZxjWMvClS6NBv9qIrYDHIIQdGRcM1pS7mnzUY5dXdIwyHDD0sk3hep/1Q==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
