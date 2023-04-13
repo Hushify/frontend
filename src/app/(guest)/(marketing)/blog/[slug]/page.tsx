@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { allAuthors, allPosts } from 'contentlayer/generated';
 import { intlFormat } from 'date-fns';
 import { ChevronLeft } from 'lucide-react';
+import { Article, WithContext } from 'schema-dts';
 
 import { Mdx } from '@/lib/components/mdx';
 import { clientRoutes } from '@/lib/data/routes';
@@ -72,8 +73,32 @@ export default async function Post({ params: { slug } }: { params: { slug: strin
         allAuthors.find(({ slug }) => slug === `/authors/${author}`)
     );
 
+    const jsonLd: WithContext<Article> = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: post.title,
+        image: `https://${process.env.NEXT_PUBLIC_DOMAIN}${post.image}`,
+        description: post.excerpt,
+        keywords: post.tags.join(', '),
+        author: authors.filter(Boolean).map(author => ({
+            '@type': 'Person',
+            name: author.title,
+            url: `https://twitter.com/${author.twitter}`,
+        })),
+        publisher: {
+            '@type': 'Organization',
+            name: 'Hushify',
+            url: `https://${process.env.NEXT_PUBLIC_DOMAIN}`,
+        },
+        datePublished: post.publishedAt,
+    };
+
     return (
         <article className='container relative mx-auto max-w-3xl py-6 lg:py-10'>
+            <script
+                type='application/ld+json'
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <div>
                 {post.publishedAt && (
                     <time dateTime={post.publishedAt} className='block text-sm text-gray-600'>

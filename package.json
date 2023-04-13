@@ -48,6 +48,7 @@
         "react-hot-toast": "^2.4.0",
         "react-use-measure": "^2.1.1",
         "sanitize-filename": "^1.6.3",
+        "schema-dts": "^1.1.2",
         "streamsaver": "^2.0.6",
         "tailwind-merge": "^1.12.0",
         "web-streams-polyfill": "^3.2.1",
