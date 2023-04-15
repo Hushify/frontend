@@ -35,11 +35,11 @@ dependencies:
     specifier: ^1.2.0
     version: 1.2.0
   '@tanstack/react-query':
-    specifier: ^4.29.1
-    version: 4.29.1(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^4.29.2
+    version: 4.29.2(react-dom@18.2.0)(react@18.2.0)
   '@tanstack/react-query-devtools':
-    specifier: ^4.29.1
-    version: 4.29.1(@tanstack/react-query@4.29.1)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^4.29.2
+    version: 4.29.2(@tanstack/react-query@4.29.2)(react-dom@18.2.0)(react@18.2.0)
   '@zxcvbn-ts/core':
     specifier: ^2.2.1
     version: 2.2.1
@@ -62,8 +62,8 @@ dependencies:
     specifier: ^2.29.3
     version: 2.29.3
   framer-motion:
-    specifier: ^10.11.6
-    version: 10.11.6(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^10.12.2
+    version: 10.12.2(react-dom@18.2.0)(react@18.2.0)
   libsodium-wrappers-sumo:
     specifier: ^0.7.11
     version: 0.7.11
@@ -71,8 +71,8 @@ dependencies:
     specifier: ^4.17.21
     version: 4.17.21
   lucide-react:
-    specifier: ^0.144.0
-    version: 0.144.0(react@18.2.0)
+    specifier: ^0.145.0
+    version: 0.145.0(react@18.2.0)
   next:
     specifier: 13.3.0
     version: 13.3.0(@babel/core@7.21.3)(@opentelemetry/api@1.1.0)(react-dom@18.2.0)(react@18.2.0)
@@ -148,8 +148,8 @@ devDependencies:
     specifier: ^0.7.5
     version: 0.7.5
   '@types/lodash':
-    specifier: ^4.14.192
-    version: 4.14.192
+    specifier: ^4.14.194
+    version: 4.14.194
   '@types/node':
     specifier: ^18.15.11
     version: 18.15.11
@@ -2158,23 +2158,23 @@ packages:
     resolution: {integrity: sha512-vkPewLEG8ua0efo3SsVT0BcBtkq5RZX8oPhDAyKL+k/rdOYSQTEocfGEXSaBwIwsXeOGBUpfKqI+UmHvNqdWXg==}
     dev: false
 
-  /@tanstack/react-query-devtools@4.29.1(@tanstack/react-query@4.29.1)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-lbtNGArplXLVmY8eEh8LFqZz61PJI38sASEcuKoSnEK8UgWvLCwY5vjlT8fzk10yQ4jhR3+PHKLDMXA5ifCTXw==}
+  /@tanstack/react-query-devtools@4.29.2(@tanstack/react-query@4.29.2)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-QoXwrnwDDWeW5JsehNzM0CtP8TtNiAF1H8qndHd/y90RedspaQuRMnnMQpIJbvy90xlCsSD+uPxGz0KTnLTZQA==}
     peerDependencies:
-      '@tanstack/react-query': 4.29.1
+      '@tanstack/react-query': 4.29.2
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@tanstack/match-sorter-utils': 8.8.4
-      '@tanstack/react-query': 4.29.1(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.29.2(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       superjson: 1.12.2
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  /@tanstack/react-query@4.29.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-/crv1v+OeuGG6EOvaQmyeo9GCKtH4jbmuhZkvk9ulufRiHcTr/A9+YP9GevEAZzUTdzXMwenpTbyxBGvG2xXvw==}
+  /@tanstack/react-query@4.29.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-xvLIrjn+FCplqGY66fUkDNH57u5OxYqYJ2qo2drJ7FVlE+Ee9mmJ2GlKe0Oq4K2Nv4X6yIZDMr9QqM/NRknNMA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -2240,8 +2240,8 @@ packages:
     resolution: {integrity: sha512-BqI9B92u+cM3ccp8mpHf+HzJ8fBlRwdmyd6+fz3p99m3V6ifT5O3zmOMi612PGkpeFeG/G6loxUnzlDNhfjPSA==}
     dev: true
 
-  /@types/lodash@4.14.192:
-    resolution: {integrity: sha512-km+Vyn3BYm5ytMO13k9KTp27O75rbQ0NFw+U//g+PX7VZyjCioXaRFisqSIJRECljcTv73G3i6BpglNGHgUQ5A==}
+  /@types/lodash@4.14.194:
+    resolution: {integrity: sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==}
     dev: true
 
   /@types/long@4.0.2:
@@ -3738,8 +3738,8 @@ packages:
     resolution: {integrity: sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA==}
     dev: true
 
-  /framer-motion@10.11.6(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-QXfnUzPQqbJEnWpmtPaRB4OCuyH44uCys5Agg44LEQvItKTg0bou57WuhsNVuEyVCnMoAhrtRYiKeG/vAz6bFw==}
+  /framer-motion@10.12.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-DD3Ieqy4pjmL0qBtfNMqnU/IONchUqnhHtgFtu0Nq5jw7bhkksD/Cs4cNhLYd1vs7iB8Q+WInxuBeMmzIoA5Xg==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
@@ -4618,8 +4618,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react@0.144.0(react@18.2.0):
-    resolution: {integrity: sha512-smxwRsaHL9YZxzv4rPWDYJUKGJTCwZxjWMvClS6NBv9qIrYDHIIQdGRcM1pS7mnzUY5dXdIwyHDD0sk3hep/1Q==}
+  /lucide-react@0.145.0(react@18.2.0):
+    resolution: {integrity: sha512-0bwi3T/DVe0Gn7HRDmtuf88j6m/+GFbQgnsoYnLX1jKnEJ/tGnP1KQY58Nfxp2gih1lOkwekJ4Hw141TNInLzA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
