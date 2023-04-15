@@ -9,14 +9,17 @@ import { cn } from '@/lib/utils/cn';
 const components = {
     h1: ({ className, ...props }: ComponentProps<'h1'>) => (
         <h1
-            className={cn('mt-2 scroll-m-20 text-4xl font-bold tracking-tight', className)}
+            className={cn(
+                'mt-2 flex w-full scroll-m-20 items-center gap-1 text-4xl font-bold tracking-tight',
+                className
+            )}
             {...props}
         />
     ),
     h2: ({ className, ...props }: ComponentProps<'h2'>) => (
         <h2
             className={cn(
-                'mt-10 scroll-m-20 border-b border-b-gray-200 pb-1 text-3xl font-semibold tracking-tight first:mt-0',
+                'mt-10 flex w-full scroll-m-20 items-center gap-1 border-b border-b-gray-200 pb-1 text-3xl font-semibold tracking-tight first:mt-0',
                 className
             )}
             {...props}
@@ -24,25 +27,37 @@ const components = {
     ),
     h3: ({ className, ...props }: ComponentProps<'h3'>) => (
         <h3
-            className={cn('mt-8 scroll-m-20 text-2xl font-semibold tracking-tight', className)}
+            className={cn(
+                'mt-8 flex w-full scroll-m-20 items-center gap-1 text-2xl font-semibold tracking-tight',
+                className
+            )}
             {...props}
         />
     ),
     h4: ({ className, ...props }: ComponentProps<'h4'>) => (
         <h4
-            className={cn('mt-8 scroll-m-20 text-xl font-semibold tracking-tight', className)}
+            className={cn(
+                'mt-8 flex w-full scroll-m-20 items-center gap-1 text-xl font-semibold tracking-tight',
+                className
+            )}
             {...props}
         />
     ),
     h5: ({ className, ...props }: ComponentProps<'h5'>) => (
         <h5
-            className={cn('mt-8 scroll-m-20 text-lg font-semibold tracking-tight', className)}
+            className={cn(
+                'mt-8 flex w-full scroll-m-20 items-center gap-1 text-lg font-semibold tracking-tight',
+                className
+            )}
             {...props}
         />
     ),
     h6: ({ className, ...props }: ComponentProps<'h6'>) => (
         <h6
-            className={cn('mt-8 scroll-m-20 text-base font-semibold tracking-tight', className)}
+            className={cn(
+                'mt-8 flex w-full scroll-m-20 items-center gap-1 text-base font-semibold tracking-tight',
+                className
+            )}
             {...props}
         />
     ),
@@ -52,6 +67,14 @@ const components = {
         if (props.href && props.href.startsWith('http')) {
             return (
                 <a {...props} ref={ref} target='_blank' rel='noreferrer' className={classString}>
+                    {children}
+                </a>
+            );
+        }
+
+        if (props.href && props.href.startsWith('#')) {
+            return (
+                <a {...props} ref={ref} className={classString}>
                     {children}
                 </a>
             );

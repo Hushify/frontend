@@ -3,7 +3,7 @@ import colors from 'tailwindcss/colors';
 
 export default {
     darkMode: ['class', '[data-theme="dark"]'],
-    content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+    content: ['./src/**/*.{js,ts,jsx,tsx,mdx}', './contentlayer.config.ts'],
     theme: {
         extend: {
             colors: {
