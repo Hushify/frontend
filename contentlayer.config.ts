@@ -26,6 +26,7 @@ export const Post = defineDocumentType(() => ({
         },
         excerpt: {
             type: 'string',
+            required: true,
         },
         publishedAt: {
             type: 'date',
