@@ -30,7 +30,7 @@ export default async function Blog() {
             {posts?.length ? (
                 <div className='grid gap-10 sm:grid-cols-2'>
                     {posts.map((post, index) => (
-                        <article key={post._id} className='group relative flex flex-col space-y-2'>
+                        <article key={post._id} className='group relative flex flex-col gap-2'>
                             <Image
                                 src={post.image}
                                 alt={post.title}
@@ -39,9 +39,9 @@ export default async function Blog() {
                                 className='aspect-video w-full rounded-md border border-gray-200 bg-gray-100 transition-colors group-hover:border-indigo-600'
                                 priority={index <= 1}
                             />
-                            <h2 className='text-2xl font-extrabold'>{post.title}</h2>
-                            {post.excerpt && <p className='text-gray-600'>{post.excerpt}</p>}
-                            <p className='text-sm text-gray-600'>
+                            <h2 className='flex-1 text-2xl font-extrabold'>{post.title}</h2>
+                            {post.excerpt && <p className='flex-1 text-gray-600'>{post.excerpt}</p>}
+                            <p className='flex-1 text-sm text-gray-600'>
                                 {intlFormat(new Date(post.publishedAt), {
                                     year: 'numeric',
                                     month: 'long',
