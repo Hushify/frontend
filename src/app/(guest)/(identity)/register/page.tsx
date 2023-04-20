@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function RegisterPage() {
     return (
-        <div className='flex w-full flex-col gap-4 sm:max-w-[300px]'>
+        <div className='flex w-full flex-col gap-6 sm:max-w-[300px]'>
             <div className='space-y-1 text-center'>
                 <h1 className='text-2xl font-bold'>Sign Up</h1>
                 <div className='text-sm text-gray-600'>
@@ -32,16 +32,23 @@ export default function RegisterPage() {
                 <hr className='w-1/2 border-gray-400' />
             </div>
 
-            <div className='mx-auto max-w-[300px] text-center text-sm text-gray-600'>
-                By clicking continue, you agree to our{' '}
-                <Link href={clientRoutes.terms} className='text-brand-600 underline'>
-                    Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href={clientRoutes.privacy} className='text-brand-600 underline'>
-                    Privacy Policy
-                </Link>
-                .
+            <div className='max-w-[300px] space-y-2 text-center text-sm text-gray-600'>
+                <div>By clicking continue, you agree to our:</div>
+                <div>
+                    <Link href={clientRoutes.terms} className='text-brand-600 hover:underline'>
+                        Terms of Service
+                    </Link>
+                    ,{' '}
+                    <Link href={clientRoutes.privacy} className='text-brand-600 hover:underline'>
+                        Privacy Policy
+                    </Link>
+                    , and
+                    <br />
+                    <Link href={clientRoutes.gdpr} className='text-brand-600 hover:underline'>
+                        GDPR Policy
+                    </Link>
+                    .
+                </div>
             </div>
         </div>
     );
