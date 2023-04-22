@@ -22,6 +22,34 @@ export function Navbar() {
                     </li>
                     <li>
                         <Link
+                            href={clientRoutes.security}
+                            className='text-lg duration-200 ease-out hover:text-brand-600'>
+                            Security
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={clientRoutes.about}
+                            className='text-lg duration-200 ease-out hover:text-brand-600'>
+                            About
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={clientRoutes.legal}
+                            className='text-lg duration-200 ease-out hover:text-brand-600'>
+                            Legal
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href={clientRoutes.identity.login}
+                            className='text-lg duration-200 ease-out hover:text-brand-600'>
+                            Login
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
                             href={clientRoutes.identity.register}
                             className={cn(
                                 'flex items-center justify-center gap-2 rounded-lg px-4 py-1.5 font-medium',
