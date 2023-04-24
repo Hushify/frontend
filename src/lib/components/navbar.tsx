@@ -152,6 +152,7 @@ function MobileNavigation() {
     );
 }
 
+// TODO: Remove Headless UI and migrate to Radix
 export function Navbar() {
     const status = useAuthStore(state => state.status);
     const logout = useAuthStore(state => state.logout);
