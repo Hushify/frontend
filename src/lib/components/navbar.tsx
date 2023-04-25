@@ -123,8 +123,8 @@ function MobileNavbar() {
         <Popover>
             {({ open, close }) => (
                 <>
-                    <Popover.Button className='relative z-10 flex h-8 w-8 items-center justify-center [&:not(:focus-visible)]:focus:outline-none'>
-                        <span className='sr-only'>Toggle Navigation</span>
+                    <Popover.Button className='relative z-10 flex h-8 items-center justify-center gap-3 [&:not(:focus-visible)]:focus:outline-none'>
+                        <span>Menu</span>
                         <svg
                             aria-hidden='true'
                             className='h-3.5 w-3.5 overflow-visible stroke-slate-700'
