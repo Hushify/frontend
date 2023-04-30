@@ -68,7 +68,7 @@ export default function PagePage({ params }: Props) {
     }
 
     return (
-        <article className='mx-auto max-w-prose py-6 lg:py-10'>
+        <article className='mx-auto max-w-prose py-24'>
             <div className='space-y-4'>
                 <h1 className='inline-block text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl'>
                     {page.title}
