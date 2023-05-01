@@ -69,6 +69,8 @@ export default function Home() {
                                 width={2432}
                                 height={1442}
                                 className='rounded-md shadow-2xl ring-1 ring-gray-900/10'
+                                placeholder='blur'
+                                priority
                             />
                         </div>
                     </div>
