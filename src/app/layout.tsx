@@ -26,6 +26,7 @@ export const metadata = {
             template: '%s',
         },
         images: '/og.png',
+        url: `https://${process.env.NEXT_PUBLIC_DOMAIN}/`,
     },
     twitter: {
         description: 'Privacy, built on open source.',

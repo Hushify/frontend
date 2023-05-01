@@ -8,6 +8,7 @@ export const metadata = {
     keywords: ['Hushify', 'Blog'],
     openGraph: {
         title: 'Blog',
+        url: `https://${process.env.NEXT_PUBLIC_DOMAIN}/blog`,
     },
     twitter: {
         title: 'Blog',
