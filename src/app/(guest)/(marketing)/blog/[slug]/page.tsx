@@ -94,7 +94,7 @@ export default async function Post({ params: { slug } }: { params: { slug: strin
     };
 
     return (
-        <article className='container relative mx-auto max-w-3xl py-24'>
+        <article className='container relative mx-auto max-w-3xl px-6 py-16 lg:py-24'>
             <script
                 type='application/ld+json'
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

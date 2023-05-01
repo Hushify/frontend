@@ -20,7 +20,7 @@ export default async function Blog() {
     });
 
     return (
-        <div className='container mx-auto max-w-4xl py-24'>
+        <div className='container mx-auto max-w-4xl px-6 py-16 lg:py-24'>
             <div className='flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8'>
                 <h1 className='inline-block text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl'>
                     Blog
