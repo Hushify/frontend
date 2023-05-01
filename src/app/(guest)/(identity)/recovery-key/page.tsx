@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function RecoveryKeyPage() {
     return (
-        <div className='flex min-h-full max-w-md flex-col items-center justify-center gap-6 p-4 text-center'>
+        <div className='flex max-w-md flex-col items-center justify-center gap-6 p-4 text-center'>
             <h3 className='text-center text-xl font-bold leading-6 text-gray-950'>Recovery Key</h3>
 
             <div className='space-y-2 text-gray-600'>

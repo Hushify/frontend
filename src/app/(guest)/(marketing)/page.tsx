@@ -34,8 +34,8 @@ const features = [
 
 export default function Home() {
     return (
-        <>
-            <div className='relative py-24 sm:py-32 lg:pb-40'>
+        <div>
+            <div className='relative py-12 sm:py-32 lg:pb-40'>
                 <div className='mx-auto max-w-7xl px-6 lg:px-8'>
                     <div className='mx-auto max-w-2xl text-center'>
                         <h1 className='text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
@@ -97,7 +97,7 @@ export default function Home() {
                     </svg>
                 </div>
             </div>
-            <div className='py-24 sm:py-32'>
+            <div className='py-12 sm:py-20'>
                 <div className='mx-auto max-w-7xl px-6 lg:px-8'>
                     <div className='mx-auto max-w-2xl lg:text-center'>
                         <h3 className='text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
@@ -126,7 +126,7 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-            <div className='mx-auto max-w-7xl py-24 sm:px-6 lg:px-8'>
+            <div className='mx-auto max-w-7xl py-12 sm:px-6 sm:py-20 lg:px-8'>
                 <div className='relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16'>
                     <h2 className='mx-auto max-w-2xl text-4xl font-bold tracking-tight text-white'>
                         Take control of your privacy today.
@@ -166,6 +166,6 @@ export default function Home() {
                 </div>
             </div>
             <Faq />
-        </>
+        </div>
     );
 }
