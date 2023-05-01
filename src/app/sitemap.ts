@@ -22,7 +22,7 @@ export default async function Sitemap() {
         })),
         ...allPosts.map(post => ({
             url: `https://${process.env.NEXT_PUBLIC_DOMAIN}/blog/${post.slugAsParams}`,
-            lastModified: post.publishedAt,
+            lastModified: new Date(post.publishedAt).toISOString().split('T')[0],
         })),
     ];
 }
