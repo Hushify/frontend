@@ -25,7 +25,7 @@ export const metadata = {
             default: 'Hushify',
             template: '%s',
         },
-        images: '/icon.png',
+        images: '/og.png',
     },
     twitter: {
         description: 'Privacy, built on open source.',
@@ -35,7 +35,7 @@ export const metadata = {
         },
         card: 'summary',
         creator: '@HushifyIO',
-        images: '/android-icon-192x192.png',
+        images: '/og.png',
     },
     icons: {
         icon: '/icon.png',
