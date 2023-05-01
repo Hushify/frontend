@@ -2,10 +2,12 @@ export const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.hushify.io
 
 export const clientRoutes = {
     index: '/',
-    legal: '/legal',
-    privacy: '/privacy',
-    terms: '/terms',
-    gdpr: '/gdpr',
+    legal: {
+        index: '/legal',
+        privacy: '/privacy',
+        terms: '/terms',
+        gdpr: '/gdpr',
+    },
     about: '/about',
     security: '/security',
     blog: { index: '/blog' },

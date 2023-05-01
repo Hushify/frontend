@@ -35,16 +35,20 @@ export default function RegisterPage() {
             <div className='max-w-[300px] space-y-2 text-center text-sm text-gray-600'>
                 <div>By clicking continue, you agree to our:</div>
                 <div>
-                    <Link href={clientRoutes.terms} className='text-brand-600 hover:underline'>
+                    <Link
+                        href={clientRoutes.legal.terms}
+                        className='text-brand-600 hover:underline'>
                         Terms of Service
                     </Link>
                     ,{' '}
-                    <Link href={clientRoutes.privacy} className='text-brand-600 hover:underline'>
+                    <Link
+                        href={clientRoutes.legal.privacy}
+                        className='text-brand-600 hover:underline'>
                         Privacy Policy
                     </Link>
                     , and
                     <br />
-                    <Link href={clientRoutes.gdpr} className='text-brand-600 hover:underline'>
+                    <Link href={clientRoutes.legal.gdpr} className='text-brand-600 hover:underline'>
                         GDPR Policy
                     </Link>
                     .

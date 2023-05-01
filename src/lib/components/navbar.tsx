@@ -13,7 +13,7 @@ const navigation = [
     { name: 'Blog', href: clientRoutes.blog.index },
     { name: 'Security', href: clientRoutes.security },
     { name: 'About', href: clientRoutes.about },
-    { name: 'Legal', href: clientRoutes.legal },
+    { name: 'Legal', href: clientRoutes.legal.index },
 ];
 
 export function Navbar() {
