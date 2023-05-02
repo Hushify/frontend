@@ -57,8 +57,9 @@ export default function Home() {
                                 href='https://github.com/Hushify'
                                 target='_blank'
                                 rel='noreferrer'
-                                className='text-base font-semibold leading-7 text-gray-900'>
-                                Contribute <span aria-hidden='true'>→</span>
+                                className='flex items-center gap-1 text-base font-semibold leading-7 text-gray-900'>
+                                <span>Contribute </span>
+                                <span aria-hidden='true'>→</span>
                             </Link>
                         </div>
                     </div>
