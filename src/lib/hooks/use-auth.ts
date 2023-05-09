@@ -60,9 +60,9 @@ export function useAuth() {
     }, [authState]);
 
     const { isLoading } = useQuery(['refreshToken'], getSession, {
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
         refetchInterval: 1000 * 60 * 10,
-        refetchIntervalInBackground: false,
+        refetchIntervalInBackground: true,
         retry: authState.status === 'authenticated',
         retryDelay: failureCount => 1000 * 60 * failureCount,
     });
