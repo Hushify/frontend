@@ -8,6 +8,7 @@ export type SuccessResponse<U> = {
 export type ErrorResponse<T> = {
     success: false;
     errors: Errors<T>;
+    status?: number;
 };
 
 export type ResponseMessage<T, U> = SuccessResponse<U> | ErrorResponse<T>;

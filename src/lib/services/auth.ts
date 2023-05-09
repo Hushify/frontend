@@ -185,7 +185,7 @@ export async function refreshToken<T>(): Promise<
     }
 
     const errors = await getErrors<T>(response);
-    return { success: false, errors };
+    return { success: false, errors, status: response.status };
 }
 
 export function logout(): Promise<Response> {

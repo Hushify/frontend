@@ -59,7 +59,10 @@ export async function downloadMultiple(selectedNodes: SelectedNode[]) {
     const zip = downloadZip(
         downloadGenerator(
             selectedNodes.filter(f => f.type === 'file').map(f => f.node as FileNodeDecrypted)
-        )
+        ),
+        {
+            buffersAreUTF8: true,
+        }
     );
 
     const streamSaver = await getStreamSaver();

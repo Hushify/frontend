@@ -2,11 +2,11 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@fluentui/react':
-    specifier: ^7.204.0
-    version: 7.204.0(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^8.109.2
+    version: 8.109.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
   '@fluentui/react-file-type-icons':
-    specifier: ^7.10.11
-    version: 7.10.11(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^8.8.17
+    version: 8.8.17(@types/react@18.2.6)(react@18.2.0)
   '@headlessui/react':
     specifier: ^1.7.14
     version: 1.7.14(react-dom@18.2.0)(react@18.2.0)
@@ -893,165 +893,200 @@ packages:
       - '@types/react'
     dev: false
 
-  /@fluentui/date-time-utilities@7.9.1:
-    resolution: {integrity: sha512-o8iU1VIY+QsqVRWARKiky29fh4KR1xaKSgMClXIi65qkt8EDDhjmlzL0KVDEoDA2GWukwb/1PpaVCWDg4v3cUQ==}
+  /@fluentui/date-time-utilities@8.5.10:
+    resolution: {integrity: sha512-q3zaKmH79+gO5t0EwR2ghSVbJqP3nnNNXx3o/rp+v6LKVZaxRZYMWgw2ESR2gF8rI7TWSeKkGVfBime2mVbDoQ==}
     dependencies:
-      '@uifabric/set-version': 7.0.24
-      tslib: 1.14.1
+      '@fluentui/set-version': 8.2.9
+      tslib: 2.5.0
     dev: false
 
-  /@fluentui/dom-utilities@1.1.2:
-    resolution: {integrity: sha512-XqPS7l3YoMwxdNlaYF6S2Mp0K3FmVIOIy2K3YkMc+eRxu9wFK6emr2Q/3rBhtG5u/On37NExRT7/5CTLnoi9gw==}
+  /@fluentui/dom-utilities@2.2.9:
+    resolution: {integrity: sha512-rdqMelLb+d+GjB33j1D2IH+zEO9ofUDP3Yeb7GUCm9byDiUW1aVY2mL7hSZ3t2CearYtEfodbUQaLijWScxO0A==}
     dependencies:
-      '@uifabric/set-version': 7.0.24
-      tslib: 1.14.1
+      '@fluentui/set-version': 8.2.9
+      tslib: 2.5.0
     dev: false
 
-  /@fluentui/keyboard-key@0.2.17:
-    resolution: {integrity: sha512-iT1bU56rKrKEOfODoW6fScY11qj3iaYrZ+z11T6fo5+TDm84UGkkXjLXJTE57ZJzg0/gbccHQWYv+chY7bJN8Q==}
+  /@fluentui/font-icons-mdl2@8.5.17(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-PKszxrhcgzjmehJHJKQmavlc//X0176arLe8iVhYYassR16cnq9bk45nY9wuaTatK0jjzAJi+IL1RMY0PeYLBQ==}
     dependencies:
-      tslib: 1.14.1
-    dev: false
-
-  /@fluentui/react-compose@0.19.24(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-4PO7WSIZjwBGObpknjK8d1+PhPHJGSlVSXKFHGEoBjLWVlCTMw6Xa1S4+3K6eE3TEBbe9rsqwwocMTFHjhWwtQ==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@types/classnames': 2.3.1
-      '@types/react': 18.2.6
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      classnames: 2.3.2
-      react: 18.2.0
-      tslib: 1.14.1
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/style-utilities': 8.9.10(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      tslib: 2.5.0
     transitivePeerDependencies:
-      - '@types/react-dom'
-      - react-dom
+      - '@types/react'
+      - react
     dev: false
 
-  /@fluentui/react-file-type-icons@7.10.11(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-j612StLTTpVDo2InFBSuHOy0kjZxlfJ3xwifhKQwhC8I/E9j1+5AY8Q+CjYLsZcs9ZOz4Pb2HQB7HTy5q4D/TA==}
+  /@fluentui/foundation-legacy@8.2.37(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-WUTNuFMV5xNbx7YUIv9nDWCUR8CQaaOT6eUgprNiFlcfDrjS0zJaoUQlFBd/kIV5R6KhWNL+zJhJg12kdl1geA==}
     peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
     dependencies:
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/style-utilities': 8.9.10(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      '@types/react': 18.2.6
+      react: 18.2.0
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/keyboard-key@0.4.9:
+    resolution: {integrity: sha512-TttoZOrkzVR6Lg9wUTR0xGZwwJnpTTCKK0/CnA0feZoMNAgYR/FZTt7yNIe2Ty2622Q1JesWiEwPT027VdGxkA==}
+    dependencies:
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/merge-styles@8.5.10:
+    resolution: {integrity: sha512-vIiFv7WtXTPz0Sx6h1NpzqrwDN7yef7aQwqFl46yov72BodiAQMTazBl2A/z76IanBPklJmaTquFT9Uydlp/Dg==}
+    dependencies:
+      '@fluentui/set-version': 8.2.9
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/react-file-type-icons@8.8.17(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-QHudXzwWeMufTX0mfQtYerP6sfCNyDm0844OHCZZvjQMuf3KUDXVZAL7X2kI5GMuFZ7FmsrlTtigyAJNaPKADg==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/style-utilities': 8.9.10(@types/react@18.2.6)(react@18.2.0)
+      '@types/react': 18.2.6
+      react: 18.2.0
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/react-focus@8.8.23(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-mBCxnrn4cnL9PzdEpNcCl5KtuRRkeumE0PxKvwM0OI9xs3PT4ZNQkM5pML2GXcWuwmHMYA09ZtvdgEvoTpnDJw==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@fluentui/keyboard-key': 0.4.9
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/style-utilities': 8.9.10(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      '@types/react': 18.2.6
+      react: 18.2.0
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/react-hooks@8.6.24(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-nw7jGA9Q+n33QPXFkOMNg7LwoPxbD2l0ifWJ5sN7UOZYMPpxO/oSKRiPiskvqKW1I/cGjGffyFE+aRomy9sO7A==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@fluentui/react-window-provider': 2.2.13(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      '@types/react': 18.2.6
+      react: 18.2.0
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/react-portal-compat-context@9.0.5(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-vgGvv74jPi/salcxv37TCm06lOFn44CfNLX5wZw5HQIe9LYGUw/J7vkaniwNIzmQZsn62Y+fVxDS6Sq5S823tA==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@swc/helpers': 0.4.14
+      '@types/react': 18.2.6
+      react: 18.2.0
+    dev: false
+
+  /@fluentui/react-window-provider@2.2.13(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-szXdTwPnvsBIxz31q9T3IVo5kypX84BDM5lpFK2Xo396xdiB8fdF7zp9H9TnJTwScJyZn5Ps3Ng31rBZX4+HNw==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@fluentui/set-version': 8.2.9
+      '@types/react': 18.2.6
+      react: 18.2.0
+      tslib: 2.5.0
+    dev: false
+
+  /@fluentui/react@8.109.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-y2sl4hG5lbYTLw8QF1tRCpVfqRjEQmHgGn+D4fL6A4nwe2ATPcj3QR/OVDc057ibQPLuogCuRMehEoEhl4n2Ug==}
+    peerDependencies:
+      '@types/react': '>=16.8.0 <19.0.0'
+      '@types/react-dom': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
+      react-dom: '>=16.8.0 <19.0.0'
+    dependencies:
+      '@fluentui/date-time-utilities': 8.5.10
+      '@fluentui/font-icons-mdl2': 8.5.17(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/foundation-legacy': 8.2.37(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/react-focus': 8.8.23(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/react-hooks': 8.6.24(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/react-portal-compat-context': 9.0.5(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/react-window-provider': 2.2.13(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/style-utilities': 8.9.10(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/theme': 2.6.29(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      '@microsoft/load-themed-styles': 1.10.295
       '@types/react': 18.2.6
       '@types/react-dom': 18.2.4
-      '@uifabric/file-type-icons': 7.10.11(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/set-version': 7.0.24
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
+      tslib: 2.5.0
     dev: false
 
-  /@fluentui/react-focus@7.18.17(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-W+sLIhX7wLzMsJ0jhBrDAblkG3DNbRbF8UoSieRVdAAm7xVf5HpiwJ6tb6nGqcFOnpRh8y+fjyVM+dV3K6GNHA==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
+  /@fluentui/set-version@8.2.9:
+    resolution: {integrity: sha512-fpWo4DLt8K4spNip2YhNZlGnSKIa5F9hL/wQBE0EPei6+HEeRO2slXfHohOO5v1lIkfLPcpAh/Lzs2iuxzw/lw==}
     dependencies:
-      '@fluentui/keyboard-key': 0.2.17
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/styling': 7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
+      tslib: 2.5.0
     dev: false
 
-  /@fluentui/react-stylesheets@0.2.9(@types/react@18.2.6)(react@18.2.0):
-    resolution: {integrity: sha512-6GDU/cUEG/eJ4owqQXDWPmP5L1zNh2NLEDKdEzxd7cWtGnoXLeMjbs4vF4t5wYGzGaxZmUQILOvJdgCIuc9L9Q==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
+  /@fluentui/style-utilities@8.9.10(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-spCRXvBndb34HQC3e5LOLZPSAJF/UDkpHfZQEXmCU9K2dlvMKbmTBZ8B5b4XibBCMZ7VhDtLcV53eQTDl2KMXQ==}
     dependencies:
-      '@types/react': 18.2.6
-      '@uifabric/set-version': 7.0.24
-      react: 18.2.0
-      tslib: 1.14.1
-    dev: false
-
-  /@fluentui/react-theme-provider@0.19.16(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Kf7z4ZfNLS/onaFL5eQDSlizgwy2ytn6SDyjEKV+9VhxIXdDtOh8AaMXWE7dsj1cRBfBUvuGPVnsnoaGdHxJ+A==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@fluentui/react-compose': 0.19.24(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@fluentui/react-stylesheets': 0.2.9(@types/react@18.2.6)(react@18.2.0)
-      '@fluentui/react-window-provider': 1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@fluentui/theme': 1.7.13(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.6
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/react-hooks': 7.16.4(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      classnames: 2.3.2
-      react: 18.2.0
-      tslib: 1.14.1
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/theme': 2.6.29(@types/react@18.2.6)(react@18.2.0)
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
+      '@microsoft/load-themed-styles': 1.10.295
+      tslib: 2.5.0
     transitivePeerDependencies:
-      - '@types/react-dom'
-      - react-dom
+      - '@types/react'
+      - react
     dev: false
 
-  /@fluentui/react-window-provider@1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-m2HoxhU2m/yWxUauf79y+XZvrrWNx+bMi7ZiL6DjiAKHjTSa8KOyvicbOXd/3dvuVzOaNTnLDdZAvhRFcelOIA==}
+  /@fluentui/theme@2.6.29(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-8Lf8ATspfyzkwf1jqSvgiExMuVdWO/LGS3bleuH7PgJYIpi+QDUg1am5hE2bWYcQ60b14mdRM33lgKnlFXPA4A==}
     peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
     dependencies:
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/set-version': 8.2.9
+      '@fluentui/utilities': 8.13.13(@types/react@18.2.6)(react@18.2.0)
       '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/set-version': 7.0.24
       react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
+      tslib: 2.5.0
     dev: false
 
-  /@fluentui/react@7.204.0(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-WQKHcO6cboGO0eCPsiNSzUwnMWBmAvdltu4X0tvXwb+q8W3wZzCQiU1voDVYNm4Nz/Jgiiy8jbMcesmNAq7jsw==}
+  /@fluentui/utilities@8.13.13(@types/react@18.2.6)(react@18.2.0):
+    resolution: {integrity: sha512-tdvRcUP2jW6NacsKeDhndJ91/Bk6qozcsm8W1LUgyr8C8YhAi9PM8I8pN2IqRiPyhUkBhZmfetVVgU2iNZHFsQ==}
     peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
+      '@types/react': '>=16.8.0 <19.0.0'
+      react: '>=16.8.0 <19.0.0'
     dependencies:
+      '@fluentui/dom-utilities': 2.2.9
+      '@fluentui/merge-styles': 8.5.10
+      '@fluentui/set-version': 8.2.9
       '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/set-version': 7.0.24
-      office-ui-fabric-react: 7.204.0(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
-
-  /@fluentui/theme@1.7.13(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-/1ZDHZNzV7Wgohay47DL9TAH4uuib5+B2D6Rxoc3T6ULoWcFzwLeVb+VZB/WOCTUbG+NGTrmsWPBOz5+lbuOxA==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
+      tslib: 2.5.0
     dev: false
 
   /@grpc/grpc-js@1.8.14:
@@ -2172,6 +2207,12 @@ packages:
       '@scure/base': 1.1.1
     dev: false
 
+  /@swc/helpers@0.4.14:
+    resolution: {integrity: sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==}
+    dependencies:
+      tslib: 2.5.0
+    dev: false
+
   /@swc/helpers@0.5.1:
     resolution: {integrity: sha512-sJ902EfIzn1Fa+qYmjdQqh8tPsoxyBz+8yBKC2HKUxyezKJFwPGOn7pv4WY6QuQW//ySQi5lJjA/ZT9sNWWNTg==}
     dependencies:
@@ -2256,13 +2297,6 @@ packages:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
     dependencies:
       '@types/estree': 1.0.1
-    dev: false
-
-  /@types/classnames@2.3.1:
-    resolution: {integrity: sha512-zeOWb0JGBoVmlQoznvqXbE0tEC/HONsnoUNH19Hc96NFsTAwTXbTqb8FMYkru1F/iqp7a18Ws3nWJvtA1sHD1A==}
-    deprecated: This is a stub types definition. classnames provides its own type definitions, so you do not need this installed.
-    dependencies:
-      classnames: 2.3.2
     dev: false
 
   /@types/debug@4.1.7:
@@ -2416,122 +2450,6 @@ packages:
       '@typescript-eslint/types': 5.59.2
       eslint-visitor-keys: 3.4.0
     dev: true
-
-  /@uifabric/file-type-icons@7.10.11(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-g/I835/qiBKn4S9FED7feGC3xy9PaUoU+Lk7wu/ZKGJFnVHEDwoOWQSGlKZc1l8LlF+9E+9zDWkm0C1vNeb25g==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/styling': 7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
-
-  /@uifabric/foundation@7.10.16(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-x13xS9aKh6FEWsyQP2jrjyiXmUUdgyuAfWKMLhUTK4Rsc+vJANwwVk4fqGsU021WA6pghcIirvEVpWf5MlykDQ==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/styling': 7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
-
-  /@uifabric/icons@7.9.5(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-0e2fEURtR7sNqoGr9gU/pzcOp24B/Lkdc05s1BSnIgXlaL2QxRszfaEsl3/E9vsNmqA3tvRwDJWbtRolDbjCpQ==}
-    dependencies:
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/styling': 7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      tslib: 1.14.1
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - react
-      - react-dom
-    dev: false
-
-  /@uifabric/merge-styles@7.20.2:
-    resolution: {integrity: sha512-cJy8hW9smlWOKgz9xSDMCz/A0yMl4mdo466pcGlIOn84vz+e94grfA7OoTuTzg3Cl0Gj6ODBSf1o0ZwIXYL1Xg==}
-    dependencies:
-      '@uifabric/set-version': 7.0.24
-      tslib: 1.14.1
-    dev: false
-
-  /@uifabric/react-hooks@7.16.4(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-k8RJYTMICWA6varT5Y+oCf2VDHHXN0tC2GuPD4I2XqYCTLaXtNCm4+dMcVA2x8mv1HIO7khvm/8aqKheU/tDfQ==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@fluentui/react-window-provider': 1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
-
-  /@uifabric/set-version@7.0.24:
-    resolution: {integrity: sha512-t0Pt21dRqdC707/ConVJC0WvcQ/KF7tKLU8AZY7YdjgJpMHi1c0C427DB4jfUY19I92f60LOQyhJ4efH+KpFEg==}
-    dependencies:
-      tslib: 1.14.1
-    dev: false
-
-  /@uifabric/styling@7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-bd4QDYyb0AS0+KmzrB8VsAfOkxZg0dpEpF1YN5Ben10COmT8L1DoE4bEF5NvybHEaoTd3SKxpJ42m+ceNzehSw==}
-    dependencies:
-      '@fluentui/theme': 1.7.13(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@microsoft/load-themed-styles': 1.10.295
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      tslib: 1.14.1
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - react
-      - react-dom
-    dev: false
-
-  /@uifabric/utilities@7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-5yM4sm142VEBg3/Q5SFheBXqnrZi9CNF5rjHNoex0GgGtG3AHPuS7U8gjm+/Io1MvbuCrn6lyyIw0MDvh1Ebkw==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@fluentui/dom-utilities': 1.1.2
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/set-version': 7.0.24
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
 
   /@zxcvbn-ts/core@3.0.0:
     resolution: {integrity: sha512-AuuYc66+5csSLd/mJ1CXuTUsjLdYw4X0zh8WvDCLztTOye0b+HrKCu8WzAEmq6Ja1u+cSbCNrKLW7m4ZCeg0FA==}
@@ -2885,10 +2803,6 @@ packages:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.2
-
-  /classnames@2.3.2:
-    resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
-    dev: false
 
   /client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
@@ -5729,35 +5643,6 @@ packages:
       es-abstract: 1.21.2
     dev: true
 
-  /office-ui-fabric-react@7.204.0(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-W1xIsYEwxPrGYojvVtGTGvSfdnUoPEm8w6hhMlW/uFr5YwIB1isG/dVk4IZxWbcbea7612u059p+jRf+RjPW0w==}
-    peerDependencies:
-      '@types/react': '>=16.8.0 <18.0.0'
-      '@types/react-dom': '>=16.8.0 <18.0.0'
-      react: '>=16.8.0 <18.0.0'
-      react-dom: '>=16.8.0 <18.0.0'
-    dependencies:
-      '@fluentui/date-time-utilities': 7.9.1
-      '@fluentui/react-focus': 7.18.17(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@fluentui/react-theme-provider': 0.19.16(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@fluentui/react-window-provider': 1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@fluentui/theme': 1.7.13(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@microsoft/load-themed-styles': 1.10.295
-      '@types/react': 18.2.6
-      '@types/react-dom': 18.2.4
-      '@uifabric/foundation': 7.10.16(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/icons': 7.9.5(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/merge-styles': 7.20.2
-      '@uifabric/react-hooks': 7.16.4(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/set-version': 7.0.24
-      '@uifabric/styling': 7.25.1(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      '@uifabric/utilities': 7.38.2(@types/react-dom@18.2.4)(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 1.14.1
-    dev: false
-
   /once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
     dependencies:
@@ -7273,6 +7158,7 @@ packages:
 
   /tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+    dev: true
 
   /tslib@2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}

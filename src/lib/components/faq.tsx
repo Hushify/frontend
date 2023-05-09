@@ -17,8 +17,7 @@ const faqs: {
             <>
                 End-to-end encryption ensures that your data is encrypted on your device before
                 it&apos;s uploaded to the cloud. Only you hold the decryption keys, making it
-                impossible for anyone else (including us) to access your data without your
-                permission.{' '}
+                impossible for anyone else (including us) to access your data.{' '}
                 <Link href={clientRoutes.security} className='text-brand-600 hover:underline'>
                     Explore our security model.
                 </Link>
@@ -28,7 +27,7 @@ const faqs: {
     {
         question: 'Is this free to use?',
         answer: () =>
-            'Yes, we have a free tier that gives you 2GB of free storage. And we are open source under AGPL license so you can host it yourself. However, premium plans with additional storage capacity, and support will be available for a subscription fee soon.',
+            'Yes, we have a free tier that gives you 2GB of free storage. And we are open source under AGPL license so you can host it yourself. However, premium plans with additional storage capacity and support will be available for a subscription fee soon.',
     },
     {
         question: 'Sounds good, how do I get started?',

@@ -32,38 +32,39 @@ export function useAuth() {
             return authState.status;
         }
 
-        try {
-            const result = await refreshToken();
+        const result = await refreshToken();
 
-            if (!result.success) {
-                await authState.logout();
-                return authState.status;
-            }
-
-            const crypto = CryptoWorkerInstance;
-
-            const decryptedAccessToken = await crypto.asymmetricDecrypt(
-                result.data.encryptedAccessToken,
-                result.data.accessTokenNonce,
-                result.data.serverPublicKey,
-                authState.privateKey!
-            );
-
-            authState.setData({ accessToken: decryptedAccessToken });
-            authState.setData({ status: 'authenticated' });
-            forceRef.current = true;
-        } catch (e) {
+        if (!result.success && result.status === 403) {
             await authState.logout();
+            return authState.status;
         }
+
+        if (!result.success) {
+            return authState.status;
+        }
+
+        const crypto = CryptoWorkerInstance;
+
+        const decryptedAccessToken = await crypto.asymmetricDecrypt(
+            result.data.encryptedAccessToken,
+            result.data.accessTokenNonce,
+            result.data.serverPublicKey,
+            authState.privateKey!
+        );
+
+        authState.setData({ accessToken: decryptedAccessToken });
+        authState.setData({ status: 'authenticated' });
+        forceRef.current = true;
 
         return authState.status;
     }, [authState]);
 
     const { isLoading } = useQuery(['refreshToken'], getSession, {
-        retry: false,
         refetchOnWindowFocus: true,
         refetchInterval: 1000 * 60 * 10,
         refetchIntervalInBackground: false,
+        retry: authState.status === 'authenticated',
+        retryDelay: failureCount => 1000 * 60 * failureCount,
     });
 
     return isLoading ? ('loading' as const) : authState.status;
