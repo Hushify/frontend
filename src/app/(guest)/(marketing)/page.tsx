@@ -43,9 +43,8 @@ export default function Home() {
                             Privacy, built on open source.
                         </h1>
                         <p className='mt-6 text-lg leading-8 text-gray-600'>
-                            We envision a digital world where privacy is paramount. We believe that
-                            everyone has the right to secure and private access to their digital
-                            assets.
+                            Hushify Drive is an open source end-to-end encrypted cloud storage that
+                            lets you take control of your privacy.
                         </p>
                         <div className='mt-10 flex items-center justify-center gap-x-6'>
                             <Link
@@ -133,7 +132,7 @@ export default function Home() {
             <div className='mx-auto max-w-7xl py-16 sm:px-6 lg:px-8 lg:py-24'>
                 <div className='relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16'>
                     <h2 className='mx-auto max-w-2xl text-4xl font-bold tracking-tight text-white'>
-                        Take control of your privacy today.
+                        Take control of your privacy.
                     </h2>
                     <div className='mt-10 flex items-center justify-center'>
                         <Link
