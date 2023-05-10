@@ -34,7 +34,7 @@ export function useAuth() {
 
         const result = await refreshToken();
 
-        if (!result.success && result.status === 403) {
+        if (!result.success && result.status === 401) {
             await authState.logout();
             return authState.status;
         }
